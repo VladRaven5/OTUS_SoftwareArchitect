@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  otus_softarch_hw1:
+    image: vladraven/otus_softarch_hw1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
