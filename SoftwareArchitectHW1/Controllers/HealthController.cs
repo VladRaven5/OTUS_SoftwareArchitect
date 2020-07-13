@@ -13,4 +13,15 @@ namespace SoftwareArchitectHW1.Controllers
             return HealthcheckResult.Ok();
         }
     }
+
+    [ApiController]
+    [Route("")]
+    public class RootController : ControllerBase
+    {
+        [HttpGet]
+        public string IsAlive()
+        {
+            return "I am alive!";
+        }
+    }
 }
