@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: soft-arch-hw2-depl
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: soft-arch-hw2
+    template:
+        metadata:
+            labels:
+                app: soft-arch-hw2
+        spec:
+            containers:
+            - name: soft-arch-hw2
+              image: vladraven/otus_softarch_hw1
+              ports:
+                - containerPort: 8000

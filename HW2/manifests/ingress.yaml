@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+    name: soft-arch-hw2-ingress
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+    rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /otusapp($|/)(.*)
+            backend:
+                serviceName: soft-arch-hw2-serv
+                servicePort: 9000

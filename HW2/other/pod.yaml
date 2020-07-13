@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: soft-arch-hw2
+  labels:
+    app: soft-arch-hw2
+spec:
+  containers:
+  - name: soft-arch-hw2
+    image: vladraven/otus_softarch_hw1
+    ports:
+      - containerPort: 8000
