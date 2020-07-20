@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  tasks_service:
+    image: vladraven/otus_tasks_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
