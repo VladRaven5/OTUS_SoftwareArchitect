@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tasks-secrets
+type: Opaque
+data:
+  PG_CONNECTION: VXNlciBJRD11c3I7UGFzc3dvcmQ9cHdkO0hvc3Q9cG9zdGdyZXMtc2VydjtQb3J0PTU0MzI7RGF0YWJhc2U9cHJvamVjdHNBcHA7Cg==

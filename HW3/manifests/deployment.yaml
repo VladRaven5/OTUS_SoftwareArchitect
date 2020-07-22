@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: tasks-service-depl
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: tasks-service
+    template:
+        metadata:
+            labels:
+                app: tasks-service
+        spec:
+            containers:
+            - name: tasks-service
+              image: vladraven/otus_tasks_service
+              env:
+               - name: ConnectionStrings__DefaultConnection
+                 valueFrom:
+                   secretKeyRef:
+                     name: tasks-secrets
+                     key: PG_CONNECTION
+                 
+              ports:
+                - containerPort: 5000
+                
