@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "tasks-chart.fullname" . }}
+type: {{.Values.persistentPg.secretType}}
+data:
+  PG_CONNECTION:  {{ printf "User ID=%s;Password=%s;Host=%s;Port=%s;Database=%s;" .Values.persistentPg.username .Values.persistentPg.password  .Values.persistentPg.host .Values.persistentPg.port .Values.persistentPg.database | b64enc | quote }}  
