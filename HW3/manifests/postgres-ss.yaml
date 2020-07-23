@@ -28,7 +28,7 @@ spec:
             value: pwd
         volumeMounts:
         - name: postgredb
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql/data2
           subPath: postgres
   volumeClaimTemplates:
   - metadata:

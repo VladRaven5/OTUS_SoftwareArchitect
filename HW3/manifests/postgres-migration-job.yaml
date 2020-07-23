@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pg-migration-job
+spec:
+  template:
+    metadata:
+      name: postgres
+    spec:
+      restartPolicy: Never
+      containers:
+       - name: pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: tasks-secrets
+                key: PG_PASSWORD
+         command:
+          - sh
+          - "-c"
+          - |
+            sleep 20
+            psql "user=usr password=$POSTGRES_PASSWORD host=postgres-serv port=5432 dbname=projectsApp" << 'EOF'
+              create table tasks (id char(36) primary key, title varchar, createddate timestamp, assignedto varchar, state varchar(15));
+            EOF
+  
+  backoffLimit: 0
