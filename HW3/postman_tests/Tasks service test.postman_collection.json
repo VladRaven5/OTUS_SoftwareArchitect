@@ -1,0 +1,386 @@
+{
+	"info": {
+		"_postman_id": "dcccaf4c-192b-4ee8-b04c-d5bfa7ff716c",
+		"name": "Tasks service test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b378d795-d22e-46e2-86dc-0e2b731c9d90",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Check title and assignee\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.title).to.eql(pm.variables.get(\"task_initial_title\"));",
+							"    pm.expect(jsonData.assignedTo).to.eql(pm.variables.get(\"task_assigned_to\"));",
+							"",
+							"    pm.variables.set(\"new_task_id\", jsonData.id);",
+							"    pm.variables.set(\"new_task_createddate\", jsonData.createdDate)",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Host",
+						"value": "{{host_name}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host_ip}}/otusapp/tasks/?title={{task_initial_title}}&assignedto={{task_assigned_to}}",
+					"protocol": "http",
+					"host": [
+						"{{host_ip}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						""
+					],
+					"query": [
+						{
+							"key": "title",
+							"value": "{{task_initial_title}}"
+						},
+						{
+							"key": "assignedto",
+							"value": "{{task_assigned_to}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e75ea272-79d1-4453-b64c-3b2ecfbfc979",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Check getting of new task\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.eql(pm.variables.get(\"new_task_id\"));",
+							"    pm.expect(jsonData.title).to.eql(pm.variables.get(\"task_initial_title\"));",
+							"    pm.expect(jsonData.assignedTo).to.eql(pm.variables.get(\"task_assigned_to\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Host",
+						"value": "{{host_name}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host_ip}}/otusapp/tasks/{{new_task_id}}",
+					"protocol": "http",
+					"host": [
+						"{{host_ip}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"{{new_task_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get tasks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "edc10616-6c86-4aba-b4ee-ae6e637378ee",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains task\", function () {",
+							"    pm.expect(pm.response.text()).to.include(pm.variables.get(\"new_task_id\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Host",
+						"value": "{{host_name}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host_ip}}/otusapp/tasks",
+					"protocol": "http",
+					"host": [
+						"{{host_ip}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a12eec14-d6a8-41d3-a4b2-ac76412c9cdd",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Check updated title\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.eql(pm.variables.get(\"new_task_id\"));",
+							"    pm.expect(jsonData.title).to.eql(pm.variables.get(\"task_updated_title\"));",
+							"    pm.expect(jsonData.assignedTo).to.eql(pm.variables.get(\"task_assigned_to\"));",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Host",
+						"value": "{{host_name}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"{{task_updated_title}}\",\n    \"createdDate\": \"{{new_task_createddate}}\",\n    \"assignedTo\": \"{{task_assigned_to}}\",\n    \"state\": 0,\n    \"id\": \"{{new_task_id}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{host_ip}}/otusapp/tasks",
+					"protocol": "http",
+					"host": [
+						"{{host_ip}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6fb268fe-94e2-4185-b95b-93a2daee0221",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Delete returns true if success\", function () {",
+							"    pm.response.to.have.body(\"true\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Host",
+						"value": "{{host_name}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host_ip}}/otusapp/tasks/{{new_task_id}}",
+					"protocol": "http",
+					"host": [
+						"{{host_ip}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"{{new_task_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check is task deleted",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9228745f-4bce-404c-97de-ac67444a220c",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Host",
+						"value": "{{host_name}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host_ip}}/otusapp/tasks/{{new_task_id}}",
+					"protocol": "http",
+					"host": [
+						"{{host_ip}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"{{new_task_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "467d20b3-cfb5-4b93-a90f-b0b2e46a08ea",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "160601a3-38b4-42df-9d55-a2e65ee02d7d",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "6d16164f-9c5a-4b4c-84d3-ded7213c0bfe",
+			"key": "host_ip",
+			"value": "172.17.0.2"
+		},
+		{
+			"id": "0db373d0-5c48-496a-bbe3-99e52274b11b",
+			"key": "task_initial_title",
+			"value": "Do A"
+		},
+		{
+			"id": "b87db321-8637-46ad-be40-57e09aa99a77",
+			"key": "task_updated_title",
+			"value": "Do B"
+		},
+		{
+			"id": "c6c46bcc-6a4b-4efa-acc5-f0a810c32eaa",
+			"key": "task_assigned_to",
+			"value": "Petrov"
+		},
+		{
+			"id": "eb0b109e-8742-4e50-b60d-9f1ad947677d",
+			"key": "new_task_id",
+			"value": ""
+		},
+		{
+			"id": "538baa79-a699-4978-8f6b-1789c4e37c31",
+			"key": "new_task_createddate",
+			"value": ""
+		},
+		{
+			"id": "2353e144-bf05-4ed3-9a77-c3724947e546",
+			"key": "host_name",
+			"value": "arch.homework"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
