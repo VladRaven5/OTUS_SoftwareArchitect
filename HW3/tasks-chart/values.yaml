@@ -14,7 +14,9 @@ service:
   type: NodePort
   port: 9000
 
-persistentPg:
+#my own postgres.yaml and postgres-service
+persistentPg: 
+  enabled: false
   username: usr
   password: pwd
   database: projectsApp
@@ -24,6 +26,16 @@ persistentPg:
   serviceType: NodePort
   secretType: Opaque
   label: postgres
+
+#official postgres chart values
+postgresql: 
+  enabled: true
+  fullnameOverride: "postgres-serv"
+  postgresqlUsername: usr
+  postgresqlPassword: pwd
+  postgresqlDatabase: projectsApp
+  service:
+    port: "5432"
 
 ingress:
   enabled: true
