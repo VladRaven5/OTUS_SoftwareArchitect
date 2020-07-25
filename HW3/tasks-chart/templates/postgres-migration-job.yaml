@@ -1,0 +1,38 @@
+{{- if or .Values.persistentPg.enabled .Values.postgresql.enabled  -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pg-migration-job
+spec:
+  template:
+    metadata:
+      name: {{ .Values.persistentPg.label }}
+    spec:
+      restartPolicy: Never
+      containers:
+       - name: pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_USER
+            value: {{.Values.persistentPg.username}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.persistentPg.password}}
+          - name: POSTGRES_DB
+            value: {{.Values.persistentPg.database}}
+          - name: POSTGRES_HOST
+            value: {{.Values.persistentPg.host}}
+          - name: POSTGRES_PORT
+            value: "{{.Values.persistentPg.port}}"
+         command:
+          - sh
+          - "-c"
+          - |
+            sleep 20
+            psql "user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB" << 'EOF'
+              create table tasks (id char(36) primary key, title varchar, createddate timestamp, assignedto varchar, state varchar(15));
+            EOF
+  
+  backoffLimit: 0
+
+
+{{- end -}}
