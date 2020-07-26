@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tasks-service-stress-job
+spec:
+  template:
+    metadata:
+      name: postgres
+    spec:
+      restartPolicy: Never
+      containers:
+       - name: stress-tasks-job 
+         image: vladraven/otus_bomber_service
+         args: ["nginx-nginx-ingress-controller", "arch.homework", "20", "2"]
+ 
+  backoffLimit: 0
