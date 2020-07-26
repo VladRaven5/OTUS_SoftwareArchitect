@@ -11,6 +11,14 @@ spec:
       containers:
        - name: stress-tasks-job 
          image: vladraven/otus_bomber_service
-         args: ["nginx-nginx-ingress-controller", "arch.homework", "20", "2"]
- 
+         env:
+         - name: TARGET_HOST_NAME
+           value: arch.homework
+         - name: TARGET_HOST_URL
+           value: nginx-nginx-ingress-controller
+         - name: RPS
+           value: "20"
+         - name: STREAM_COUNT
+           value: "2"
+
   backoffLimit: 0

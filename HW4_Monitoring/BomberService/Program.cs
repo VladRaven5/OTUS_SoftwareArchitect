@@ -7,42 +7,46 @@ namespace BomberService
 {
     class Program
     {
+        private const string targetHostNameVariable = "TARGET_HOST_NAME";
+        private const string targetHostUrlVariable = "TARGET_HOST_URL";
+        private const string rpsVariable = "RPS";
+        private const string streamCountVariable = "STREAM_COUNT";
+
+        private const int _defaultRps = 10;
+        private const int _defaultStreams = 2;
+
+
         private static ConcurrentStack<string> _tasksIds = new ConcurrentStack<string>();    
         private static List<Bombarder> _bombareds = new List<Bombarder>();        
         
         private static string _hostUri;
         private static string _hostName;
-        private static int _rps;
+        private static int _rps;        
         private static int _streamsCount;
 
         static void Main(string[] args)
         {
-            Console.WriteLine($"Run with args: {string.Join(", ", args)}");
+            _hostUri = Environment.GetEnvironmentVariable(targetHostUrlVariable);
+            _hostName = Environment.GetEnvironmentVariable(targetHostNameVariable);
 
-            if(args.Length < 4)
+            if(string.IsNullOrWhiteSpace(_hostName) || string.IsNullOrWhiteSpace(_hostUri))
             {
-                Console.WriteLine("No hosturl or hostname or RPS or parallel streams count arguments provided. Exit");
+                Console.WriteLine($"Target hostname ({targetHostNameVariable}) or url ({targetHostUrlVariable}) not provided. Exit");
                 return;
             }
 
-            _hostUri = args[0];
-
-            _hostName = args[1];
-
-            string rpsString = args[2];
-
+            string rpsString = Environment.GetEnvironmentVariable(rpsVariable);
             if(!int.TryParse(rpsString, out _rps))
             {                        
-                Console.WriteLine($"Can't parse {rpsString} to RpS. Exit");
-                return;
+                Console.WriteLine($"Can't parse \"{rpsString}\" to RpS. Use default value {_defaultRps}");
+                _rps = _defaultRps;
             }
 
-            string streamsCountString = args[3];
-
+            string streamsCountString = Environment.GetEnvironmentVariable(streamCountVariable);
             if(!int.TryParse(streamsCountString, out _streamsCount))
             {                        
-                Console.WriteLine($"Can't parse {rpsString} to RpS. Exit");
-                return;
+                Console.WriteLine($"Can't parse \"{rpsString}\" to streams count. Use default value {_defaultStreams}");
+                _streamsCount = _defaultStreams;
             }
 
             InitBombardment(_rps, _streamsCount);
