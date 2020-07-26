@@ -11,6 +11,7 @@ namespace BomberService
         private static List<Bombarder> _bombareds = new List<Bombarder>();        
         
         private static string _hostUri;
+        private static string _hostName;
         private static int _rps;
         private static int _streamsCount;
 
@@ -18,15 +19,17 @@ namespace BomberService
         {
             Console.WriteLine($"Run with args: {string.Join(", ", args)}");
 
-            if(args.Length < 3)
+            if(args.Length < 4)
             {
-                Console.WriteLine("No hostname or RPS or parallel streams count arguments provided. Exit");
+                Console.WriteLine("No hosturl or hostname or RPS or parallel streams count arguments provided. Exit");
                 return;
             }
 
             _hostUri = args[0];
 
-            string rpsString = args[1];
+            _hostName = args[1];
+
+            string rpsString = args[2];
 
             if(!int.TryParse(rpsString, out _rps))
             {                        
@@ -34,7 +37,7 @@ namespace BomberService
                 return;
             }
 
-            string streamsCountString = args[2];
+            string streamsCountString = args[3];
 
             if(!int.TryParse(streamsCountString, out _streamsCount))
             {                        
@@ -47,15 +50,14 @@ namespace BomberService
 
         private static void InitBombardment(int rps, int bombardersCount)
         {          
-            int msecPerBombarderRequest = (1000 / rps) * bombardersCount;
+            int rpsPerBomber = rps / bombardersCount;
 
-            Console.WriteLine($"Bombing {_hostUri} started with RpS = {rps} in {bombardersCount} streams");
+            Console.WriteLine($"Bombing {_hostUri} with host {_hostName} started with RpS = {rps} in {bombardersCount} streams");
 
             for(int i = 0; i < bombardersCount; i++)
             {
-                _bombareds.Add(new Bombarder(_hostUri, msecPerBombarderRequest, _tasksIds));
+                _bombareds.Add(new Bombarder(_hostUri, _hostName, rpsPerBomber, _tasksIds));
             }
-
 
             Task.Run(async () => {
 
@@ -63,12 +65,13 @@ namespace BomberService
 
                 foreach(var bombard in _bombareds)
                 {
-                    bombardingTasks.Add(bombard.StartBombardment());
-                }    
-                await Task.WhenAll(bombardingTasks);            
+                    var bombardingTask = Task.Run(bombard.StartBombardment);
+                    bombardingTasks.Add(bombardingTask);                    
+                }          
+                await Task.WhenAll(bombardingTasks);
             })
             .GetAwaiter()
-            .GetResult();           
+            .GetResult();          
         }        
     }
 }

@@ -17,14 +17,18 @@ namespace BomberService
         private HttpClient _httpClient;
         private readonly Random _random;
         private readonly string _hostUrl;
-        private readonly int _maxMsPerRequest;
+        private readonly string _hostName;
+        private readonly int _rps;
         private readonly ConcurrentStack<string> _tasksIds;
 
-        public Bombarder(string hostUrl, int maxMsPerRequest, ConcurrentStack<string> tasksIds)
+        private int requestsCount = 0;
+
+        public Bombarder(string hostUrl, string hostName, int rps, ConcurrentStack<string> tasksIds)
         {
             _hostUrl = hostUrl;
-            _maxMsPerRequest = maxMsPerRequest;
+            _hostName = hostName;
             _tasksIds = tasksIds;
+            _rps = rps;
             
             _allRequests.Add(RequestType.GetTasks, GetTasksRequest);
             _allRequests.Add(RequestType.PostTask, PostTaskRequest);
@@ -36,22 +40,29 @@ namespace BomberService
 
             InitHttpClient();
         }
-
+        
         public async Task StartBombardment()
         {              
-            Stopwatch timer = new Stopwatch();            
+            Console.WriteLine($"Bombarder {GetHashCode()} has started at {DateTime.Now}. RpS ={_rps}");
+
+            Stopwatch timer = Stopwatch.StartNew();            
 
             while(true)
             {
-                timer.Restart();
+                double elapsedSec = timer.ElapsedMilliseconds / 1000;
 
-                await PerformRandomRequest();                 
-                
-                int additionalDelayMsec = _maxMsPerRequest - (int)timer.ElapsedMilliseconds;
-                if(additionalDelayMsec > 0)
+                double currentRps = elapsedSec > 0
+                    ? requestsCount / elapsedSec
+                    : 0;
+
+                if(currentRps > _rps)
                 {
-                    await Task.Delay(additionalDelayMsec); 
+                    await Task.Delay(15);
+                    continue;
                 }
+
+                await PerformRandomRequest();
+                requestsCount++;
             }
         }
 
@@ -119,9 +130,7 @@ namespace BomberService
                 RequestUri = new Uri($"{GetEndpointString()}")
             };
 
-            AddHostIfNecessary(request, _hostUrl);
-
-            return _httpClient.SendAsync(request);
+            return SendRequest(request); 
         }
 
         private Task GetTaskRequest(string taskId)
@@ -132,9 +141,7 @@ namespace BomberService
                 RequestUri = new Uri($"{GetEndpointString()}/{taskId}")
             };
 
-            AddHostIfNecessary(request, _hostUrl);
-
-            return _httpClient.SendAsync(request);
+            return SendRequest(request); 
         }
 
         private async Task PostTaskRequest(string _)
@@ -148,9 +155,7 @@ namespace BomberService
                 RequestUri = new Uri($"{GetEndpointString()}/?title={title}&assignedTo={assignedTo}")
             };            
 
-            AddHostIfNecessary(request, _hostUrl);
-
-            var response = await _httpClient.SendAsync(request);
+            var response = await SendRequest(request); 
 
             if(response.StatusCode != HttpStatusCode.OK)
                 return;
@@ -178,14 +183,12 @@ namespace BomberService
             {
                 Method = HttpMethod.Put,
                 RequestUri = new Uri($"{GetEndpointString()}")
-            };            
-
-            AddHostIfNecessary(request, _hostUrl);
+            };           
 
             var bodyContent = new StringContent(JsonConvert.SerializeObject(updatedTask), Encoding.UTF8, "application/json");
             request.Content = bodyContent;
 
-            await _httpClient.SendAsync(request);
+            await SendRequest(request); 
 
             bodyContent.Dispose();           
         }
@@ -198,6 +201,12 @@ namespace BomberService
                 RequestUri = new Uri($"{GetEndpointString()}/{taskId}")
             };
 
+            return SendRequest(request);            
+        }
+
+        private Task<HttpResponseMessage> SendRequest(HttpRequestMessage request)
+        {
+            AddHostIfNecessary(request, _hostName);
             return _httpClient.SendAsync(request);
         }
 
@@ -205,7 +214,6 @@ namespace BomberService
         [Conditional("RELEASE")]
         private static void AddHostIfNecessary(HttpRequestMessage request, string host)
         {
-            return;
             request.Headers.Add("Host", host);            
         }
 
