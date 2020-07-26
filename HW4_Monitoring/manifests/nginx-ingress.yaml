@@ -1,9 +1,9 @@
 controller:
   kind: DaemonSet
 
-  remortNodeInternalIp: true
+  reportNodeInternalIp: true
 
-  daemonSet:
+  daemonset:
     useHostPort: true
     hostPorts:
       http: 80
