@@ -10,6 +10,6 @@ spec:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.image.containerPort }}
       protocol: TCP
-      name: http
+      name: web
   selector:
     {{- include "tasks-chart.selectorLabels" . | nindent 4 }}

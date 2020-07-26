@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_tasks_service
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
-  tag: latest
+  tag: prometh
 
 service:
   type: NodePort
@@ -47,6 +47,11 @@ ingress:
       paths: [ 
         /otusapp($|/)(.*)
       ]
+    
+metrics:
+  serviceMonitor:
+    enabled: true
+      
 
 serviceAccount:
   create: false
