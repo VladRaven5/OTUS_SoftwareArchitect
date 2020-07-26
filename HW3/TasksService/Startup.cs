@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Prometheus;
 
 namespace TasksService
 {
@@ -35,12 +36,14 @@ namespace TasksService
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
         }
     }
