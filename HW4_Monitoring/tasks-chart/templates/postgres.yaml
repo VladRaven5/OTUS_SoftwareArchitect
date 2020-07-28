@@ -1,0 +1,43 @@
+{{- if .Values.persistentPg.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name:  {{ include "tasks-chart.fullname" . }}
+spec:
+  serviceName: "{{ .Values.persistentPg.host }}"
+  replicas: {{ .Values.persistentPg.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.persistentPg.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.persistentPg.label }}
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        ports:
+        - containerPort: {{.Values.persistentPg.port}}
+          name: postgredb
+        env:
+          - name: POSTGRES_DB
+            value: {{.Values.persistentPg.database}}
+          - name: POSTGRES_USER
+            value: {{.Values.persistentPg.username}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.persistentPg.password}}
+        volumeMounts:
+        - name: postgredb
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+  volumeClaimTemplates:
+  - metadata:
+      name: postgredb
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 1Gi
+{{- end }}

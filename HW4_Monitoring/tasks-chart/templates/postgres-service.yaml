@@ -1,0 +1,14 @@
+{{- if .Values.persistentPg.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.persistentPg.host }}
+  labels:
+    app: {{ .Values.persistentPg.replicas }}
+spec:
+  type: {{ .Values.persistentPg.serviceType }}
+  ports:
+   - port: {{.Values.persistentPg.port}}
+  selector:
+    app: {{ .Values.persistentPg.replicas }}
+{{- end }}
