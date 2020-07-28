@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tasks-chart.fullname" . }}-pg-exp
+  labels:
+    {{- include "tasks-chart.pg-exp-labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "tasks-chart.pg-exp-selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tasks-chart.pg-exp-selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+       - name: exporter-wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{.Values.persistentPg.host}}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+      containers:
+      - name: {{ include "tasks-chart.fullname" . }}-pg-exp
+        image: wrouesnel/postgres_exporter
+        ports:
+          - containerPort: {{ .Values.persistentPg.exporter.port }}
+        env:
+        - name: DATA_SOURCE_NAME
+          value: {{ printf "user=%s password=%s host=%s port=%s dbname=%s sslmode=disable" .Values.persistentPg.username .Values.persistentPg.password  .Values.persistentPg.host .Values.persistentPg.port .Values.persistentPg.database | quote }}

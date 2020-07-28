@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tasks-chart.fullname" . }}-pg-exp
+  labels: 
+    {{- include "tasks-chart.pg-exp-labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "tasks-chart.pg-exp-selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.persistentPg.exporter.port }}
+      targetPort: {{ .Values.persistentPg.exporter.port }}
+      name: pexp
+  type: NodePort

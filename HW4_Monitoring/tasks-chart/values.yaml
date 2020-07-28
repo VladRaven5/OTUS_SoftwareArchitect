@@ -26,6 +26,8 @@ persistentPg:
   serviceType: NodePort
   secretType: Opaque
   label: postgres
+  exporter:
+    port: 9187
 
 #official postgres chart values
 postgresql: 

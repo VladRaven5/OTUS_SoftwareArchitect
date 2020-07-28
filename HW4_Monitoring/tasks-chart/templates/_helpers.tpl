@@ -52,6 +52,26 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "tasks-chart.pg-exp-labels" -}}
+helm.sh/chart: {{ include "tasks-chart.chart" . }}
+{{ include "tasks-chart.pg-exp-selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "tasks-chart.pg-exp-selectorLabels" -}}
+app.kubernetes.io/name: {{ include "tasks-chart.name" . }}-pg-exp
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "tasks-chart.serviceAccountName" -}}

@@ -1,0 +1,20 @@
+{{- if .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "tasks-chart.fullname" . }}-pg-exp
+  labels:
+    {{- include "tasks-chart.pg-exp-labels" . | nindent 4 }}
+spec:
+  jobLabel: {{ include "tasks-chart.fullname" . }}-pg-exp
+  namespaceSelector:
+    matchNames:
+    - "{{ $.Release.Namespace }}"
+  selector:
+    matchLabels:
+      {{- include "tasks-chart.pg-exp-selectorLabels" . | nindent 6 }}
+  endpoints:
+  - interval: 15s
+    port: pexp
+    path: /metrics
+{{- end }}
