@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="3.1.6" />
+    <PackageReference Include="ravendb.client" Version="5.0.0" />
   </ItemGroup>
 
 
