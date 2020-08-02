@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService
@@ -10,16 +16,31 @@ namespace AuthService
         private readonly AuthenticationService _authenticationService;
 
         public AuthController(AuthenticationService authenticationService)
-        {
+        {            
             _authenticationService = authenticationService;
         }
 
+        [Authorize]
         [HttpGet("auth")]
-        public async Task<ActionResult> Authenticate(string sessionId)
+        public ActionResult Authenticate()
         {
-            return await _authenticationService.AuthenticateAsync(sessionId) 
-                ? (ActionResult)Ok()
-                : Unauthorized("You must login at /login path");
+            return Ok(User.Identity.Name);
+        }
+
+        [HttpPost("register")]
+        public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
+        {
+            try
+            {
+                var user = await _authenticationService.RegisterAsync(registerDto.Username, registerDto.Login, registerDto.Password);
+                await AuthenticateUser(user.Id);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }                       
+
+            return Ok();
         }
 
         [HttpPost("login")]
@@ -28,33 +49,38 @@ namespace AuthService
             string login = loginDto.Login;
             string password = loginDto.Password;
 
-            if(string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+            UserAuthInfo user = await _authenticationService.LoginAsync(login, password);
+            if(user == null)
             {
-                BadRequest("Login and password can't be empty");
+                NotFound("user with this credentials not found");
             }
 
-            string sessionId = await _authenticationService.LoginAsync(login, password);
-
-            return string.IsNullOrWhiteSpace(sessionId)
-                ? (ActionResult)Forbid()
-                : Ok();
-        }
-
-        [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
-        {
-            string login = registerDto.Login;
-            string password = registerDto.Password;
-            string username = registerDto.Username;
-
-            if(string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(username))
-            {
-                BadRequest("Login, password or username can't be empty");
-            }
-
-            await _authenticationService.RegisterAsync(username, login, password);
+            await AuthenticateUser(user.Id);        
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("logout")]
+        public async Task<ActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            
+            return Ok();
+        } 
+
+        private Task AuthenticateUser(string userId)
+        {
+            var claims = new List<Claim> 
+            {
+                new Claim(ClaimTypes.Name,  userId)
+            };
+
+            ClaimsIdentity identity = new ClaimsIdentity(claims, "User Identity");            
+
+            return HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity));
         }
     }
 }

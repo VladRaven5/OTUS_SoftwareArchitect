@@ -15,29 +15,13 @@ namespace AuthService
             _passwordHasher = new PasswordHasher("54321");
         }
 
-        public async Task<bool> AuthenticateAsync(string sessionId)
-        {
-            var userInfo = (await _repository
-                .FilterUsersByPredicateAsync(user => user.SessionId == sessionId))
-                .SingleOrDefault();
-
-            return userInfo != null && userInfo.SessionExpiredAt < DateTimeOffset.UtcNow;
-        }
-
-        public async Task<string> LoginAsync(string login, string password)
+        public async Task<UserAuthInfo> LoginAsync(string login, string password)
         {
             string passwordHash = _passwordHasher.HashPassword(password);
 
-            var userInfo = (await _repository
+            return (await _repository
                 .FilterUsersByPredicateAsync(user => user.Login == login && user.PasswordHash == passwordHash))
                 .SingleOrDefault();
-
-            if(userInfo == null)
-            {
-                throw new Exception($"User with this credentials not found");
-            }
-
-            return await _repository.UpdateUserSessionAsync(userInfo.Id);
         }
 
         public async Task<UserAuthInfo> RegisterAsync(string username, string login, string password)

@@ -31,25 +31,10 @@ namespace AuthService
                 PasswordHash = password,
             };
 
-            UpdateUserSessionInternal(userInfo);
-
             await _connection.StoreAsync(userInfo);
             await _connection.SaveChangesAsync();
 
             return userInfo;
-        }
-
-        public async Task<string> UpdateUserSessionAsync(string userId)
-        {
-            var userInfo = await GetUserAuthInfoAsync(userId);
-            if(userInfo == null)
-                throw new Exception($"User with id={userId} not found");
-
-            var sessionId = UpdateUserSessionInternal(userInfo);
-
-            await _connection.SaveChangesAsync();
-
-            return sessionId;
         }
 
         public async Task<IEnumerable<UserAuthInfo>> FilterUsersByPredicateAsync(Expression<Func<UserAuthInfo, bool>> predicate)
@@ -58,14 +43,6 @@ namespace AuthService
                     _connection.Query<UserAuthInfo>(),
                     predicate)
                 .ToListAsync();
-        }
-
-        private string UpdateUserSessionInternal(UserAuthInfo userInfo)
-        {
-            string sessionId = Guid.NewGuid().ToString();
-            userInfo.SetSession(sessionId);
-
-            return sessionId;
         }
 
         public void Dispose()
