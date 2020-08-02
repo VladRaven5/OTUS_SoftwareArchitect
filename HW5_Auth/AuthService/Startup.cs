@@ -1,9 +1,12 @@
+using System;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 
 namespace AuthService
 {
@@ -20,12 +23,26 @@ namespace AuthService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            var redisConnectionString = Configuration.GetConnectionString("RedisConnection");
+            var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+            
+            services.AddDataProtection()
+                .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
+                .SetApplicationName("SharedCookieApp");
             
             services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/login");
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.Name = "UserAuthCookie";
+                    options.Events = new CookieAuthenticationEvents
+                    {
+                        OnRedirectToLogin = async (context) => context.Response.StatusCode = 401,
+                        OnRedirectToAccessDenied = async (context) => context.Response.StatusCode = 403
+                    };
+                    options.ExpireTimeSpan = TimeSpan.FromDays(1);
                 });
 
 
