@@ -29,7 +29,7 @@ namespace UsersService
             
             services.AddDataProtection()
                 .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
-                .SetApplicationName("SharedCookieApp");
+                .SetApplicationName("NotJiraApp");
 
             services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
