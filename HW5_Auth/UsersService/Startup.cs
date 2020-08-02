@@ -44,6 +44,10 @@ namespace UsersService
                     };
                     options.ExpireTimeSpan = TimeSpan.FromDays(1);
                 });
+
+            services.AddSingleton<DBConnectionProvider, DBConnectionProvider>();
+            services.AddScoped<Repository, Repository>();
+            services.AddScoped<UserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +62,7 @@ namespace UsersService
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
