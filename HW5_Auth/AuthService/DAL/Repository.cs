@@ -17,9 +17,15 @@ namespace AuthService
             _connection = connectionProvider.GetConnection();
         }
 
-        public Task<UserAuthInfo> GetUserAuthInfoAsync(string userId)
+        public async Task<UserAuthInfo> GetUserAuthInfoAsync(string userId)
         {
-            return _connection.LoadAsync<UserAuthInfo>(userId);
+            var userInfo = await _connection.LoadAsync<UserAuthInfo>(userId);
+            if(userInfo == null)
+            {
+                throw new Exception($"UserInfo for user id {userId} not found");
+            }
+
+            return userInfo;
         }
 
         public async Task<UserAuthInfo> CreateUserInfo(string userId, string login, string password)
@@ -35,6 +41,13 @@ namespace AuthService
             await _connection.SaveChangesAsync();
 
             return userInfo;
+        }
+
+        public async Task DeleteUserInfoAsync(string userId)
+        {
+            var user = await GetUserAuthInfoAsync(userId);
+            _connection.Delete(user);
+            await _connection.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<UserAuthInfo>> FilterUsersByPredicateAsync(Expression<Func<UserAuthInfo, bool>> predicate)

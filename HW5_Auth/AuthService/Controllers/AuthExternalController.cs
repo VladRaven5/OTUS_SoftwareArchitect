@@ -11,11 +11,11 @@ namespace AuthService
 {
     [ApiController]
     [Route("")]
-    public class AuthController : ControllerBase
+    public class AuthExternalController : ControllerBase
     {
         private readonly AuthenticationService _authenticationService;
 
-        public AuthController(AuthenticationService authenticationService)
+        public AuthExternalController(AuthenticationService authenticationService)
         {            
             _authenticationService = authenticationService;
         }
@@ -40,7 +40,7 @@ namespace AuthService
                 return BadRequest(e.Message);
             }                       
 
-            return Ok();
+            return Ok("Success");
         }
 
         [HttpPost("login")]
@@ -52,12 +52,12 @@ namespace AuthService
             UserAuthInfo user = await _authenticationService.LoginAsync(login, password);
             if(user == null)
             {
-                NotFound("user with this credentials not found");
+                return NotFound("user with this credentials not found");
             }
 
             await AuthenticateUser(user.Id);        
 
-            return Ok();
+            return Ok("Success");
         }
 
         [Authorize]
@@ -66,7 +66,7 @@ namespace AuthService
         {
             await HttpContext.SignOutAsync();
             
-            return Ok();
+            return Ok("Success");
         } 
 
         private Task AuthenticateUser(string userId)

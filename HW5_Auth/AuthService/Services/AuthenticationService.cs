@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace AuthService
 {
@@ -8,6 +10,8 @@ namespace AuthService
     {
         private readonly Repository _repository;
         private readonly PasswordHasher _passwordHasher;
+
+        private HttpClient _httpClient;
 
         public AuthenticationService(Repository repository)
         {
@@ -22,6 +26,11 @@ namespace AuthService
             return (await _repository
                 .FilterUsersByPredicateAsync(user => user.Login == login && user.PasswordHash == passwordHash))
                 .SingleOrDefault();
+        }
+
+        internal Task DeleteUserAsync(string userId)
+        {
+            return _repository.DeleteUserInfoAsync(userId);
         }
 
         public async Task<UserAuthInfo> RegisterAsync(string username, string login, string password)
@@ -51,14 +60,39 @@ namespace AuthService
                 .Any();
         }
 
-        private Task<UserCreationResult> CheckUsernameAndCreateAsync(string username)
+        private async Task<UserCreationResult> CheckUsernameAndCreateAsync(string username)
         {
-            return Task<UserCreationResult>.FromResult(
-                new UserCreationResult
-                {
-                    IsSuccess = true,
-                    UserId = Guid.NewGuid().ToString()
-                });
+            _httpClient ??= CreateHttpClient();
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri($"https://localhost:5003/svc/users?username={username}")
+            };
+
+            var response = await _httpClient.SendAsync(request);
+
+            if(!response.IsSuccessStatusCode)
+            {
+                var errorDto = JsonConvert.DeserializeObject<ErrorResponseDto>(await response.Content.ReadAsStringAsync());
+                return UserCreationResult.Failure(errorDto.Title);
+            }
+                
+
+            var userModel = JsonConvert.DeserializeObject<UserModel>(await response.Content.ReadAsStringAsync());
+            
+            return UserCreationResult.Success(userModel.Id);
+        }
+
+        private HttpClient CreateHttpClient()
+        {
+            var handler = new HttpClientHandler()
+            { 
+                ServerCertificateCustomValidationCallback 
+                    = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+
+            return new HttpClient(handler);
         }
     }
 }
