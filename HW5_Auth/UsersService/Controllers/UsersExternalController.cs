@@ -53,6 +53,23 @@ namespace UsersService
         }
 
         [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserModel>> GetMe()
+        {
+            var userId = User.Identity.Name;
+
+            try
+            {
+                var user = await _userService.GetUserAsync(userId);
+                return Ok(user);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
+        [Authorize]
         [HttpDelete("{userId}")]
         public async Task<ActionResult> DeleteUser(string userId)
         {
