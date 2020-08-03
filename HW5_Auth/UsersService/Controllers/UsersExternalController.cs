@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace UsersService
 {
     [ApiController]
-    [Route("users")]
+    [Route("")]
     public class UsersExternalController : ControllerBase
     {
         private readonly UserService _userService;
@@ -56,10 +56,9 @@ namespace UsersService
         [HttpGet("me")]
         public async Task<ActionResult<UserModel>> GetMe()
         {
-            var userId = User.Identity.Name;
-
             try
             {
+                string userId = Request.Headers["X-UserId"];                              
                 var user = await _userService.GetUserAsync(userId);
                 return Ok(user);
             }
