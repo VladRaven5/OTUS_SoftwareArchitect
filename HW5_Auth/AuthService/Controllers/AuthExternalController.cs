@@ -36,8 +36,8 @@ namespace AuthService
             try
             {
                 var user = await _authenticationService.RegisterAsync(registerDto.Username, registerDto.Login, registerDto.Password);
-                await AuthenticateUser(user.Id);
-                SetUserIdHeader(user.Id);
+                //await AuthenticateUser(user.Id);
+                //SetUserIdHeader(user.Id);
             }
             catch(Exception e)
             {
@@ -71,7 +71,7 @@ namespace AuthService
         public async Task<ActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            
+                        
             return Ok("Success");
         } 
 

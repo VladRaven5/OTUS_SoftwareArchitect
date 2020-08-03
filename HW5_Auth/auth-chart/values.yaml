@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_auth_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.2"
+  tag: "0.3"
   containerPort: "5000"
   dbConnectionStringEnvName: ConnectionStrings__DefaultConnection
   redisConnectionStringEnvName: ConnectionStrings__RedisConnection
