@@ -23,12 +23,12 @@ spec:
           - name: RAVEN_ARGS
             value: '--Setup.Mode=None'
         volumeMounts:
-        - name: ravendb
-          mountPath: /var/lib/ravendb/data
-          subPath: ravendb
+        - name: auth-ravendb
+          mountPath: /opt/RavenDB/Server/RavenData
+          subPath: auth_info
   volumeClaimTemplates:
   - metadata:
-      name: ravendb
+      name: auth-ravendb
     spec:
       accessModes: ["ReadWriteOnce"]
       storageClassName: standard
