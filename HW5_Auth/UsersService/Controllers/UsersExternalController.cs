@@ -44,6 +44,12 @@ namespace UsersService
         {
             try
             {
+                string currentUserId = Request.Headers["X-UserId"];
+                if(currentUserId != userId)
+                {
+                    return Forbid();
+                }
+
                 return await _userService.UpdateUserAsync(userId, username);
             }
             catch(Exception e)
