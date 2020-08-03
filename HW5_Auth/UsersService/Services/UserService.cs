@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,12 +11,13 @@ namespace UsersService
     public class UserService
     {
         private readonly Repository _repository;
-
+        private readonly IConfiguration _configuration;
         private HttpClient _httpClient;
 
-        public UserService(Repository repository)
+        public UserService(Repository repository, IConfiguration configuration)
         {
             _repository = repository;
+            _configuration = configuration;
         }
 
         public async Task<UserModel> CreateUserAsync(string username)
@@ -60,10 +62,12 @@ namespace UsersService
         {
             _httpClient ??= CreateHttpClient();
 
+            string authServiceUrl = _configuration["ServicesUris:AuthService"];
+
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Delete,
-                RequestUri = new Uri($"https://localhost:5001/svc/userauth/{userId}")
+                RequestUri = new Uri($"{authServiceUrl}/svc/userauth/{userId}")
             };
 
             var response = await _httpClient.SendAsync(request);

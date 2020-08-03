@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace AuthService
@@ -9,13 +10,15 @@ namespace AuthService
     public class AuthenticationService
     {
         private readonly Repository _repository;
+        private readonly IConfiguration _configuration;
         private readonly PasswordHasher _passwordHasher;
 
         private HttpClient _httpClient;
 
-        public AuthenticationService(Repository repository)
+        public AuthenticationService(Repository repository, IConfiguration configuration)
         {
             _repository = repository;
+            _configuration = configuration;
             _passwordHasher = new PasswordHasher("54321");
         }
 
@@ -64,10 +67,12 @@ namespace AuthService
         {
             _httpClient ??= CreateHttpClient();
 
+            string usersServiceUrl = _configuration["ServicesUris:UsersService"];
+
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"https://localhost:5003/svc/users?username={username}")
+                RequestUri = new Uri($"{usersServiceUrl}/svc/users?username={username}")
             };
 
             var response = await _httpClient.SendAsync(request);
