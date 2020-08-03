@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_users_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.5"
+  tag: "0.7"
   containerPort: "5003"
   dbConnectionStringEnvName: ConnectionStrings__DefaultConnection
   redisConnectionStringEnvName: ConnectionStrings__RedisConnection
@@ -62,9 +62,9 @@ ingress:
   enabled: true
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-    #nginx.ingress.kubernetes.io/auth-url: "http://default.auth.svc.cluster.local:9001/auth"
-    #nginx.ingress.kubernetes.io/auth-signin: "http://$host/login"
-    #nginx.ingress.kubernetes.io/auth-response-headers: "X-UserId"
+    nginx.ingress.kubernetes.io/auth-url: "http://auth-service.default.svc.cluster.local:9001/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://$host/otusapp/login"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-UserId"
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
