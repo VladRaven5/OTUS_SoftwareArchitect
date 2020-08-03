@@ -16,6 +16,6 @@ services:
   
   auth_service_current:
     << : *default_auth_service
-    image: vladraven/otus_auth_service:0.1
+    image: vladraven/otus_auth_service:0.2
 
     

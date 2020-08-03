@@ -24,7 +24,10 @@ namespace AuthService
         [HttpGet("auth")]
         public ActionResult Authenticate()
         {
-            return Ok(User.Identity.Name);
+            string userId = User.Identity.Name;
+            SetUserIdHeader(userId);
+
+            return Ok("Success");
         }
 
         [HttpPost("register")]
@@ -34,6 +37,7 @@ namespace AuthService
             {
                 var user = await _authenticationService.RegisterAsync(registerDto.Username, registerDto.Login, registerDto.Password);
                 await AuthenticateUser(user.Id);
+                SetUserIdHeader(user.Id);
             }
             catch(Exception e)
             {
@@ -55,7 +59,9 @@ namespace AuthService
                 return NotFound("user with this credentials not found");
             }
 
-            await AuthenticateUser(user.Id);        
+            await AuthenticateUser(user.Id);
+
+            SetUserIdHeader(user.Id);      
 
             return Ok("Success");
         }
@@ -68,6 +74,11 @@ namespace AuthService
             
             return Ok("Success");
         } 
+
+        private void SetUserIdHeader(string userId)
+        {
+            Response.Headers.Add("X-UserId", userId);
+        }
 
         private Task AuthenticateUser(string userId)
         {
