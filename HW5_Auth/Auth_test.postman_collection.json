@@ -1,0 +1,642 @@
+{
+	"info": {
+		"_postman_id": "db062420-9cbf-4ed3-84e9-8b6b812f29a9",
+		"name": "Auth test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User1 registers",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3619bdc2-d9cd-480a-8fc9-c1f11409c75e",
+						"exec": [
+							"pm.collectionVariables.set(\"user1_login\", pm.variables.replaceIn('{{$randomWord}}'));",
+							"pm.collectionVariables.set(\"user1_pwd\", pm.variables.replaceIn('{{$randomPassword}}'));",
+							"pm.collectionVariables.set(\"user1_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "8fd51f02-b1c0-4bb2-8964-e6ae4f0e2c40",
+						"exec": [
+							"const jar = pm.cookies.jar();",
+							"",
+							"jar.clear(pm.request.url, function (error) {",
+							"  // error - <Error>",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user1_login}}\",\n    \"password\": \"{{user1_pwd}}\",\n    \"username\": \"{{user1_username}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/register",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check unauthorized access",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "acacf25f-fbd2-44a0-96a5-481489c64a93",
+						"exec": [
+							"pm.test(\"Status code is redirect to login\", function () {",
+							"    pm.response.to.have.status(302);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"followRedirects": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/users/me",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 logins",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1c966cd0-5465-47d6-b29f-fd523c0af006",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Cookie assigned\", function () {",
+							"    pm.expect(pm.cookies.has('UserAuthCookie')).to.be.true;",
+							"})",
+							"",
+							"pm.test(\"Header assigned\", function () {",
+							"    pm.expect(pm.response.headers.has(\"X-UserId\")).to.be.true;",
+							"    pm.collectionVariables.set(\"user1_id\", pm.response.headers.get(\"X-UserId\"));",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user1_login}}\",\n    \"password\": \"{{user1_pwd}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/login",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 checks /me",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0639d5d6-8076-4893-bbd0-453addf83152",
+						"exec": [
+							"pm.request.headers.add(\"X-UserId\", \"{{user1_id}}\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "72ae27ca-fb25-4930-99f4-41241bf5c3d9",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user1_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/users/me",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 updates username",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "37e6889f-0467-4d8f-8369-06892a8a12b6",
+						"exec": [
+							"pm.request.headers.add(\"X-UserId\", \"{{user1_id}}\");",
+							"pm.collectionVariables.set(\"user1_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "38fa553b-3f8b-4418-a539-a9c9173e6698",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user1_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/users/?userId={{user1_id}}&username={{user1_username}}",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						""
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{user1_id}}"
+						},
+						{
+							"key": "username",
+							"value": "{{user1_username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 logouts",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f8a527c7-fe2e-45be-a94e-7001ecc61b84",
+						"exec": [
+							"pm.request.headers.add(\"X-UserId\", \"{{user1_id}}\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "474d9c95-5b21-4a6c-83b4-9c8922bf57b6",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Has no auth cookie\", function () {",
+							"    pm.expect(pm.cookies.has('UserAuthCookie')).to.be.false;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/logout",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 registers",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e80cb0a9-5577-410e-8d20-e0b8e4ab195c",
+						"exec": [
+							"pm.collectionVariables.set(\"user2_login\", pm.variables.replaceIn('{{$randomWord}}'));",
+							"pm.collectionVariables.set(\"user2_pwd\", pm.variables.replaceIn('{{$randomPassword}}'));",
+							"pm.collectionVariables.set(\"user2_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "393a9329-6041-4a3e-aabe-3a2ea02e3966",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user2_login}}\",\n    \"password\": \"{{user2_pwd}}\",\n    \"username\": \"{{user2_username}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/register",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 logins",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8019e261-960d-453b-bdb6-6d556f9137ef",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Cookie assigned\", function () {",
+							"    pm.expect(pm.cookies.has('UserAuthCookie')).to.be.true;",
+							"})",
+							"",
+							"pm.test(\"Header assigned\", function () {",
+							"    pm.expect(pm.response.headers.has(\"X-UserId\")).to.be.true;",
+							"    pm.collectionVariables.set(\"user2_id\", pm.response.headers.get(\"X-UserId\"));",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user2_login}}\",\n    \"password\": \"{{user2_pwd}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/login",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 checks /me",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ead8a248-dd10-4f9c-811f-2edff31b5712",
+						"exec": [
+							"pm.request.headers.add(\"X-UserId\", \"{{user2_id}}\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "dc749bd3-bf00-44e7-8b6a-cbc1bba71b3e",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user2_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/users/me",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 can't update User1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "db814036-371f-4428-b656-a334ec60267e",
+						"exec": [
+							"pm.request.headers.add(\"X-UserId\", \"{{user2_id}}\");",
+							"pm.collectionVariables.set(\"user2_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2df4545e-bd89-4077-8b9d-0e9ba2f319c7",
+						"exec": [
+							"pm.test(\"Is status forbidden\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/users/?userId={{user1_id}}&username={{user2_username}}",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						""
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{user1_id}}"
+						},
+						{
+							"key": "username",
+							"value": "{{user2_username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 stays not changed",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "082ef482-da37-4dbe-9ff7-b516d3aa3995",
+						"exec": [
+							"pm.request.headers.add(\"X-UserId\", \"{{user2_id}}\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e60d9f0e-9090-43f4-af18-d3f86b510779",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username not changed\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user1_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/users/{{user1_id}}",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"{{user1_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "a4eb3fb5-ccfa-4149-83d6-b4e1f7e82cf0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "aea04584-e8f0-421b-8b44-a13c323b36ea",
+				"type": "text/javascript",
+				"exec": [
+					"tests[\"[INFO] Request: \" + (('data' in request) ? request['data'] : '')] = true;",
+					"tests[\"[INFO] Response: \" + responseBody] = true;"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "47392a37-9702-4540-b836-53e363b7312e",
+			"key": "base_url",
+			"value": "arch.homework"
+		},
+		{
+			"id": "54c4761c-f344-4d50-8e68-ab48c63815a2",
+			"key": "user1_login",
+			"value": ""
+		},
+		{
+			"id": "14e91dd7-8d4e-4eeb-89c2-2f0d705e250a",
+			"key": "user1_pwd",
+			"value": ""
+		},
+		{
+			"id": "0eb2b2f1-56b8-4185-92e1-deec86163a5b",
+			"key": "user1_username",
+			"value": ""
+		},
+		{
+			"id": "424d9fcc-0999-49a7-8908-67da0e995ed5",
+			"key": "user1_id",
+			"value": ""
+		},
+		{
+			"id": "7dc470d7-6bc9-49a1-9a2c-793c8a62f033",
+			"key": "user2_login",
+			"value": ""
+		},
+		{
+			"id": "3abd41f0-0409-4f56-9786-03919f8d6ddc",
+			"key": "user2_pwd",
+			"value": ""
+		},
+		{
+			"id": "2ba2b08b-8bd5-498f-826e-e0e93bde91c7",
+			"key": "user2_username",
+			"value": ""
+		},
+		{
+			"id": "bd2114ea-7731-482a-a5ca-85ae2faa7d07",
+			"key": "user2_id",
+			"value": ""
+		}
+	],
+	"protocolProfileBehavior": {}
+}
