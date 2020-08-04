@@ -1,0 +1,4 @@
+create database working_hours;
+create table working_hours_records (id char(36) primary key, taskid char(36), userid char(36), description varchar, hours real, createddate timestamp, version int);
+create index idx_tasks_users on working_hours_records (taskid, userid);
+create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
