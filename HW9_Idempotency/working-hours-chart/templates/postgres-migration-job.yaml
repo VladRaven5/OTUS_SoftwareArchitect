@@ -1,0 +1,47 @@
+{{- if .Values.postgresql.enabled  -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pg-migration-job
+spec:
+  template:
+    metadata:
+      name: {{ include "working-hours-chart.fullname" . }}
+    spec:
+      restartPolicy: Never
+      initContainers:
+       - name: wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+      containers:
+       - name: pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_USER
+            value: {{.Values.postgresql.postgresqlUsername}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.postgresql.postgresqlPassword}}
+          - name: POSTGRES_DB
+            value: {{.Values.postgresql.postgresqlDatabase}}
+          - name: POSTGRES_HOST
+            value: {{.Values.postgresql.fullnameOverride}}
+          - name: POSTGRES_PORT
+            value: "{{.Values.postgresql.service.port}}"
+         command:
+          - sh
+          - "-c"
+          - |
+            psql "user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB" << 'EOF'
+              create database working_hours;
+              create table working_hours_records (id char(36) primary key, taskid char(36), userid char(36), description varchar, hours real, createddate timestamp, version int);
+              create index idx_tasks_users on working_hours_records (taskid, userid);
+              create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+            EOF
+  
+  backoffLimit: 0
+
+
+{{- end -}}
