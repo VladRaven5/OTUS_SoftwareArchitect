@@ -1,0 +1,544 @@
+{
+	"info": {
+		"_postman_id": "1fc8c463-ee44-46fe-abea-b0071dd8f80a",
+		"name": "Idempotency test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check records count before create",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9e3f136f-3637-431c-b599-92975bf22fe2",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"initial_count\", jsonData.length);",
+							" ",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create first record",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2908f986-b41c-46c5-a3a0-3e205eaa958d",
+						"exec": [
+							"pm.collectionVariables.set(\"first_record_req_id\", pm.variables.replaceIn('{{$randomUUID}}'));",
+							"pm.collectionVariables.set(\"first_record_taskid\", pm.variables.replaceIn('{{$randomUUID}}'));",
+							"pm.collectionVariables.set(\"first_record_userid\", pm.variables.replaceIn('{{$randomUUID}}'));",
+							"pm.collectionVariables.set(\"first_record_hours\", pm.variables.replaceIn('{{$randomInt}}'));",
+							"pm.collectionVariables.set(\"first_record_description\", pm.variables.replaceIn('{{$randomWord}}'));",
+							"",
+							"pm.request.headers.add(pm.collectionVariables.get(\"first_record_req_id\"), \"X-RequestId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "46e87748-d75b-4db2-8e13-1a61681eeff6",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is record created correct\", function () {",
+							"    var jsonData = pm.response.json();    ",
+							"    pm.expect(jsonData.taskId).to.eql(pm.variables.get(\"first_record_taskid\"));",
+							"    pm.expect(jsonData.userId).to.eql(pm.variables.get(\"first_record_userid\"));",
+							"    pm.expect(jsonData.hours.toString()).to.eql(pm.variables.get(\"first_record_hours\"));",
+							"    pm.expect(jsonData.description).to.eql(pm.variables.get(\"first_record_description\"));",
+							"",
+							"    pm.collectionVariables.set(\"first_record_version\", jsonData.version);",
+							"    pm.collectionVariables.set(\"first_record_id\", jsonData.id);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"taskId\": \"{{first_record_taskid}}\",\n    \"userId\": \"{{first_record_userid}}\",\n    \"hours\": {{first_record_hours}},\n    \"description\": \"{{first_record_description}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send same creation request one more time",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9a19d58e-4c4f-402d-813f-3422184f0eff",
+						"exec": [
+							"pm.request.headers.add(pm.collectionVariables.get(\"first_record_req_id\"), \"X-RequestId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0ae20baf-2030-4bdd-8044-e1b7a6817ca0",
+						"exec": [
+							"pm.test(\"Status code is 202\", function () {",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"taskId\": \"{{first_record_taskid}}\",\n    \"userId\": \"{{first_record_userid}}\",\n    \"hours\": {{first_record_hours}},\n    \"description\": \"{{first_record_description}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check record created only once",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bcb5c693-1f19-41c4-a7b0-1d1aad6831e1",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Count incresed only once\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.length).to.eql(1 + pm.variables.get(\"initial_count\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create record with new request id",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d0374c85-6004-4d8a-86c4-199c69f47cb9",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{$randomUUID}}'), \"X-RequestId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "3deedcfb-5888-40c8-a271-5447c275f33f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"taskId\": \"{{$randomUUID}}\",\n    \"userId\": \"{{$randomUUID}}\",\n    \"hours\": {{$randomInt}},\n    \"description\": \"{{$randomWord}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check is second record created",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5c54b7b4-ee1b-4363-ae70-14edc88e306e",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Count incresed only once\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.length).to.eql(2 + pm.variables.get(\"initial_count\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Try update first record",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "13f27db8-5f6a-4815-b5a5-0b612f2a90e2",
+						"exec": [
+							"pm.collectionVariables.set(\"first_record_req_id\", pm.variables.replaceIn('{{$randomUUID}}'));",
+							"pm.collectionVariables.set(\"first_record_taskid\", pm.variables.replaceIn('{{$randomUUID}}'));",
+							"pm.collectionVariables.set(\"first_record_userid\", pm.variables.replaceIn('{{$randomUUID}}'));",
+							"pm.collectionVariables.set(\"first_record_hours\", pm.variables.replaceIn('{{$randomInt}}'));",
+							"pm.collectionVariables.set(\"first_record_description\", pm.variables.replaceIn('{{$randomWord}}'));",
+							"",
+							"pm.request.headers.add(pm.collectionVariables.get(\"first_record_req_id\"), \"X-RequestId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5b8e80a3-3bc4-4b03-9e82-9ce56cf27f5b",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is record created correct\", function () {",
+							"    var jsonData = pm.response.json();    ",
+							"    pm.expect(jsonData.taskId).to.eql(pm.variables.get(\"first_record_taskid\"));",
+							"    pm.expect(jsonData.userId).to.eql(pm.variables.get(\"first_record_userid\"));",
+							"    pm.expect(jsonData.hours.toString()).to.eql(pm.variables.get(\"first_record_hours\"));",
+							"    pm.expect(jsonData.description).to.eql(pm.variables.get(\"first_record_description\"));",
+							"});",
+							"",
+							"",
+							"pm.test(\"Is version increased\", function () {",
+							"    var jsonData = pm.response.json();    ",
+							"    pm.expect(jsonData.version).to.eql(1 + pm.variables.get(\"first_record_version\"));",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{first_record_id}}\",\n    \"taskId\": \"{{first_record_taskid}}\",\n    \"userId\": \"{{first_record_userid}}\",\n    \"hours\": {{first_record_hours}},\n    \"description\": \"{{first_record_description}}\",\n    \"version\": {{first_record_version}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Try another update with old version",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "705699ac-eb36-4aa0-8a05-9cd645cd8b20",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "51af0448-756a-4166-aafe-e394500c7a0f",
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{first_record_id}}\",\n    \"taskId\": \"{{$randomUUID}}\",\n    \"userId\": \"{{$randomUUID}}\",\n    \"hours\": {{$randomInt}},\n    \"description\": \"{{$randomWord}}\",\n    \"version\": {{first_record_version}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check is first record not modified",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a89c7d70-3536-4c2d-9cba-f01c14211ec6",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is data preserved unmodified\", function () {",
+							"    var jsonData = pm.response.json();    ",
+							"    pm.expect(jsonData.taskId).to.eql(pm.variables.get(\"first_record_taskid\"));",
+							"    pm.expect(jsonData.userId).to.eql(pm.variables.get(\"first_record_userid\"));",
+							"    pm.expect(jsonData.hours.toString()).to.eql(pm.variables.get(\"first_record_hours\"));",
+							"    pm.expect(jsonData.description).to.eql(pm.variables.get(\"first_record_description\"));",
+							"    pm.expect(jsonData.version).to.eql(1 + pm.variables.get(\"first_record_version\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/working-hours/{{first_record_id}}",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"working-hours",
+						"{{first_record_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "532a41f2-9e9b-4c06-bfce-3d6d98e3d0af",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "85528a6d-5529-408b-a615-8e39ebdc147e",
+				"type": "text/javascript",
+				"exec": [
+					"tests[\"[INFO] Request: \" + (('data' in request) ? request['data'] : '')] = true;",
+					"tests[\"[INFO] Response: \" + responseBody] = true;"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "a87e00b8-c77e-4403-9dc2-4641422a3061",
+			"key": "base_url",
+			"value": "arch.homework"
+		},
+		{
+			"id": "48bab326-dadd-45f6-aca1-169fe413eaab",
+			"key": "first_record_req_id",
+			"value": ""
+		},
+		{
+			"id": "507f15d6-90d9-430b-b169-9c08797434d0",
+			"key": "first_record_taskid",
+			"value": ""
+		},
+		{
+			"id": "9baefc14-7198-4673-b450-d1bcb7ee31cd",
+			"key": "first_record_userid",
+			"value": ""
+		},
+		{
+			"id": "94f3de69-cec1-45ae-b811-8048674f7d41",
+			"key": "first_record_hours",
+			"value": ""
+		},
+		{
+			"id": "fa913876-3386-4f0f-b3f7-2dc21ddb265a",
+			"key": "first_record_description",
+			"value": ""
+		},
+		{
+			"id": "666048f7-f1cf-4164-a5b9-f80080c77d14",
+			"key": "first_record_version",
+			"value": ""
+		},
+		{
+			"id": "08cf62eb-6bde-49b5-8d06-ee9b432beb63",
+			"key": "second_record_req_id",
+			"value": ""
+		},
+		{
+			"id": "aa758d1e-17fe-4814-b5e4-adb005739680",
+			"key": "initial_count",
+			"value": ""
+		},
+		{
+			"id": "765fc8ef-e46c-49fe-9b32-e889999989cf",
+			"key": "first_record_id",
+			"value": ""
+		}
+	],
+	"protocolProfileBehavior": {}
+}
