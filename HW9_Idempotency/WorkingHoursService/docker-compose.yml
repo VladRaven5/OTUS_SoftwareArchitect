@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-working_hours-service:
+  &default_working_hours_service
+  image: vladraven/otus_working_hours_service
+  build:
+    context: .
+    dockerfile: Dockerfile
+  ports:
+    - 5000:5000
+
+services:
+  working_hours_service_latest:
+    *default_working_hours_service
+  
+  working_hours_service_current:
+    << : *default_working_hours_service
+    image: vladraven/otus_working_hours_service:0.1
+
+    
