@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -37,6 +38,7 @@ namespace AuthService
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.Name = "UserAuthCookie";
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
                     options.Events = new CookieAuthenticationEvents
                     {
                         OnRedirectToLogin = async (context) => context.Response.StatusCode = 401,
@@ -58,8 +60,6 @@ namespace AuthService
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 
