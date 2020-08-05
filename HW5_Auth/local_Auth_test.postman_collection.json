@@ -1,0 +1,636 @@
+{
+	"info": {
+		"_postman_id": "4fe5ca7d-7351-474f-ae94-610978d61490",
+		"name": "Auth test local",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User1 registers",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0ce3d73a-a74a-4445-8222-db581592ae26",
+						"exec": [
+							"pm.collectionVariables.set(\"user1_login\", pm.variables.replaceIn('{{$randomWord}}'));",
+							"pm.collectionVariables.set(\"user1_pwd\", pm.variables.replaceIn('{{$randomPassword}}'));",
+							"pm.collectionVariables.set(\"user1_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "dd571024-b19d-4855-abe0-31cb25c6bf34",
+						"exec": [
+							"const jar = pm.cookies.jar();",
+							"",
+							"jar.clear(pm.request.url, function (error) {",
+							"  // error - <Error>",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user1_login}}\",\n    \"password\": \"{{user1_pwd}}\",\n    \"username\": \"{{user1_username}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check unauthorized access",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4dad778b-b73c-4412-9910-9953d4fb804a",
+						"exec": [
+							"// pm.test(\"Status code is redirect to login\", function () {",
+							"//     pm.response.to.have.status(302);",
+							"// });"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"followRedirects": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5003/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5003",
+					"path": [
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 logins",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4773b88c-23c7-439f-9960-5238f9072b67",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// pm.test(\"Cookie assigned\", function () {",
+							"//     pm.expect(pm.cookies.has('UserAuthCookie')).to.be.true;",
+							"// })",
+							"",
+							"pm.test(\"Header assigned\", function () {",
+							"    pm.expect(pm.response.headers.has(\"X-UserId\")).to.be.true;",
+							"    pm.collectionVariables.set(\"user1_id\", pm.response.headers.get(\"X-UserId\"));",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user1_login}}\",\n    \"password\": \"{{user1_pwd}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 checks /me",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9ecbfa2b-226e-49c6-a4fa-e23f1ee389ad",
+						"exec": [
+							"pm.request.headers.add(\"{{user1_id}}\", \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ade19cf0-7ca7-477a-b92b-0ed1655c29b9",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user1_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5003/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5003",
+					"path": [
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 updates username",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "426738ac-3fde-49d2-a28d-91bd1cfc496d",
+						"exec": [
+							"pm.request.headers.add(\"{{user1_id}}\", \"X-UserId\");",
+							"pm.collectionVariables.set(\"user1_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "486bc4d2-78be-4ba2-9b57-acdfe1293242",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user1_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5003/?userId={{user1_id}}&username={{user1_username}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5003",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{user1_id}}"
+						},
+						{
+							"key": "username",
+							"value": "{{user1_username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 logouts",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "aa70dbb1-b47d-4591-8621-eea1ef9517d3",
+						"exec": [
+							"pm.request.headers.add(\"{{user1_id}}\", \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ef57bd32-fe0f-496f-8b21-8fd0699f128d",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Has no auth cookie\", function () {",
+							"    pm.expect(pm.cookies.has('UserAuthCookie')).to.be.false;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 registers",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f734c140-4d82-4b1b-930c-9b06a6f836b3",
+						"exec": [
+							"pm.collectionVariables.set(\"user2_login\", pm.variables.replaceIn('{{$randomWord}}'));",
+							"pm.collectionVariables.set(\"user2_pwd\", pm.variables.replaceIn('{{$randomPassword}}'));",
+							"pm.collectionVariables.set(\"user2_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "54ecc7cf-4209-4439-883b-1ef8633140a2",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user2_login}}\",\n    \"password\": \"{{user2_pwd}}\",\n    \"username\": \"{{user2_username}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 logins",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1eaef8c0-5a0c-42b0-a9ed-e9cce2088667",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Cookie assigned\", function () {",
+							"    pm.expect(pm.cookies.has('UserAuthCookie')).to.be.true;",
+							"})",
+							"",
+							"pm.test(\"Header assigned\", function () {",
+							"    pm.expect(pm.response.headers.has(\"X-UserId\")).to.be.true;",
+							"    pm.collectionVariables.set(\"user2_id\", pm.response.headers.get(\"X-UserId\"));",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{user2_login}}\",\n    \"password\": \"{{user2_pwd}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 checks /me",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bffd941c-49b0-4044-81c9-1100d837582e",
+						"exec": [
+							"pm.request.headers.add(\"{{user2_id}}\", \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9464a9cd-d129-4874-aa2b-db15613233e6",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user2_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5003/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5003",
+					"path": [
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User2 can't update User1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "79a540f4-ee8d-412e-81af-9a26088646cc",
+						"exec": [
+							"pm.request.headers.add(\"{{user2_id}}\", \"X-UserId\");",
+							"pm.collectionVariables.set(\"user2_username\", pm.variables.replaceIn('{{$randomUserName}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "95f9b152-1c1f-44cf-82fa-92ad1fd44725",
+						"exec": [
+							"pm.test(\"Is status forbidden\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5003/?userId={{user1_id}}&username={{user2_username}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5003",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{user1_id}}"
+						},
+						{
+							"key": "username",
+							"value": "{{user2_username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User1 stays not changed",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9a7ff289-e61b-4388-8519-dceaa6d554d9",
+						"exec": [
+							"pm.request.headers.add(\"{{user2_id}}\", \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d1f8901c-90d7-4d47-bfb2-ccfa75e6be93",
+						"exec": [
+							"pm.test(\"Is status ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is username not changed\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.username).to.eql(pm.variables.get(\"user1_username\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5003/{{user1_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5003",
+					"path": [
+						"{{user1_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "e67be08d-418a-44e2-93a6-443856fd02a9",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "1e9ed5c5-c22d-45f2-929d-8105ee698bd5",
+				"type": "text/javascript",
+				"exec": [
+					"tests[\"[INFO] Request: \" + (('data' in request) ? request['data'] : '')] = true;",
+					"tests[\"[INFO] Response: \" + responseBody] = true;"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "0522aed8-cf53-4756-9fcf-ff462fa62d92",
+			"key": "base_url",
+			"value": "arch.homework"
+		},
+		{
+			"id": "1e5e8ddd-c2a9-499f-88a1-d552de65fdde",
+			"key": "user1_login",
+			"value": ""
+		},
+		{
+			"id": "b8b523c7-cfd1-429e-b221-53c04f6a5962",
+			"key": "user1_pwd",
+			"value": ""
+		},
+		{
+			"id": "8f383d23-2d10-4d8d-bf0c-d72767893928",
+			"key": "user1_username",
+			"value": ""
+		},
+		{
+			"id": "8bafab29-c195-469e-b7bd-896aba178360",
+			"key": "user1_id",
+			"value": ""
+		},
+		{
+			"id": "ecb9f972-4823-445d-adb3-f4af41e538c1",
+			"key": "user2_login",
+			"value": ""
+		},
+		{
+			"id": "02b50486-89f6-4324-a711-e62f8478f979",
+			"key": "user2_pwd",
+			"value": ""
+		},
+		{
+			"id": "47226282-ced9-4e2c-80d4-28b8416fcdf0",
+			"key": "user2_username",
+			"value": ""
+		},
+		{
+			"id": "e1a7438d-6340-4a65-8e8b-e188d6b7f69e",
+			"key": "user2_id",
+			"value": ""
+		}
+	],
+	"protocolProfileBehavior": {}
+}
