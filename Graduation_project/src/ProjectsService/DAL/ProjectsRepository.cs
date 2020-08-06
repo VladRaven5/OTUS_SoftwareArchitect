@@ -1,39 +1,35 @@
-using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Shared;
 
 namespace ProjectsService
 {
-    public class ProjectsRepository : IDisposable
+    public class ProjectsRepository : BaseDapperRepository
     {
-        private const string _projectsTableName = "projects";
-        private readonly IDbConnection _connection;
+        protected override string _tableName => "projects";
 
         public ProjectsRepository(PostgresConnectionManager connectionManager)
+            : base(connectionManager.GetConnection())
         {
-            _connection = connectionManager.GetConnection();
         }
 
         public Task<IEnumerable<ProjectModel>> GetProjectsAsync()
         {
-            string query = $"select * from {_projectsTableName};";
+            string query = $"select * from {_tableName};";
             return _connection.QueryAsync<ProjectModel>(query);
         }
 
         public Task<ProjectModel> GetProjectByIdAsync(string projectId)
         {
-            string query = $"select * from {_projectsTableName} where id = '{projectId}' limit 1;";
-            return _connection.QueryFirstOrDefaultAsync<ProjectModel>(query);
+            return GetModelByIdAsync<ProjectModel>(projectId);
         }
 
         public async Task<ProjectModel> CreateProjectAsync(ProjectModel newProject)
         {
             newProject.Init();
 
-            string insertQuery = $"insert into {_projectsTableName} (id, title, description, createddate, begindate, enddate, version) "
+            string insertQuery = $"insert into {_tableName} (id, title, description, createddate, begindate, enddate, version) "
                 + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.Description}', '{newProject.CreatedDate}', '{newProject.BeginDate}', '{newProject.EndDate}', {newProject.Version});";
 
             int res = await _connection.ExecuteAsync(insertQuery);
@@ -50,7 +46,7 @@ namespace ProjectsService
         {
             int newVersion = updatedProject.Version + 1;
 
-            string updateQuery = $"update {_projectsTableName} set " + 
+            string updateQuery = $"update {_tableName} set " + 
                 $"title = '{updatedProject.Title}', " +
                 $"description = '{updatedProject.Description}', " +
                 $"begindate = '{updatedProject.BeginDate}', " +
@@ -68,16 +64,9 @@ namespace ProjectsService
             return await GetProjectByIdAsync(updatedProject.Id);
         }
 
-        public async Task DeleteProjectAsync(string projectId)
+        public Task DeleteProjectAsync(string projectId)
         {
-            string deleteQuery = $"delete from {_projectsTableName} where id = '{projectId}';";
-            await _connection.ExecuteAsync(deleteQuery);              
-        }
-        
-
-        public void Dispose()
-        {
-            _connection.Dispose();
+            return DeleteModelAsync(projectId);          
         }
     }
 }
