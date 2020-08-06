@@ -1,6 +1,6 @@
 namespace Shared
 {
-    public abstract class BaseVersionedModel : BaseModel
+    public abstract class BaseVersionedModel : BaseDatedModel
     {
         public int Version { get; set; }
 
