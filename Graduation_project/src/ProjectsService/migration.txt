@@ -1,0 +1,4 @@
+create database projects;
+\c projects;
+create table projects (id char(36) primary key, title char(150) not null, description varchar, createddate timestamp, begindate timestamp, enddate timestamp, version int not null);
+create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
