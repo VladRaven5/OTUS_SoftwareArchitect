@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-users-service:
+  &default_users_service
+  image: vladraven/otus_grad_users_service
+  build:
+    context: .
+    dockerfile: UsersDockerfile
+  ports:
+    - 5000:5000
+
+services:
+  users_service_latest:
+    *default_users_service
+  
+  users_service_current:
+    << : *default_users_service
+    image: vladraven/otus_grad_users_service:0.1
+
+    
