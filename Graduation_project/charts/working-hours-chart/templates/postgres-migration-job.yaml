@@ -1,0 +1,59 @@
+{{- if .Values.postgresql.enabled  -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: working-hours-pg-migration-job
+spec:
+  template:
+    metadata:
+      name: {{ include "working-hours-chart.fullname" . }}
+    spec:
+      restartPolicy: Never
+      initContainers:
+       - name: wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+      containers:
+       - name: working-hours-pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_USER
+            value: {{.Values.postgresql.postgresqlUsername}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.postgresql.postgresqlPassword}}
+          - name: POSTGRES_DB
+            value: {{.Values.postgresql.postgresqlDatabase}}
+          - name: POSTGRES_HOST
+            value: {{.Values.postgresql.fullnameOverride}}
+          - name: POSTGRES_PORT
+            value: "{{.Values.postgresql.service.port}}"
+         command:
+          - sh
+          - "-c"
+          - |
+            psql "user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB" << 'EOF'
+              create database working_hours;
+              \c working_hours;
+              create table projects (id char(36) primary key, title varchar(150));
+              create table tasks (id char(36) primary key, projectid char(36), title varchar(200),
+                constraint fk_tasks_projects foreign key(projectid) references projects(id));
+              create table users (id char(36) primary key, username varchar(200));
+              create table working_hours_records (id char(36) primary key, taskid char(36), userid char(36), description varchar,
+                hours real, createddate timestamp, version int,
+                constraint fk_hours_tasks foreign key(taskid) references tasks(id),
+                constraint fk_hours_users foreign key(userid) references users(id));
+              create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+
+              insert into projects (id, title) values('11111111111111111111111111111111', 'proj111');
+              insert into tasks (id, projectid, title) values('00000000000000000000000000000000', '11111111111111111111111111111111', 'task000');
+              insert into users (id, username) values('222222222222222222222222222222222222', 'Dima');
+              insert into users (id, username) values('333333333333333333333333333333333333', 'Vasya');
+            EOF
+  
+  backoffLimit: 0
+
+
+{{- end -}}
