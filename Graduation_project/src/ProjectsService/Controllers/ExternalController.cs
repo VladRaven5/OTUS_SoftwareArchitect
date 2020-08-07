@@ -71,7 +71,7 @@ namespace ProjectsService
             try
             {
                 var updateProject = _mapper.Map<UpdateProjectDto, ProjectModel>(updateDto);
-                return Ok(await _projectsManager.UpdateRecordAsync(updateProject));
+                return Ok(await _projectsManager.UpdateProjectAsync(updateProject));
             }
             catch(VersionsNotMatchException ve)
             {

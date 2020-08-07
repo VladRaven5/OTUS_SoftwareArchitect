@@ -5,6 +5,9 @@ using Dapper;
 
 namespace Shared
 {
+    ///
+    ///Used both for requestId and messageId
+    ///
     public class RequestsRepository : IDisposable
     {
         private const string _requestsTableName = "handled_requests";

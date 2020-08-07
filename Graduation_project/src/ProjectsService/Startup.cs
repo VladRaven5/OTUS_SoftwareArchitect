@@ -25,6 +25,7 @@ namespace ProjectsService
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<ProjectsRepository, ProjectsRepository>();
+            services.AddScoped<RequestsRepository, RequestsRepository>();
             services.AddScoped<ProjectsManager, ProjectsManager>();
         }
 

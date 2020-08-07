@@ -48,7 +48,7 @@ namespace ProjectsService
             }
         }
 
-        public async Task<ProjectModel> UpdateRecordAsync(ProjectModel updatingProject)
+        public async Task<ProjectModel> UpdateProjectAsync(ProjectModel updatingProject)
         {
             ProjectModel currentProject = await _projectsRepository.GetProjectByIdAsync(updatingProject.Id);
             if(currentProject == null)
