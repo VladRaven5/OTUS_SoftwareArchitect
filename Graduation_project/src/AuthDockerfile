@@ -5,10 +5,9 @@ ENV ASPNETCORE_URLS=http://+:5000
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
-COPY ["AuthService.csproj", "./"]
-RUN dotnet restore "./AuthService.csproj"
 COPY . .
-WORKDIR "/src/."
+RUN dotnet restore "./AuthService/AuthService.csproj"
+WORKDIR "/src/AuthService"
 RUN dotnet build "AuthService.csproj" -c Release -o /app/build
 
 FROM build AS publish

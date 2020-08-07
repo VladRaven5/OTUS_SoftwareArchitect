@@ -3,10 +3,10 @@ version: '3.4'
 #common
 x-auth-service:
   &default_auth_service
-  image: vladraven/otus_auth_service
+  image: vladraven/otus_grad_auth_service
   build:
     context: .
-    dockerfile: Dockerfile
+    dockerfile: AuthDockerfile
   ports:
     - 5000:5000
 
@@ -16,6 +16,6 @@ services:
   
   auth_service_current:
     << : *default_auth_service
-    image: vladraven/otus_auth_service:0.3
+    image: vladraven/otus_grad_auth_service:0.1
 
     

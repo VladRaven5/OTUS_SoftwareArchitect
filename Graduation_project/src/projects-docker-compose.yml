@@ -3,7 +3,7 @@ version: '3.4'
 #common
 x-projects-service:
   &default_projects_service
-  image: vladraven/otus_projects_service
+  image: vladraven/otus_grad_projects_service
   build:
     context: .
     dockerfile: ProjectsDockerfile
@@ -16,6 +16,6 @@ services:
   
   projects_service_current:
     << : *default_projects_service
-    image: vladraven/otus_projects_service:0.1
+    image: vladraven/otus_grad_projects_service:0.1
 
     
