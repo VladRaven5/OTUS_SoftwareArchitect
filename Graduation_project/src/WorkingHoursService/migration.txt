@@ -1,0 +1,12 @@
+create database working_hours;
+\c working_hours;
+create table projects (id char(36) primary key, title varchar(150));
+create table tasks (id char(36) primary key, projectid char(36), title varchar(200),
+    constraint fk_tasks_projects foreign key(projectid) references projects(id));
+create table users (id char(36) primary key, username varchar(200));
+create table working_hours_records (id char(36) primary key, taskid char(36), userid char(36), description varchar,
+    hours real, createddate timestamp, version int,
+    constraint fk_hours_tasks foreign key(taskid) references tasks(id),
+    constraint fk_hours_users foreign key(userid) references users(id));
+create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+
