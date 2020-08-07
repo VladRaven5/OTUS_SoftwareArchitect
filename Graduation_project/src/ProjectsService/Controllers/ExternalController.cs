@@ -31,7 +31,7 @@ namespace ProjectsService
         public async Task<ActionResult<ProjectModel>> GetProject(string id)
         {
             try
-            {
+            {                
                 return await _projectsManager.GetProjectByIdAsync(id);
             }
             catch(NotFoundException nfe)

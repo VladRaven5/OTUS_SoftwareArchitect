@@ -30,7 +30,7 @@ namespace ProjectsService
             newProject.Init();
 
             string insertQuery = $"insert into {_tableName} (id, title, description, createddate, begindate, enddate, version) "
-                + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.Description}', '{newProject.CreatedDate}', '{newProject.BeginDate}', '{newProject.EndDate}', {newProject.Version});";
+                + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.CreatedDate}', '{newProject.BeginDate}', '{newProject.EndDate}', {newProject.Version});";
 
             int res = await _connection.ExecuteAsync(insertQuery);
 

@@ -24,9 +24,14 @@ namespace ProjectsService
             return _projectsRepository.GetProjectsAsync();
         }
 
-        public Task<ProjectModel> GetProjectByIdAsync(string projectId)
+        public async Task<ProjectModel> GetProjectByIdAsync(string projectId)
         {
-            return _projectsRepository.GetProjectByIdAsync(projectId);
+             var project = await _projectsRepository.GetProjectByIdAsync(projectId);
+             if(project == null)
+             {
+                 throw new NotFoundException($"Project with id {projectId} not found");
+             }
+             return project;
         }
 
         public async Task<ProjectModel> CreateProjectAsync(ProjectModel newProject, string requestId)

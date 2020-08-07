@@ -8,6 +8,7 @@ namespace Shared
 
         public override void Init()
         {
+            base.Init();
             CreatedDate = DateTimeOffset.UtcNow;
         }
     }
