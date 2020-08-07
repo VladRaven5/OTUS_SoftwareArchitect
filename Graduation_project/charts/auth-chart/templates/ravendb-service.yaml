@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.ravendb.host }}
+  labels:
+    app: {{ .Values.ravendb.label }}
+spec:
+  type: {{ .Values.ravendb.serviceType }}
+  ports:
+   - port: {{ .Values.ravendb.extport }}
+     targetPort: {{ .Values.ravendb.intport }}
+     protocol: TCP
+     name: http
+  selector:
+    app: {{ .Values.ravendb.label }}

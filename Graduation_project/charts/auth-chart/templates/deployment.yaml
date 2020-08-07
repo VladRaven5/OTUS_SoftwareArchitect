@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "auth-chart.fullname" . }}
+  labels:
+    {{- include "auth-chart.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "auth-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "auth-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "auth-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+       - name: wait-redis-ready
+         image: busybox:latest
+         env:
+          - name: REDIS_HOST
+            value: {{ .Values.redis.url }}
+         command: ['sh', '-c', 'until nslookup $REDIS_HOST; do echo waiting for $REDIS_HOST; sleep 2; done;']
+       - name: wait-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.host }}
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+      containers:      
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+            - name: {{ .Values.image.dbConnectionStringEnvName }}
+              value: "http://{{ .Values.ravendb.host }}:{{ .Values.ravendb.extport }}"
+            - name: {{ .Values.image.redisConnectionStringEnvName }}
+              value: {{ .Values.redis.url }}
+            - name: {{ .Values.image.usersServiceUrlEnvName }}
+              value: "http://{{ .Values.usersService.url }}:{{ .Values.usersService.port }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

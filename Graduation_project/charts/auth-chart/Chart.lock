@@ -1,0 +1,6 @@
+dependencies:
+- name: keyring-chart
+  repository: file://../keyring-chart
+  version: 0.1.0
+digest: sha256:f722290ba48552abf4a9b52f34018635c9695bbbd4683964fb36ea6e951cfa1b
+generated: "2020-08-07T14:14:08.686008685+07:00"
