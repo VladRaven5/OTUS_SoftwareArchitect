@@ -14,24 +14,6 @@ namespace WorkingHoursService
         {
         }
 
-        // public Task<IEnumerable<UserWorkingHoursAggregate>> GetProjectWorkingHours(string projectId)
-        // {
-        //     return _connection.QueryAsync<UserWorkingHoursAggregate>(
-        //         GetMergedSelectQuery($"where projectId = {projectId}"));
-        // }
-
-        // public Task<IEnumerable<UserWorkingHoursAggregate>> GetTaskMemberWorkingHours(string taskId, string userId)
-        // {
-        //     return _connection.QueryAsync<UserWorkingHoursAggregate>(
-        //         GetMergedSelectQuery($"where taskid = {taskId} and userid = {userId}"));
-        // }
-
-        // public Task<IEnumerable<UserWorkingHoursAggregate>> GetMemberWorkingHours(string userId)
-        // {
-        //     return _connection.QueryAsync<UserWorkingHoursAggregate>(
-        //         GetMergedSelectQuery($"where userid = {userId}"));
-        // }
-
         public Task<IEnumerable<MemberWorkingHoursAggregate>> GetProjectTaskMemberWorkingHoursAsync(string projectId = null,
             string taskId = null, string userId = null)
         {
@@ -53,17 +35,17 @@ namespace WorkingHoursService
 
             if(!string.IsNullOrWhiteSpace(projectId))
             {
-                AddStatement(whereStatement, $"projectid = '{projectId}'");
+                whereStatement = AddStatement(whereStatement, $"projectid = '{projectId}'");
             }
 
             if(!string.IsNullOrWhiteSpace(taskId))
             {
-                AddStatement(whereStatement, $"taskid = '{taskId}'");
+                whereStatement = AddStatement(whereStatement, $"taskid = '{taskId}'");
             }
 
             if(!string.IsNullOrWhiteSpace(userId))
             {
-                AddStatement(whereStatement, $"userid = '{userId}'");
+                whereStatement = AddStatement(whereStatement, $"userid = '{userId}'");
             }
 
             return _connection.QueryAsync<MemberWorkingHoursAggregate>(
