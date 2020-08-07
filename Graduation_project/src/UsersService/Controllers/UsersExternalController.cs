@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -44,7 +45,7 @@ namespace UsersService
                 string currentUserId = Request.Headers[Constants.UserIdHeaderName];
                 if(currentUserId != userId)
                 {
-                    return Forbid();
+                    return StatusCode((int)HttpStatusCode.Forbidden);
                 }
 
                 return await _userService.UpdateUserAsync(userId, username);
