@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Shared;
 
 namespace UsersService
 {
@@ -12,12 +13,14 @@ namespace UsersService
     {
         private readonly Repository _repository;
         private readonly IConfiguration _configuration;
+        private readonly RabbitMqTopicManager _rabbitMq;
         private HttpClient _httpClient;
 
-        public UsersManager(Repository repository, IConfiguration configuration)
+        public UsersManager(Repository repository, IConfiguration configuration, RabbitMqTopicManager rabbitMq)
         {
             _repository = repository;
             _configuration = configuration;
+            _rabbitMq = rabbitMq;
         }
 
         public async Task<UserModel> CreateUserAsync(string username)
@@ -26,10 +29,21 @@ namespace UsersService
 
             if(isUsernameBusy)
             {
-                throw new Exception("This username already in use");
+                throw new EntityExistsException("This username already in use");
             }
 
-            return await _repository.CreateUserAsync(username);
+            var createdUser = await _repository.CreateUserAsync(username);
+
+            var message = new UserCreatedUpdatedMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = createdUser.Id,
+                Username = createdUser.Username
+            };
+
+            SendMessageToBroker(message, MessageActions.Created);
+
+            return createdUser;
         }
 
         public Task<List<UserModel>> GetUsersAsync()
@@ -42,9 +56,20 @@ namespace UsersService
             return _repository.GetUserAsync(userId);
         }
 
-        internal Task<UserModel> UpdateUserAsync(string userId, string username)
-        {
-            return _repository.UpdateUserAsync(userId, username);
+        internal async Task<UserModel> UpdateUserAsync(string userId, string username)
+        {   
+            var updatedUser = await _repository.UpdateUserAsync(userId, username);
+
+            var message = new UserCreatedUpdatedMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = userId,
+                Username = username
+            };
+
+            SendMessageToBroker(message, MessageActions.Updated);
+
+            return updatedUser;
         }
 
         internal async Task<(bool isSuccess, string error)> DeleteUserAsync(string userId)
@@ -54,6 +79,14 @@ namespace UsersService
                 return isAuthInfoDeleted;
 
             await _repository.DeleteUserAsync(userId);
+
+
+            var message = new UserDeletedMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = userId
+            };
+            SendMessageToBroker(message, MessageActions.Deleted);
 
             return (true, string.Empty);
         }
@@ -78,7 +111,19 @@ namespace UsersService
             var errorModel = new {Title = "", Status = default(HttpStatusCode)};
             JsonConvert.DeserializeAnonymousType(await response.Content.ReadAsStringAsync(), errorModel);
 
-            return (false, errorModel.Title);            
+            return (false, $"Error during connection with Auth service:{errorModel.Title}");            
+        }
+
+        private void SendMessageToBroker(BaseMessage message, string action)
+        {
+            try
+            {
+                _rabbitMq.SendMessage(Topics.Users, message, action);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"Message sending error:\n{e.Message}\n{e.StackTrace}");
+            }   
         }
 
         private HttpClient CreateHttpClient()
