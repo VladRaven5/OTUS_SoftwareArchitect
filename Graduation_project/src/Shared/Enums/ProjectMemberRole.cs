@@ -2,7 +2,7 @@ namespace Shared
 {
     public enum ProjectMemberRole
     {
-        Manager,
-        Implementer
+        Implementer = 0,
+        Manager = 1,        
     }
 }
