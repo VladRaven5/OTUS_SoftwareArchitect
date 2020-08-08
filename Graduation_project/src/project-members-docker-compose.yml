@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-project-members-service:
+  &default_project_members_service
+  image: vladraven/otus_grad_project_members_service
+  build:
+    context: .
+    dockerfile: ProjectMembersDockerfile
+  ports:
+    - 5000:5000
+
+services:
+  project_members_service_latest:
+    *default_project_members_service
+  
+  project_members_service_current:
+    << : *default_project_members_service
+    image: vladraven/otus_grad_project_members_service:0.1
+
+    
