@@ -22,6 +22,7 @@ namespace ProjectMembersService
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerDocument();
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<ProjectMembersRepository, ProjectMembersRepository>();
@@ -42,6 +43,9 @@ namespace ProjectMembersService
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseEndpoints(endpoints =>
             {

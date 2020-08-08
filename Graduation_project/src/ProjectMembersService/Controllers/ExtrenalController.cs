@@ -21,12 +21,19 @@ namespace ProjectMembersService
             _projectMembersManager = projectMembersManager;
         }
 
+        /// <summary>
+        /// Get members of the project or projects of the member, or just one project member.
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectMemberAggregate>>> GetProjectsMembers(string projectId, string userId)
         {
             return Ok(await _projectMembersManager.GetProjectsMembersAsync(projectId, userId));
         }
 
+        /// <summary>
+        /// Get projects of current user (by X-UserId header value)
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("my")]
         public async Task<ActionResult<IEnumerable<ProjectMemberAggregate>>> GetMyProjects()
         {
@@ -40,6 +47,11 @@ namespace ProjectMembersService
             return Ok(await _projectMembersManager.GetProjectsMembersAsync(userId: userId));            
         }
 
+        /// <summary>
+        /// Add member to project
+        /// </summary>
+        /// <param name="projectMemberDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<ProjectMemberAggregate>> AddMemberToProject([FromBody] ProjectMemberDto projectMemberDto)
         {
@@ -70,6 +82,11 @@ namespace ProjectMembersService
             }         
         }
 
+        /// <summary>
+        /// Change member project role (0 - Implementer, 1 - Manager)
+        /// </summary>
+        /// <param name="updatingDto"></param>
+        /// <returns></returns>
         [HttpPut("change-role")]
         public async Task<ActionResult> UpdateProjectMemberRole(ProjectMemberDto updatingDto)
         {
@@ -89,6 +106,11 @@ namespace ProjectMembersService
             }
         }   
 
+        /// <summary>
+        /// Remove member from project
+        /// </summary>
+        /// <param name="projectUserDto"></param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<ActionResult> RemoveMemberFromProject([FromQuery] ProjectUserPairDto projectUserDto)
         {
