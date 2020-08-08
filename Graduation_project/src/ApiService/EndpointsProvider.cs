@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 
 namespace ApiService
@@ -10,13 +11,18 @@ namespace ApiService
         public Endpoint[] Endpoints { get; private set; }
 
         public void SetEndpoints(IConfiguration configuration)
-        {
+        {            
+
             var endpoints = new List<Endpoint>();
-            var endpointsSection = configuration.GetSection("Endpoints");
-            foreach(var endpointSection in endpointsSection.GetChildren())
+            var endpointsCollectionString = configuration.GetValue<string>("Endpoints");
+
+            var endpointsStrings = endpointsCollectionString.Split(",").ToList();
+
+            foreach(var endpointRecordString in endpointsStrings)
             {
-                string name = endpointSection.GetValue<string>("Name");
-                string url = endpointSection.GetValue<string>("Url");
+                var keyvalues = endpointRecordString.Split('@').ToArray();
+                string name = keyvalues[0].Trim();
+                string url = keyvalues[1].Trim();
                 endpoints.Add(new Endpoint(name, url));
             }
 
