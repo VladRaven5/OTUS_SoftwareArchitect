@@ -13,9 +13,9 @@ namespace Shared
         {
             _rabbitMq = rabbitMq;
 
-            InitializeQueues(bindingArgs);
-
             _rabbitMq.MessageReceived += OnMessageReceived;
+
+            InitializeQueues(bindingArgs);            
         }
 
         protected virtual void InitializeQueues(List<TopicQueueBindingArgs> bindingArgs)
