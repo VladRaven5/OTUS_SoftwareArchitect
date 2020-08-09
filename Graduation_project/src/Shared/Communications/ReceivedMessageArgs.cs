@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Shared
 {
     public class ReceivedMessageArgs
@@ -11,6 +13,11 @@ namespace Shared
             Topic = topic;
             Action = action;
             Message = message;
+        }
+
+        public TModel GetModel<TModel>()
+        {
+            return JsonConvert.DeserializeObject<TModel>(Message);
         }
     }
 }

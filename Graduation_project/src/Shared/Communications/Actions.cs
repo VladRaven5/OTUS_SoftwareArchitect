@@ -1,7 +1,9 @@
 namespace Shared
 {
-    public static class Actions
+    public static class MessageActions
     {
-        public static string Created = "created";
+        public const string Created = "created";
+        public const string Updated = "updated";
+        public const string Deleted = "deleted";
     }
 }

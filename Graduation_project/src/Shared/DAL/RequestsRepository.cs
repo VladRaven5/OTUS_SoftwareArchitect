@@ -37,7 +37,16 @@ namespace Shared
             {
                 throw new DatabaseException("Request id insertion failed");
             }          
-        }   
+        }
+
+        public async Task<bool> IsHandledOrSaveRequestAsync(string requestId, DateTimeOffset invalidateAt)
+        {
+            if(await IsRequestIdHandledAsync(requestId))
+                return true;
+
+            await SaveRequestIdAsync(requestId, invalidateAt);
+            return false;
+        }
 
         public async Task DeleteRequestIdAsync(string requestId)
         {

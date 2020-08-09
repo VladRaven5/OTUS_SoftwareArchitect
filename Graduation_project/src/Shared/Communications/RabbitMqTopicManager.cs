@@ -33,11 +33,11 @@ namespace Shared
             {
                 string serializedMessage = JsonConvert.SerializeObject(message);
 
-                IBasicProperties messageProperties = default(IBasicProperties);
+                IBasicProperties messageProperties = _channel.CreateBasicProperties(); 
+                messageProperties.Persistent = true;
 
                 if(!string.IsNullOrWhiteSpace(action))
                 {
-                    messageProperties = _channel.CreateBasicProperties(); 
                     messageProperties.Headers = new Dictionary<string, object> {{_actionHeaderName, action}};
                 } 
 
@@ -55,29 +55,29 @@ namespace Shared
             }
         }
 
-        public void CreateTopicSubscriptions(List<(string topic, string queueName)> subscriptionInfo)
+        public void CreateTopicSubscriptions(List<TopicQueueBindingArgs> subscriptionInfo)
         {
-            foreach(var (topic, queueName) in subscriptionInfo)
+            foreach(TopicQueueBindingArgs arg in subscriptionInfo)
             {
                 _channel.QueueDeclare(
-                    queue: queueName,
+                    queue: arg.QueueName,
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
                     arguments: null);
 
                 _channel.QueueBind(
-                    queue: queueName,
+                    queue: arg.QueueName,
                     exchange: _exchangeName,
-                    routingKey: topic);
+                    routingKey: arg.Topic);
 
                 var consumer = new EventingBasicConsumer(_channel);
 
                 consumer.Received += HandleMessage;
                 
                 _channel.BasicConsume(
-                    queue: queueName,
-                    autoAck: true,
+                    queue: arg.QueueName,
+                    autoAck: false,
                     consumer: consumer);
 
                 _consumers.Add(consumer);
@@ -88,6 +88,7 @@ namespace Shared
         {
             try
             {
+                Console.WriteLine($"Message received!");
                 var body = e.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 var headers = e.BasicProperties?.Headers;
@@ -103,6 +104,9 @@ namespace Shared
                 var args = new ReceivedMessageArgs(topic, actionHeader, message);
 
                 MessageReceived?.Invoke(args);
+
+                _channel.BasicAck(e.DeliveryTag, false);
+                Console.WriteLine($"Message acked!");
             }
             catch(Exception exc)
             {
