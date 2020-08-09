@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -14,6 +15,12 @@ namespace Shared
         protected BaseDapperRepository(IDbConnection connection)
         {
             _connection = connection;
+        }
+
+        protected Task<IEnumerable<TModel>> GetModelsAsync<TModel>()
+        {
+            string query = $"select * from {_tableName};";
+            return _connection.QueryAsync<TModel>(query);
         }
 
         protected Task<TModel> GetModelByIdAsync<TModel>(string modelId)
@@ -52,6 +59,24 @@ namespace Shared
             }
             
             return message;
+        }
+
+        protected string GetQueryNullableEscapedValue<T>(Nullable<T> nullableValue) where T : struct
+        {
+            if(nullableValue.HasValue)
+            {
+                return $"'{nullableValue.Value}'";
+            }
+            return "NULL";
+        }
+
+        protected string GetQueryNullableEscapedValue(object nullableValue)
+        {
+            if(nullableValue != null)
+            {
+                return $"'{nullableValue}'";
+            }
+            return "NULL";
         }
 
         public void Dispose()

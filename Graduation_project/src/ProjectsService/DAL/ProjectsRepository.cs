@@ -28,7 +28,7 @@ namespace ProjectsService
         public async Task<ProjectModel> CreateProjectAsync(ProjectModel newProject, OutboxMessageModel message)
         {
             string insertQuery = $"insert into {_tableName} (id, title, description, createddate, begindate, enddate, version) "
-                + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.CreatedDate}', '{newProject.BeginDate}', '{newProject.EndDate}', {newProject.Version});";
+                + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.CreatedDate}', {GetQueryNullableEscapedValue(newProject.BeginDate)}, {GetQueryNullableEscapedValue(newProject.EndDate)}, {newProject.Version});";
 
             string insertMessageQuery = TakeInsertMessageQuery(message);
 
@@ -51,8 +51,8 @@ namespace ProjectsService
             string updateQuery = $"update {_tableName} set " + 
                 $"title = '{updatedProject.Title}', " +
                 $"description = '{updatedProject.Description}', " +
-                $"begindate = '{updatedProject.BeginDate}', " +
-                $"enddate = '{updatedProject.EndDate}', " +
+                $"begindate = {GetQueryNullableEscapedValue(updatedProject.BeginDate)}, " +
+                $"enddate = {GetQueryNullableEscapedValue(updatedProject.EndDate)}, " +
                 $"version = {newVersion} " +
                 $"where id = '{updatedProject.Id}';";
 
