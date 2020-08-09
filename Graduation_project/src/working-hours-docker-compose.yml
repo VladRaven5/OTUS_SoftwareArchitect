@@ -16,6 +16,6 @@ services:
   
   working_hours_service_current:
     << : *default_working_hours_service
-    image: vladraven/otus_grad_working_hours_service:0.2
+    image: vladraven/otus_grad_working_hours_service:0.4
 
     

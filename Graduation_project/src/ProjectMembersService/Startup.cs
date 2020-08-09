@@ -41,9 +41,12 @@ namespace ProjectMembersService
 
         private void InitializeRabbitMQ(IServiceCollection services)
         {
-            string rabbitMqHost = Configuration.GetValue<string>("RabbitMQ:Host");
-            int rabbitMqPort = Configuration.GetValue<int>("RabbitMQ:Port");
-            var rabbit = new RabbitMqTopicManager(rabbitMqHost, rabbitMqPort);        
+            string host = Configuration.GetValue<string>("RabbitMQ:Host");
+            int port = Configuration.GetValue<int>("RabbitMQ:Port");
+            string username = Configuration.GetValue<string>("RabbitMQ:Username");
+            string password = Configuration.GetValue<string>("RabbitMQ:Password"); 
+
+            var rabbit = new RabbitMqTopicManager(host, port, username, password);        
             services.AddSingleton<RabbitMqTopicManager>(rabbit);
             services.AddSingleton<BrokerMessagesHandler, BrokerMessagesHandler>();
         }

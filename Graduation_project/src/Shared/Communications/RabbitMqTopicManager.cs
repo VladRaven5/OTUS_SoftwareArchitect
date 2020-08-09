@@ -14,9 +14,9 @@ namespace Shared
         private readonly IConnection _connection;
         private readonly IModel _channel;
 
-        public RabbitMqTopicManager(string host, int port)
-        {            
-            var factory = new ConnectionFactory() { HostName = host, Port = port };
+        public RabbitMqTopicManager(string host, int port, string username, string password)
+        {             
+            var factory = new ConnectionFactory() { HostName = host, Port = port, UserName = username, Password = password };            
             
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
