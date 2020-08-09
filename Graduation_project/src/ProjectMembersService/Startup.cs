@@ -27,7 +27,7 @@ namespace ProjectMembersService
 
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
-            services.AddSwaggerDocument();
+            services.AddSwaggerDocument();                       
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<ProjectMembersRepository, ProjectMembersRepository>();
@@ -35,6 +35,17 @@ namespace ProjectMembersService
             services.AddScoped<UsersRepository, UsersRepository>();
             services.AddScoped<RequestsRepository, RequestsRepository>();
             services.AddScoped<ProjectMembersManager, ProjectMembersManager>();
+
+            InitializeRabbitMQ(services); 
+        }
+
+        private void InitializeRabbitMQ(IServiceCollection services)
+        {
+            string rabbitMqHost = Configuration.GetValue<string>("RabbitMQ:Host");
+            int rabbitMqPort = Configuration.GetValue<int>("RabbitMQ:Port");
+            var rabbit = new RabbitMqTopicManager(rabbitMqHost, rabbitMqPort);        
+            services.AddSingleton<RabbitMqTopicManager>(rabbit);
+            services.AddSingleton<BrokerMessagesHandler, BrokerMessagesHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +69,8 @@ namespace ProjectMembersService
             {
                 endpoints.MapControllers();
             });
+
+            app.ApplicationServices.GetService<BrokerMessagesHandler>();
         }
     }
 }
