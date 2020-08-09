@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -27,12 +26,15 @@ namespace Shared
 
         public event Action<ReceivedMessageArgs> MessageReceived;
 
-        public void SendMessage(string topic, object message, string action)
+        public void SendMessage(OutboxMessageModel outboxMessage)
+        {
+            SendMessage(outboxMessage.Topic, outboxMessage.Message, outboxMessage.Action);
+        }
+
+        public void SendMessage(string topic, string message, string action)
         {
             try
             {
-                string serializedMessage = JsonConvert.SerializeObject(message);
-
                 IBasicProperties messageProperties = _channel.CreateBasicProperties(); 
                 messageProperties.Persistent = true;
 
@@ -41,7 +43,7 @@ namespace Shared
                     messageProperties.Headers = new Dictionary<string, object> {{_actionHeaderName, action}};
                 } 
 
-                var body = Encoding.UTF8.GetBytes(serializedMessage);
+                var body = Encoding.UTF8.GetBytes(message);
 
                 _channel.BasicPublish(
                     exchange: _exchangeName,
