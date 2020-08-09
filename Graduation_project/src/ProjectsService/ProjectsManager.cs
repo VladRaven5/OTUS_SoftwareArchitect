@@ -9,14 +9,12 @@ namespace ProjectsService
     {
         private readonly RequestsRepository _requestsRepository;
         private readonly ProjectsRepository _projectsRepository;
-        private readonly RabbitMqTopicManager _rabbitMq;
 
         public ProjectsManager(RequestsRepository requestsRepository,
             ProjectsRepository projectsRepository, RabbitMqTopicManager rabbitMq) : base(requestsRepository)
         {
             _requestsRepository = requestsRepository;
             _projectsRepository = projectsRepository;
-            _rabbitMq = rabbitMq;
         }
 
         public Task<IEnumerable<ProjectModel>> GetAllProjectsAsync()
