@@ -5,7 +5,7 @@ using Shared;
 
 namespace WorkingHoursService
 {
-    public class TaskUserWorkingHoursService
+    public class TaskUserWorkingHoursManager
     {
         private readonly int _requestIdLifetimeDays = Constants.RequestIdLifetimeDays;
 
@@ -14,7 +14,7 @@ namespace WorkingHoursService
         private readonly TasksRepository _tasksRepository;
         private readonly UsersRepository _usersRepository;
 
-        public TaskUserWorkingHoursService(RequestsRepository requestsRepository,
+        public TaskUserWorkingHoursManager(RequestsRepository requestsRepository,
             WorkingHoursRepository workingHoursRepository, TasksRepository tasksRepository,
             UsersRepository usersRepository)
         {

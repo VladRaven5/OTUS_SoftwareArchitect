@@ -1,4 +1,5 @@
 using AutoMapper;
+using Shared;
 
 namespace WorkingHoursService
 {
@@ -13,6 +14,12 @@ namespace WorkingHoursService
 
             CreateMap<UpdateWorkingHoursRecordDto, TaskUserWorkingHoursRecord>()
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore());
+
+            CreateMap<ProjectCreatedUpdatedMessage, ProjectModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProjectId));
+            
+            CreateMap<UserCreatedUpdatedMessage, UserModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));   
         }
     }
 }

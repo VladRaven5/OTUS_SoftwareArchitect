@@ -13,9 +13,9 @@ namespace WorkingHoursService
     public class ExternalController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly TaskUserWorkingHoursService _workingHoursService;
+        private readonly TaskUserWorkingHoursManager _workingHoursService;
 
-        public ExternalController(IMapper mapper, TaskUserWorkingHoursService workingHoursService)
+        public ExternalController(IMapper mapper, TaskUserWorkingHoursManager workingHoursService)
         {
             _mapper = mapper;
             _workingHoursService = workingHoursService;

@@ -30,7 +30,9 @@ namespace WorkingHoursService
             services.AddScoped<ProjectsRepository, ProjectsRepository>();
             services.AddScoped<TasksRepository, TasksRepository>();
             services.AddScoped<UsersRepository, UsersRepository>();
-            services.AddScoped<TaskUserWorkingHoursService, TaskUserWorkingHoursService>();
+            services.AddScoped<TaskUserWorkingHoursManager, TaskUserWorkingHoursManager>();
+
+            InitializeRabbitMQ(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +51,17 @@ namespace WorkingHoursService
             {
                 endpoints.MapControllers();
             });
+
+            app.ApplicationServices.GetService<BrokerMessagesHandler>();
+        }
+
+        private void InitializeRabbitMQ(IServiceCollection services)
+        {
+            string rabbitMqHost = Configuration.GetValue<string>("RabbitMQ:Host");
+            int rabbitMqPort = Configuration.GetValue<int>("RabbitMQ:Port");
+            var rabbit = new RabbitMqTopicManager(rabbitMqHost, rabbitMqPort);        
+            services.AddSingleton<RabbitMqTopicManager>(rabbit);
+            services.AddSingleton<BrokerMessagesHandler, BrokerMessagesHandler>();
         }
     }
 }
