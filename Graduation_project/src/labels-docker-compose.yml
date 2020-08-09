@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-labels-service:
+  &default_labels_service
+  image: vladraven/otus_grad_labels_service
+  build:
+    context: .
+    dockerfile: LabelsDockerfile
+  ports:
+    - 5000:5000
+
+services:
+  labels_service_latest:
+    *default_labels_service
+  
+  labels_service_current:
+    << : *default_labels_service
+    image: vladraven/otus_grad_labels_service:0.1
+
+    
