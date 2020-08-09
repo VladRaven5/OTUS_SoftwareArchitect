@@ -5,16 +5,14 @@ using Shared;
 
 namespace ProjectsService
 {
-    public class ProjectsManager
+    public class ProjectsManager : DomainManagerBase
     {
-        private int _requestIdLifetimeDays = Constants.RequestIdLifetimeDays;
-
         private readonly RequestsRepository _requestsRepository;
         private readonly ProjectsRepository _projectsRepository;
         private readonly RabbitMqTopicManager _rabbitMq;
 
         public ProjectsManager(RequestsRepository requestsRepository,
-            ProjectsRepository projectsRepository, RabbitMqTopicManager rabbitMq)
+            ProjectsRepository projectsRepository, RabbitMqTopicManager rabbitMq) : base(requestsRepository)
         {
             _requestsRepository = requestsRepository;
             _projectsRepository = projectsRepository;
@@ -98,20 +96,6 @@ namespace ProjectsService
                 }, Topics.Projects, MessageActions.Deleted);
 
             return _projectsRepository.DeleteProjectAsync(projectId, outboxMessage);
-        }
-
-        private async Task<bool> CheckAndSaveRequestIdAsync(string requestId)
-        {
-            bool isRequestAlreadyHadled = await _requestsRepository.IsRequestIdHandledAsync(requestId);
-            
-            if(isRequestAlreadyHadled)
-                return false;
-
-            DateTimeOffset requestIdExpiresAt = DateTimeOffset.UtcNow.AddDays(_requestIdLifetimeDays);
-
-            await _requestsRepository.SaveRequestIdAsync(requestId, requestIdExpiresAt); 
-
-            return true;          
-        }
+        }        
     }
 }

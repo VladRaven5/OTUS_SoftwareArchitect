@@ -5,10 +5,8 @@ using Shared;
 
 namespace ProjectMembersService
 {
-    public class ProjectMembersManager
+    public class ProjectMembersManager : DomainManagerBase
     {
-        private int _requestIdLifetimeDays = Constants.RequestIdLifetimeDays;
-
         private readonly RequestsRepository _requestsRepository;
         private readonly ProjectsRepository _projectsRepository;
         private readonly UsersRepository _usersRepository;
@@ -16,7 +14,7 @@ namespace ProjectMembersService
 
         public ProjectMembersManager(RequestsRepository requestsRepository,
             ProjectsRepository projectsRepository, UsersRepository usersRepository,
-            ProjectMembersRepository projectMembersRepository)
+            ProjectMembersRepository projectMembersRepository) : base(requestsRepository)
         {
             _requestsRepository = requestsRepository;
             _projectsRepository = projectsRepository;
@@ -99,20 +97,6 @@ namespace ProjectMembersService
             {
                 throw new NotFoundException($"User with id {userId} not found");
             }  
-        }
-
-        private async Task<bool> CheckAndSaveRequestIdAsync(string requestId)
-        {
-            bool isRequestAlreadyHadled = await _requestsRepository.IsRequestIdHandledAsync(requestId);
-            
-            if(isRequestAlreadyHadled)
-                return false;
-
-            DateTimeOffset requestIdExpiresAt = DateTimeOffset.UtcNow.AddDays(_requestIdLifetimeDays);
-
-            await _requestsRepository.SaveRequestIdAsync(requestId, requestIdExpiresAt); 
-
-            return true;          
-        }
+        }        
     }
 }

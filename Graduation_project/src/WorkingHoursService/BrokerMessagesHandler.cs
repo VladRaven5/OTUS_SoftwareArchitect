@@ -67,7 +67,7 @@ namespace WorkingHoursService
                                 {
                                     usersRepository.CreateOrUpdateUserAsync(model).GetAwaiter().GetResult();
                                 }
-                                catch(Exception e)
+                                catch(Exception)
                                 {
                                     requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
                                     throw;
@@ -108,7 +108,7 @@ namespace WorkingHoursService
                                 {
                                     projectsRepository.CreateOrUpdateProjectAsync(model).GetAwaiter().GetResult();
                                 }
-                                catch(Exception e)
+                                catch(Exception)
                                 {
                                     requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
                                     throw;
@@ -149,7 +149,7 @@ namespace WorkingHoursService
                                 {
                                     projectsRepository.CreateOrUpdateProjectAsync(model).GetAwaiter().GetResult();
                                 }
-                                catch(Exception e)
+                                catch(Exception)
                                 {
                                     requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
                                     throw;

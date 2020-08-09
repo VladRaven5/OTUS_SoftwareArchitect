@@ -5,10 +5,8 @@ using Shared;
 
 namespace WorkingHoursService
 {
-    public class TaskUserWorkingHoursManager
+    public class TaskUserWorkingHoursManager : DomainManagerBase
     {
-        private readonly int _requestIdLifetimeDays = Constants.RequestIdLifetimeDays;
-
         private readonly RequestsRepository _requestsRepository;
         private readonly WorkingHoursRepository _workingHoursRepository;
         private readonly TasksRepository _tasksRepository;
@@ -16,7 +14,7 @@ namespace WorkingHoursService
 
         public TaskUserWorkingHoursManager(RequestsRepository requestsRepository,
             WorkingHoursRepository workingHoursRepository, TasksRepository tasksRepository,
-            UsersRepository usersRepository)
+            UsersRepository usersRepository) : base(requestsRepository)
         {
             _requestsRepository = requestsRepository;
             _workingHoursRepository = workingHoursRepository;
@@ -100,20 +98,6 @@ namespace WorkingHoursService
             {
                 throw new NotFoundException($"User with id = {userId} not found");
             }
-        }
-
-        private async Task<bool> CheckAndSaveRequestIdAsync(string requestId)
-        {
-            bool isRequestAlreadyHadled = await _requestsRepository.IsRequestIdHandledAsync(requestId);
-            
-            if(isRequestAlreadyHadled)
-                return false;
-
-            DateTimeOffset requestIdExpiresAt = DateTimeOffset.UtcNow.AddDays(_requestIdLifetimeDays);
-
-            await _requestsRepository.SaveRequestIdAsync(requestId, requestIdExpiresAt); 
-
-            return true;          
         }
     }
 }
