@@ -11,16 +11,14 @@ namespace UsersService
 {
     public class UsersManager
     {
-        private readonly Repository _repository;
+        private readonly UsersRepository _repository;
         private readonly IConfiguration _configuration;
-        private readonly RabbitMqTopicManager _rabbitMq;
         private HttpClient _httpClient;
 
-        public UsersManager(Repository repository, IConfiguration configuration, RabbitMqTopicManager rabbitMq)
+        public UsersManager(UsersRepository repository, IConfiguration configuration)
         {
             _repository = repository;
             _configuration = configuration;
-            _rabbitMq = rabbitMq;
         }
 
         public async Task<UserModel> CreateUserAsync(string username)
@@ -32,16 +30,22 @@ namespace UsersService
                 throw new EntityExistsException("This username already in use");
             }
 
-            var createdUser = await _repository.CreateUserAsync(username);
-
-            var message = new UserCreatedUpdatedMessage
+            var user = new UserModel
             {
-                Id = Guid.NewGuid().ToString(),
-                UserId = createdUser.Id,
-                Username = createdUser.Username
-            };
+                Username = username
+            }; 
+            user.Init();
 
-            SendMessageToBroker(message, MessageActions.Created);
+            var message = OutboxMessageModel.Create(
+                new UserCreatedUpdatedMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = user.Id,
+                    Username = user.Username
+                }, Topics.Users, MessageActions.Created
+            );
+
+            var createdUser = await _repository.CreateUserAsync(user, message);
 
             return createdUser;
         }
@@ -58,16 +62,16 @@ namespace UsersService
 
         internal async Task<UserModel> UpdateUserAsync(string userId, string username)
         {   
-            var updatedUser = await _repository.UpdateUserAsync(userId, username);
+            var message = OutboxMessageModel.Create(
+                new UserCreatedUpdatedMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = userId,
+                    Username = username
+                }, Topics.Users, MessageActions.Updated
+            );
 
-            var message = new UserCreatedUpdatedMessage
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserId = userId,
-                Username = username
-            };
-
-            SendMessageToBroker(message, MessageActions.Updated);
+            var updatedUser = await _repository.UpdateUserAsync(userId, username, message);
 
             return updatedUser;
         }
@@ -76,17 +80,17 @@ namespace UsersService
         {
             var isAuthInfoDeleted = await TryDeleteUserAuthInfoAsync(userId);
             if(!isAuthInfoDeleted.isSuccess)
-                return isAuthInfoDeleted;
+                return isAuthInfoDeleted;            
 
-            await _repository.DeleteUserAsync(userId);
+            var message = OutboxMessageModel.Create(
+                new UserDeletedMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = userId
+                }, Topics.Users, MessageActions.Deleted
+            );
 
-
-            var message = new UserDeletedMessage
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserId = userId
-            };
-            SendMessageToBroker(message, MessageActions.Deleted);
+            await _repository.DeleteUserAsync(userId, message);
 
             return (true, string.Empty);
         }
@@ -112,18 +116,6 @@ namespace UsersService
             JsonConvert.DeserializeAnonymousType(await response.Content.ReadAsStringAsync(), errorModel);
 
             return (false, $"Error during connection with Auth service:{errorModel.Title}");            
-        }
-
-        private void SendMessageToBroker(BaseMessage message, string action)
-        {
-            try
-            {
-                _rabbitMq.SendMessage(Topics.Users, message, action);
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine($"Message sending error:\n{e.Message}\n{e.StackTrace}");
-            }   
         }
 
         private HttpClient CreateHttpClient()

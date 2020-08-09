@@ -29,13 +29,12 @@ namespace Shared
                     bool isSomeMessagesHandled = await HandleOneMessageAsync();
                     if(isSomeMessagesHandled)
                     {
-                        Console.WriteLine($"Message sent");
+                        Console.WriteLine($"Outbox message sent");
                     }
                     
                     sw.Stop();
                     long msElapsed = sw.ElapsedMilliseconds;
-                    long msToAwait = _defaulPeriodMsec - msElapsed;
-                    Console.WriteLine($"Await new message {msToAwait} ms");
+                    long msToAwait = _defaulPeriodMsec - msElapsed;                    
                     if(!isSomeMessagesHandled && msToAwait > 0)
                     {
                         await Task.Delay((int)msToAwait);

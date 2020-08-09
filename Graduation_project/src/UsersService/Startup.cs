@@ -24,8 +24,10 @@ namespace UsersService
             InitializeRabbitMQ(services);
             
             services.AddSingleton<DBConnectionProvider, DBConnectionProvider>();
-            services.AddScoped<Repository, Repository>();
+            services.AddScoped<UsersRepository, UsersRepository>();
             services.AddScoped<UsersManager, UsersManager>();
+            
+            services.AddHostedService<OutboxMessagesSender>();
         }        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
