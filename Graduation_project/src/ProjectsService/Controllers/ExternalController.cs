@@ -61,7 +61,7 @@ namespace ProjectsService
             }
             catch(Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest($"{e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -83,7 +83,7 @@ namespace ProjectsService
             }
             catch(Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest($"{e.Message}\n{e.StackTrace}");
             }
         }
 

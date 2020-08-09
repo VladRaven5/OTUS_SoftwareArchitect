@@ -15,7 +15,11 @@ namespace UsersService
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseStartup<Startup>();
+                        .UseStartup<Startup>()
+                        #if DEBUG
+                        .UseUrls("http://0.0.0.0:5010")
+                        #endif
+                        ;
                 });
     }
 }
