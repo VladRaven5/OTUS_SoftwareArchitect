@@ -1,0 +1,9 @@
+fullnameOverride: rabbitmq-broker
+
+persistence:
+  size: 1Gi
+
+auth:
+  username: user
+  password: psSacMx1Bj
+  erlangCookie: r4QqBhP0FKsm1TeWh2oLWJW3N8bo2k7w
