@@ -11,7 +11,8 @@ namespace ProjectMembersService
     {
         private static List<TopicQueueBindingArgs> _bindingArgs => new List<TopicQueueBindingArgs> 
             { 
-                new TopicQueueBindingArgs(Topics.Users, "userstoprojectmembers")
+                new TopicQueueBindingArgs(Topics.Users, "userstoprojectmembers"),
+                new TopicQueueBindingArgs(Topics.Projects, "projectstoprojectmembers"),
             };
 
         private readonly IMapper _mapper;
@@ -30,7 +31,11 @@ namespace ProjectMembersService
             {
                 case Topics.Users:
                     HandleUserMessage(messageObject);
-                break;
+                    break;
+
+                case Topics.Projects:
+                    HandleProjectMessage(messageObject);
+                    break;
 
                 default:
                     throw new NotFoundException($"Topic {messageObject.Topic} is not known");
@@ -39,6 +44,8 @@ namespace ProjectMembersService
 
         private void HandleUserMessage(ReceivedMessageArgs messageObject)
         {            
+            Console.WriteLine($"User message received");
+
             switch(messageObject.Action)
             {
                 case MessageActions.Created:
@@ -51,7 +58,15 @@ namespace ProjectMembersService
                             var usersRepository = scope.ServiceProvider.GetRequiredService<UsersRepository>();
                             if(!requestsRepository.IsHandledOrSaveRequestAsync(message.Id, GetRequestIdInvalidationDate()).GetAwaiter().GetResult())
                             {
-                                usersRepository.CreateOrUpdateUserAsync(model).GetAwaiter().GetResult();
+                                try
+                                {
+                                    usersRepository.CreateOrUpdateUserAsync(model).GetAwaiter().GetResult();
+                                }
+                                catch(Exception e)
+                                {
+                                    requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
+                                    throw;
+                                }
                             }
                             else
                             {
@@ -85,6 +100,45 @@ namespace ProjectMembersService
             }
         }
 
+        private void HandleProjectMessage(ReceivedMessageArgs messageObject)
+        {
+            Console.WriteLine($"Project message received");
+            switch(messageObject.Action)
+            {
+                case MessageActions.Created:
+                case MessageActions.Updated:
+                    var message = JsonConvert.DeserializeObject<ProjectCreatedUpdatedMessage>(messageObject.Message);
+                    var model = _mapper.Map<ProjectCreatedUpdatedMessage, ProjectModel>(message);     
+                    using(var scope = _serviceProvider.CreateScope())
+                        {
+                            var requestsRepository = scope.ServiceProvider.GetRequiredService<RequestsRepository>();
+                            var projectsRepository = scope.ServiceProvider.GetRequiredService<ProjectsRepository>();
+                            if(!requestsRepository.IsHandledOrSaveRequestAsync(message.Id, GetRequestIdInvalidationDate()).GetAwaiter().GetResult())
+                            {
+                                try
+                                {
+                                    projectsRepository.CreateOrUpdateProjectAsync(model).GetAwaiter().GetResult();
+                                }
+                                catch(Exception e)
+                                {
+                                    requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
+                                    throw;
+                                }                                
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Already handled: {message.Id}");
+                            }
+                        }                    
+                break;
 
+                case MessageActions.Deleted:
+                    //do nothing for now...
+                break;
+
+                default:
+                    throw new NotFoundException($"Topic {messageObject.Topic} is not known");
+            }
+        }
     }
 }
