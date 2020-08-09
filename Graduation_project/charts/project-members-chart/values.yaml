@@ -1,0 +1,103 @@
+# Default values for project-members-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: vladraven/otus_grad_project_members_service
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "0.2"
+  connectionStringEnvName: ConnectionStrings__DefaultConnection
+  containerPort: 5000
+
+rabbitMq:
+  hostEnvName: RabbitMQ__Host
+  portEnvName: RabbitMQ__Port
+  usernameEnvName: RabbitMQ__Username
+  passwordEnvName: RabbitMQ__Password
+  host: rabbitmq-broker.default.svc
+  port: 5672
+  username: user
+  password: psSacMx1Bj
+
+postgresql: 
+  enabled: true
+  fullnameOverride: "project-members-postgres-serv"
+  postgresqlUsername: usr
+  postgresqlPassword: pwd
+  postgresqlDatabase: project_members
+  service:
+    port: "5432"
+  persistence:
+    size: 2Gi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations: 
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: arch.homework
+      paths: [ "/otusapp/project-members($|/)(.*)" ]
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
