@@ -8,13 +8,23 @@ image:
   repository: vladraven/otus_grad_projects_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.4"
+  tag: "0.6"
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+rabbitMq:
+  hostEnvName: RabbitMQ__Host
+  portEnvName: RabbitMQ__Port
+  usernameEnvName: RabbitMQ__Username
+  passwordEnvName: RabbitMQ__Password
+  host: rabbitmq-broker.default.svc
+  port: 5672
+  username: user
+  password: psSacMx1Bj
 
 postgresql: 
   enabled: true
@@ -24,6 +34,8 @@ postgresql:
   postgresqlDatabase: projects
   service:
     port: "5432"
+  persistence:
+    size: 2Gi
 
 serviceAccount:
   # Specifies whether a service account should be created

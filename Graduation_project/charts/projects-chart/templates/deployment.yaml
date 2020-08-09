@@ -27,6 +27,37 @@ spec:
       serviceAccountName: {{ include "projects-chart.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+       - name: wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+       - name: projects-pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_USER
+            value: {{.Values.postgresql.postgresqlUsername}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.postgresql.postgresqlPassword}}
+          - name: POSTGRES_DB
+            value: {{.Values.postgresql.postgresqlDatabase}}
+          - name: POSTGRES_HOST
+            value: {{.Values.postgresql.fullnameOverride}}
+          - name: POSTGRES_PORT
+            value: "{{.Values.postgresql.service.port}}"
+         command:
+          - sh
+          - "-c"
+          - |
+            psql "user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB" << 'EOF'
+              create database projects;
+              \c projects;
+              create table projects (id char(36) primary key, title varchar(150) not null, description varchar, createddate timestamp, begindate timestamp, enddate timestamp, version int not null);
+              create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+              create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30));
+            EOF
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -39,6 +70,14 @@ spec:
                 secretKeyRef:
                   name: {{ include "projects-chart.fullname" . }}
                   key: PG_CONNECTION
+            - name: {{ .Values.rabbitMq.hostEnvName }}
+              value: {{ .Values.rabbitMq.host }}
+            - name: {{ .Values.rabbitMq.portEnvName }}
+              value: "{{ .Values.rabbitMq.port }}"
+            - name: {{ .Values.rabbitMq.usernameEnvName }}
+              value: {{ .Values.rabbitMq.username }}
+            - name: {{ .Values.rabbitMq.passwordEnvName }}
+              value: {{ .Values.rabbitMq.password }}
           ports:
             - name: http
               containerPort: {{ .Values.image.containerPort }}

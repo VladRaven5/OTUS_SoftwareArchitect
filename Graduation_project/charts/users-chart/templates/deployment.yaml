@@ -32,7 +32,7 @@ spec:
          image: busybox:latest
          env:
           - name: RAVENDB_HOST
-            value: {{ .Values.ravendb.host }}
+            value: {{ .Values.ravendb.host }}          
          command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
       containers:
         - name: {{ .Chart.Name }}
@@ -44,6 +44,14 @@ spec:
               value: "http://{{ .Values.ravendb.host }}:{{ .Values.ravendb.extport }}"
             - name: {{ .Values.image.authServiceUrlEnvName }}
               value: "http://{{ .Values.authService.url }}:{{ .Values.authService.port }}"
+            - name: {{ .Values.rabbitMq.hostEnvName }}
+              value: {{ .Values.rabbitMq.host }}
+            - name: {{ .Values.rabbitMq.portEnvName }}
+              value: "{{ .Values.rabbitMq.port }}"
+            - name: {{ .Values.rabbitMq.usernameEnvName }}
+              value: {{ .Values.rabbitMq.username }}
+            - name: {{ .Values.rabbitMq.passwordEnvName }}
+              value: {{ .Values.rabbitMq.password }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http

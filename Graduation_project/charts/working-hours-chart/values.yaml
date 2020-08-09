@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_grad_working_hours_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.2"
+  tag: "0.4"
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
 
@@ -20,6 +20,18 @@ postgresql:
   postgresqlDatabase: working_hours
   service:
     port: "5432"
+  persistence:
+    size: 2Gi
+
+rabbitMq:
+  hostEnvName: RabbitMQ__Host
+  portEnvName: RabbitMQ__Port
+  usernameEnvName: RabbitMQ__Username
+  passwordEnvName: RabbitMQ__Password
+  host: rabbitmq-broker.default.svc
+  port: 5672
+  username: user
+  password: psSacMx1Bj
 
 imagePullSecrets: []
 nameOverride: ""

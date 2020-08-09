@@ -6,10 +6,10 @@ replicaCount: 2
 
 image:
   repository: vladraven/otus_grad_users_service
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.2"
-  containerPort: "5000"
+  tag: "0.4"
+  containerPort: 5000
   dbConnectionStringEnvName: ConnectionStrings__DefaultConnection
   authServiceUrlEnvName: ServicesUris__AuthService
 
@@ -23,6 +23,16 @@ ravendb:
 authService:
   url: "auth-service"
   port: "9001"
+
+rabbitMq:
+  hostEnvName: RabbitMQ__Host
+  portEnvName: RabbitMQ__Port
+  usernameEnvName: RabbitMQ__Username
+  passwordEnvName: RabbitMQ__Password
+  host: rabbitmq-broker.default.svc
+  port: 5672
+  username: user
+  password: psSacMx1Bj
 
 imagePullSecrets: []
 nameOverride: ""
