@@ -11,12 +11,14 @@ namespace ProjectsService
 
         private readonly RequestsRepository _requestsRepository;
         private readonly ProjectsRepository _projectsRepository;
+        private readonly RabbitMqTopicManager _rabbitMq;
 
         public ProjectsManager(RequestsRepository requestsRepository,
-            ProjectsRepository projectsRepository)
+            ProjectsRepository projectsRepository, RabbitMqTopicManager rabbitMq)
         {
             _requestsRepository = requestsRepository;
             _projectsRepository = projectsRepository;
+            _rabbitMq = rabbitMq;
         }
 
         public Task<IEnumerable<ProjectModel>> GetAllProjectsAsync()
@@ -43,7 +45,17 @@ namespace ProjectsService
 
             try
             {
-                return await _projectsRepository.CreateProjectAsync(newProject);
+                newProject.Init();
+
+                var outboxMessage = OutboxMessageModel.Create(
+                    new ProjectCreatedUpdatedMessage
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        ProjectId = newProject.Id,
+                        Title = newProject.Title
+                    }, Topics.Projects, MessageActions.Created);
+
+                return await _projectsRepository.CreateProjectAsync(newProject, outboxMessage);
             }
             catch(Exception)
             {
@@ -66,11 +78,26 @@ namespace ProjectsService
                 throw new VersionsNotMatchException();
             }
 
-            return await _projectsRepository.UpdateProjectAsync(updatingProject);
+            var outboxMessage = OutboxMessageModel.Create(
+                new ProjectCreatedUpdatedMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ProjectId = updatingProject.Id,
+                    Title = updatingProject.Title
+                }, Topics.Projects, MessageActions.Updated);
+
+            return await _projectsRepository.UpdateProjectAsync(updatingProject, outboxMessage);
         }
         public Task DeleteProjectAsync(string projectId)
         {
-            return _projectsRepository.DeleteProjectAsync(projectId);
+            var outboxMessage = OutboxMessageModel.Create(
+                new ProjectDeletedMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ProjectId = projectId,
+                }, Topics.Projects, MessageActions.Deleted);
+
+            return _projectsRepository.DeleteProjectAsync(projectId, outboxMessage);
         }
 
         private async Task<bool> CheckAndSaveRequestIdAsync(string requestId)

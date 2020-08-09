@@ -26,7 +26,11 @@ namespace ProjectsService
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<ProjectsRepository, ProjectsRepository>();
             services.AddScoped<RequestsRepository, RequestsRepository>();
+            
+            InitializeRabbitMQ(services);
             services.AddScoped<ProjectsManager, ProjectsManager>();
+
+            services.AddHostedService<OutboxMessagesSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,6 +49,13 @@ namespace ProjectsService
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void InitializeRabbitMQ(IServiceCollection services)
+        {
+            string rabbitMqHost = Configuration.GetValue<string>("RabbitMQ:Host");
+            int rabbitMqPort = Configuration.GetValue<int>("RabbitMQ:Port");
+            services.AddSingleton<RabbitMqTopicManager>(new RabbitMqTopicManager(rabbitMqHost, rabbitMqPort));
         }
     }
 }

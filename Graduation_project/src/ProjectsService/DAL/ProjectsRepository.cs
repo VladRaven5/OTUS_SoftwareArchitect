@@ -25,12 +25,14 @@ namespace ProjectsService
             return GetModelByIdAsync<ProjectModel>(projectId);
         }
 
-        public async Task<ProjectModel> CreateProjectAsync(ProjectModel newProject)
+        public async Task<ProjectModel> CreateProjectAsync(ProjectModel newProject, OutboxMessageModel message)
         {
-            newProject.Init();
-
             string insertQuery = $"insert into {_tableName} (id, title, description, createddate, begindate, enddate, version) "
                 + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.CreatedDate}', '{newProject.BeginDate}', '{newProject.EndDate}', {newProject.Version});";
+
+            string insertMessageQuery = TakeInsertMessageQuery(message);
+
+            insertQuery += insertMessageQuery;
 
             int res = await _connection.ExecuteAsync(insertQuery);
 
@@ -42,7 +44,7 @@ namespace ProjectsService
             return await GetProjectByIdAsync(newProject.Id);
         }
 
-        public async Task<ProjectModel> UpdateProjectAsync(ProjectModel updatedProject)
+        public async Task<ProjectModel> UpdateProjectAsync(ProjectModel updatedProject, OutboxMessageModel message)
         {
             int newVersion = updatedProject.Version + 1;
 
@@ -54,6 +56,9 @@ namespace ProjectsService
                 $"version = {newVersion} " +
                 $"where id = '{updatedProject.Id}';";
 
+            string insertMessageQuery = TakeInsertMessageQuery(message);
+            updateQuery += insertMessageQuery;
+
             int res = await _connection.ExecuteAsync(updateQuery);
 
             if(res <= 0)
@@ -64,9 +69,9 @@ namespace ProjectsService
             return await GetProjectByIdAsync(updatedProject.Id);
         }
 
-        public Task DeleteProjectAsync(string projectId)
+        public Task DeleteProjectAsync(string projectId, OutboxMessageModel message)
         {
-            return DeleteModelAsync(projectId);          
+            return DeleteModelAsync(projectId, message);          
         }
     }
 }
