@@ -94,13 +94,8 @@ namespace Shared
                 var body = e.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 var headers = e.BasicProperties?.Headers;
-                string actionHeader = null;
+                string actionHeader = GetHeaderValue(headers, _actionHeaderName);                    
                 
-                if(headers.TryGetValue(_actionHeaderName, out object actionHeaderObject))
-                {
-                    var headerBytes = (byte[])actionHeaderObject;
-                    actionHeader = Encoding.UTF8.GetString(headerBytes);
-                }
                 string topic = e.RoutingKey;
 
                 var args = new ReceivedMessageArgs(topic, actionHeader, message);
@@ -115,7 +110,18 @@ namespace Shared
                 Console.WriteLine($"{exc.Message}\n{exc.StackTrace}");
             }
             
-        }    
+        }
+
+        private string GetHeaderValue(IDictionary<string, object> headers, string headerName)
+        {
+            if(headers.TryGetValue(headerName, out object headerObject))
+            {
+                var headerBytes = (byte[])headerObject;
+                return Encoding.UTF8.GetString(headerBytes);
+            }
+
+            return null;
+        }
 
         public void Dispose()
         {
