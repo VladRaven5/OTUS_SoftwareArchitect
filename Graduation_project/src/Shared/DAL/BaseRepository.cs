@@ -6,7 +6,8 @@ using Dapper;
 
 namespace Shared
 {
-    public abstract class BaseDapperRepository : IDisposable
+
+    public abstract class BaseDapperRepository : IDisposable, IOutboxRepository
     {
         protected abstract string _tableName { get; }
         protected readonly string _outboxTableName = "outbox_messages";
@@ -33,37 +34,24 @@ namespace Shared
         {
             string deleteQuery = $"delete from {_tableName} where id = '{modelId}';";
 
-            if(message != null)
+            if (message != null)
             {
                 string insertMessageQuery = TakeInsertMessageQuery(message);
                 deleteQuery += insertMessageQuery;
             }
 
-            return _connection.ExecuteAsync(deleteQuery);    
+            return _connection.ExecuteAsync(deleteQuery);
         }
 
         protected string TakeInsertMessageQuery(OutboxMessageModel message)
         {
             return $" insert into {_outboxTableName} (topic, message, action) " +
                 $"values('{message.Topic}', '{message.Message}', '{message.Action}'); ";
-        }
-
-        public async Task<OutboxMessageModel> PopOutboxMessageAsync()
-        {
-            string query = $" select * from {_outboxTableName} order by id limit 1; ";
-            var message = await _connection.QueryFirstOrDefaultAsync<OutboxMessageModel>(query);
-            if(message != null)
-            {
-                string deleteQuery = $" delete from {_outboxTableName} where id = '{message.Id}'; ";
-                await _connection.ExecuteAsync(deleteQuery); 
-            }
-            
-            return message;
-        }
+        }        
 
         protected string GetQueryNullableEscapedValue<T>(Nullable<T> nullableValue) where T : struct
         {
-            if(nullableValue.HasValue)
+            if (nullableValue.HasValue)
             {
                 return $"'{nullableValue.Value}'";
             }
@@ -72,12 +60,46 @@ namespace Shared
 
         protected string GetQueryNullableEscapedValue(object nullableValue)
         {
-            if(nullableValue != null)
+            if (nullableValue != null)
             {
                 return $"'{nullableValue}'";
             }
             return "NULL";
         }
+
+
+        #region Outbox
+
+        public async Task<OutboxMessageModel> PopOutboxMessageAsync()
+        {
+            string query = $" select * from {_outboxTableName} where not isinprocess order by id limit 1; ";
+            var message = await _connection.QueryFirstOrDefaultAsync<OutboxMessageModel>(query);
+            if (message != null)
+            {
+                await SetOuboxMessageStateAsync(message.Id, true);
+            }
+
+            return message;
+        }
+
+        public Task ReturnOutboxMessageToPendingAsync(int messageId)
+        {
+            return SetOuboxMessageStateAsync(messageId, false);
+        }        
+
+        public Task DeleteOutboxMessageAsync(int messageId)
+        {
+            string deleteQuery = $" delete from {_outboxTableName} where id = '{messageId}'; ";
+            return _connection.ExecuteAsync(deleteQuery);
+        }
+
+        private Task SetOuboxMessageStateAsync(int messageId, bool isInProcess)
+        {
+            string updateQuery = $" update {_outboxTableName} set isinprocess = {isInProcess} where id = {messageId}; ";
+            return _connection.ExecuteAsync(updateQuery);
+        }
+
+        #endregion Outbox
 
         public void Dispose()
         {

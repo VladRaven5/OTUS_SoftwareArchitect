@@ -17,11 +17,13 @@ namespace UsersService
             Message = baseModel.Message;
             Topic = baseModel.Topic;
             Action = baseModel.Action;
+            IsInProcess = baseModel.IsInProcess;
         }
         public long Index { get; set; }
         public string Message { get; set; }
         public string Topic { get; set; }        
         public string Action { get; set; }
+        public bool IsInProcess { get; set; }
 
         public OutboxMessageModel ToBasicOutbox()
         {
@@ -30,7 +32,8 @@ namespace UsersService
                 Id = 0, //doesn't matter
                 Message = Message,
                 Topic = Topic,
-                Action = Action
+                Action = Action,
+                IsInProcess = IsInProcess
             };
         }
     }

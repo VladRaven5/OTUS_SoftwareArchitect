@@ -93,7 +93,6 @@ namespace WorkingHoursService
 
             string updateQuery = $"update {_tableName} set " + 
                 $"taskid = '{updatedRecord.TaskId}', " +
-                $"userid = '{updatedRecord.UserId}', " +
                 $"description = '{updatedRecord.Description}', " +
                 $"hours = {updatedRecord.Hours}, " +
                 $"version = {newVersion} " +
