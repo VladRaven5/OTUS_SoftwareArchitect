@@ -8,6 +8,7 @@ namespace Shared
         public string Topic { get; set; }
         public string Message { get; set; }
         public string Action { get; set; }
+        public bool IsInProcess { get; set; }
 
         public static OutboxMessageModel Create(BaseMessage message, string topic, string action)
         {

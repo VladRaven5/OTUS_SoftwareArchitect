@@ -26,12 +26,12 @@ namespace Shared
 
         public event Action<ReceivedMessageArgs> MessageReceived;
 
-        public void SendMessage(OutboxMessageModel outboxMessage)
+        public bool SendMessage(OutboxMessageModel outboxMessage)
         {
-            SendMessage(outboxMessage.Topic, outboxMessage.Message, outboxMessage.Action);
+            return SendMessage(outboxMessage.Topic, outboxMessage.Message, outboxMessage.Action);
         }
 
-        public void SendMessage(string topic, string message, string action)
+        public bool SendMessage(string topic, string message, string action)
         {
             try
             {
@@ -49,12 +49,15 @@ namespace Shared
                     exchange: _exchangeName,
                     routingKey: topic,
                     basicProperties: messageProperties, 
-                    body: body);               
+                    body: body);
+
+                return true;             
             }
             catch(Exception exc)
             {
                 Console.WriteLine($"{exc.Message}\n{exc.StackTrace}");
             }
+            return false;
         }
 
         public void CreateTopicSubscriptions(List<TopicQueueBindingArgs> subscriptionInfo)

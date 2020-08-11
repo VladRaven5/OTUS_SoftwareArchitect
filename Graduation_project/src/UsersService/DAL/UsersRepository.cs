@@ -9,7 +9,7 @@ using Shared;
 
 namespace UsersService
 {
-    public class UsersRepository : IDisposable
+    public class UsersRepository : IDisposable, IOutboxRepository
     {
         private readonly IAsyncDocumentSession _connection;
 
@@ -63,24 +63,7 @@ namespace UsersService
             _connection.Delete(user);
             await _connection.StoreAsync(message.ToRavendDb());
             await _connection.SaveChangesAsync();
-        }
-
-        public async Task<OutboxMessageModel> PopOutboxMessageAsync()
-        {
-            var rdbMessage = await _connection.Query<RavendbOutboxMessageModel>()
-                .OrderBy(m => m.Index)
-                .FirstOrDefaultAsync();
-
-            if(rdbMessage == null)
-                return null;
-            
-            var outbox = rdbMessage.ToBasicOutbox();
-
-            _connection.Delete(rdbMessage);
-            await _connection.SaveChangesAsync();            
-
-            return outbox;
-        }
+        }        
 
         public Task<List<UserModel>> FilterUsersByPredicateAsync(Expression<Func<UserModel, bool>> predicate)
         {
@@ -101,6 +84,54 @@ namespace UsersService
         {
             return _connection.Query<T>().Where(predicate);
         }
+
+        #region Outbox
+
+        public async Task<OutboxMessageModel> PopOutboxMessageAsync()
+        {
+            var rdbMessage = await _connection.Query<RavendbOutboxMessageModel>()
+                .Where(m => !m.IsInProcess)
+                .OrderBy(m => m.Index)
+                .FirstOrDefaultAsync();
+
+            if(rdbMessage == null)
+                return null;
+
+            rdbMessage.IsInProcess = true;
+            var outbox = rdbMessage.ToBasicOutbox();
+            await _connection.SaveChangesAsync();            
+
+            return outbox;
+        }
+
+        public async Task ReturnOutboxMessageToPendingAsync(int messageId)
+        {
+            var rdbMessage = await _connection.Query<RavendbOutboxMessageModel>()
+                .Where(m => m.Index == messageId)
+                .FirstOrDefaultAsync();
+
+            if(rdbMessage == null)
+                return;
+
+            rdbMessage.IsInProcess = false;
+            await _connection.SaveChangesAsync();            
+        }
+
+        public async Task DeleteOutboxMessageAsync(int messageId)
+        {
+            var rdbMessage = await _connection.Query<RavendbOutboxMessageModel>()
+                .Where(m => m.Index == messageId)
+                .FirstOrDefaultAsync();
+
+            if(rdbMessage == null)
+                return;
+
+            _connection.Delete(rdbMessage);
+            await _connection.SaveChangesAsync();
+        }
+
+        #endregion Outbox
+
 
         public void Dispose()
         {

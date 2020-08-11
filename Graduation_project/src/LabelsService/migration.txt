@@ -2,4 +2,4 @@ create database labels;
 \c labels;
 create table labels (id char(36) primary key, title varchar(30), color char(6), createddate timestamp, version int not null);
 create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
-create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30));
+create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false );
