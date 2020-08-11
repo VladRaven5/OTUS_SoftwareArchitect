@@ -10,10 +10,13 @@ namespace WorkingHoursService
             CreateMap<CreateWorkingHoursRecordDto, TaskUserWorkingHoursRecord>()
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.Version, opt => opt.Ignore());
+                .ForMember(dest => dest.Version, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             CreateMap<UpdateWorkingHoursRecordDto, TaskUserWorkingHoursRecord>()
-                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore());
+                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
+                
 
             CreateMap<ProjectCreatedUpdatedMessage, ProjectModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProjectId));

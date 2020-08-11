@@ -65,11 +65,19 @@ namespace WorkingHoursService
                 return BadRequest($"{Constants.RequestIdHeaderName} header must be specified!");
             }
 
+            if(!Request.Headers.TryGetValue(Constants.UserIdHeaderName, out StringValues userIdValue))
+            {
+                return BadRequest($"{Constants.UserIdHeaderName} header must be specified!");
+            }
+
             string requestId = requestIdValue.ToString();
+            string userId = requestIdValue.ToString();
 
             try
             {
                 TaskUserWorkingHoursRecord newRecord = _mapper.Map<CreateWorkingHoursRecordDto, TaskUserWorkingHoursRecord>(creationDto);
+                newRecord.UserId = userId;
+                
                 var createdRecord = await _workingHoursService.CreateRecordAsync(newRecord, requestId);
                 
                 return Ok(createdRecord);
