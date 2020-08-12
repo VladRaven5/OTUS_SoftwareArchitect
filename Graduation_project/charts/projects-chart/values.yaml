@@ -21,10 +21,11 @@ rabbitMq:
   portEnvName: RabbitMQ__Port
   usernameEnvName: RabbitMQ__Username
   passwordEnvName: RabbitMQ__Password
-  host: rabbitmq-broker.default.svc
+  host: rabbitmq-broker
   port: 5672
   username: user
-  password: psSacMx1Bj
+  #this pass is required according to bug in chart: https://github.com/bitnami/charts/issues/3095
+  password: CHANGEME 
 
 postgresql: 
   enabled: true

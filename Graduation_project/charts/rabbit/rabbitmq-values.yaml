@@ -5,5 +5,6 @@ persistence:
 
 auth:
   username: user
-  password: psSacMx1Bj
+  #this pass is required according to bug in chart: https://github.com/bitnami/charts/issues/3095
+  password: CHANGEME
   erlangCookie: r4QqBhP0FKsm1TeWh2oLWJW3N8bo2k7w

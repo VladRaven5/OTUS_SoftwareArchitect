@@ -27,7 +27,13 @@ spec:
       serviceAccountName: {{ include "users-chart.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      initContainers:       
+      initContainers:
+       - name: wait-rabbit-ready
+         image: busybox:latest
+         env:
+         - name: RABBIT_HOST
+           value: {{ .Values.rabbitMq.host }}          
+         command: ['sh', '-c', 'until nslookup $RABBIT_HOST; do echo waiting for $RABBIT_HOST; sleep 2; done;']   
        - name: wait-ravendb-ready
          image: busybox:latest
          env:
@@ -45,7 +51,7 @@ spec:
             - name: {{ .Values.image.authServiceUrlEnvName }}
               value: "http://{{ .Values.authService.url }}:{{ .Values.authService.port }}"
             - name: {{ .Values.rabbitMq.hostEnvName }}
-              value: {{ .Values.rabbitMq.host }}
+              value: "{{ .Values.rabbitMq.host }}.default.svc"
             - name: {{ .Values.rabbitMq.portEnvName }}
               value: "{{ .Values.rabbitMq.port }}"
             - name: {{ .Values.rabbitMq.usernameEnvName }}
