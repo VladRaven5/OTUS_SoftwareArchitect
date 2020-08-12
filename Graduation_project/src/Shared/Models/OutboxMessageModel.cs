@@ -12,6 +12,8 @@ namespace Shared
 
         public static OutboxMessageModel Create(BaseMessage message, string topic, string action)
         {
+            message.Init();
+
             return new OutboxMessageModel
             {
                 Message = JsonConvert.SerializeObject(message),

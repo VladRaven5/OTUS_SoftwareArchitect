@@ -46,7 +46,6 @@ namespace LabelsService
                 var outboxMessage = OutboxMessageModel.Create(
                     new LabelCreatedUpdatedMessage
                     {
-                        Id = Guid.NewGuid().ToString(),
                         LabelId = newLabel.Id,
                         Title = newLabel.Title,
                         Color = newLabel.Color
@@ -78,7 +77,6 @@ namespace LabelsService
             var outboxMessage = OutboxMessageModel.Create(
                 new LabelCreatedUpdatedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     LabelId = updatingLabel.Id,
                     Title = updatingLabel.Title,
                     Color = updatingLabel.Color
@@ -91,7 +89,6 @@ namespace LabelsService
             var outboxMessage = OutboxMessageModel.Create(
                 new LabelDeletedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     LabelId = labelId,
                 }, Topics.Labels, MessageActions.Deleted);
 

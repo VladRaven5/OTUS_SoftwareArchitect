@@ -48,12 +48,12 @@ namespace ProjectsService
                 return BadRequest($"Header {Constants.RequestIdHeaderName} must be specified");
             }
 
-            string requsetId = requestIdValue.ToString();
+            string requestId = requestIdValue.ToString();
 
             try
             {
                 var creatingProject = _mapper.Map<CreateProjectDto, ProjectModel>(createDto);
-                return Ok(await _projectsManager.CreateProjectAsync(creatingProject, requsetId));
+                return Ok(await _projectsManager.CreateProjectAsync(creatingProject, requestId));
             }
             catch(AlreadyHandledException)
             {

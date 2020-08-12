@@ -46,7 +46,6 @@ namespace ProjectsService
                 var outboxMessage = OutboxMessageModel.Create(
                     new ProjectCreatedUpdatedMessage
                     {
-                        Id = Guid.NewGuid().ToString(),
                         ProjectId = newProject.Id,
                         Title = newProject.Title
                     }, Topics.Projects, MessageActions.Created);
@@ -77,7 +76,6 @@ namespace ProjectsService
             var outboxMessage = OutboxMessageModel.Create(
                 new ProjectCreatedUpdatedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     ProjectId = updatingProject.Id,
                     Title = updatingProject.Title
                 }, Topics.Projects, MessageActions.Updated);
@@ -89,7 +87,6 @@ namespace ProjectsService
             var outboxMessage = OutboxMessageModel.Create(
                 new ProjectDeletedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     ProjectId = projectId,
                 }, Topics.Projects, MessageActions.Deleted);
 

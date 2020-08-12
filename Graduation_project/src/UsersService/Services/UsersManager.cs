@@ -39,7 +39,6 @@ namespace UsersService
             var message = OutboxMessageModel.Create(
                 new UserCreatedUpdatedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     UserId = user.Id,
                     Username = user.Username
                 }, Topics.Users, MessageActions.Created
@@ -65,7 +64,6 @@ namespace UsersService
             var message = OutboxMessageModel.Create(
                 new UserCreatedUpdatedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     UserId = userId,
                     Username = username
                 }, Topics.Users, MessageActions.Updated
@@ -85,7 +83,6 @@ namespace UsersService
             var message = OutboxMessageModel.Create(
                 new UserDeletedMessage
                 {
-                    Id = Guid.NewGuid().ToString(),
                     UserId = userId
                 }, Topics.Users, MessageActions.Deleted
             );
