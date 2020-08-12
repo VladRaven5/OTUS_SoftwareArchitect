@@ -28,4 +28,4 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
     tags:
-      - working-hours-database
+      - projects-database
