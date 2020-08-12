@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-lists-service:
+  &default_lists_service
+  image: vladraven/otus_grad_lists_service
+  build:
+    context: .
+    dockerfile: ListsDockerfile
+  ports:
+    - 5000:5000
+
+services:
+  lists_service_latest:
+    *default_lists_service
+  
+  lists_service_current:
+    << : *default_lists_service
+    image: vladraven/otus_grad_lists_service:0.1
+
+    

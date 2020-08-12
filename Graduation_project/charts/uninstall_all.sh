@@ -1,6 +1,7 @@
 helm uninstall myauth
 helm uninstall myusers
 helm uninstall mylabels
+helm uninstall mylists
 helm uninstall myprojmembers
 helm uninstall myprojects
 helm uninstall myworkhours
