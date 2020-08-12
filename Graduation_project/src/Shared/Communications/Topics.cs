@@ -7,5 +7,7 @@ namespace Shared
         public const string Projects = "projects";
         public const string Tasks = "tasks";
         public const string Labels = "labels";
+
+        public const string Lists = "lists";
     }
 }
