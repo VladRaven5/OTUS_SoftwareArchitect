@@ -5,6 +5,7 @@ namespace Shared
         public const string Users = "users";
 
         public const string Projects = "projects";
+        public const string ProjectMembers = "projectmembers";
         public const string Tasks = "tasks";
         public const string Labels = "labels";
 

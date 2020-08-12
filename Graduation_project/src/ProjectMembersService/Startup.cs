@@ -36,7 +36,9 @@ namespace ProjectMembersService
             services.AddScoped<RequestsRepository, RequestsRepository>();
             services.AddScoped<ProjectMembersManager, ProjectMembersManager>();
 
-            InitializeRabbitMQ(services); 
+            InitializeRabbitMQ(services);
+            
+            services.AddHostedService<OutboxMessagesSender>();
         }
 
         private void InitializeRabbitMQ(IServiceCollection services)

@@ -42,7 +42,7 @@ namespace ProjectMembersService
                 throw new AlreadyHandledException();
             }
 
-            await EnsureProjectAndUserExistAsync(newProjectMember.ProjectId, newProjectMember.UserId);          
+            (string projectTitle, string username) = await EnsureProjectAndUserExistAsync(newProjectMember.ProjectId, newProjectMember.UserId);          
 
             try
             {
@@ -51,7 +51,19 @@ namespace ProjectMembersService
                 {
                     throw new EntityExistsException("This member already in project");
                 }
-                await _projectMembersRepository.AddMemberToProjectAsync(newProjectMember);
+
+                var outboxMessage = OutboxMessageModel.Create(
+                    new ProjectMemberCreatedUpdatedMessage
+                    {
+                        ProjectId = newProjectMember.ProjectId,
+                        ProjectTitle = projectTitle,
+                        UserId = newProjectMember.UserId,
+                        Username = username,
+                        Role = newProjectMember.Role
+                    }, Topics.ProjectMembers, MessageActions.Created
+                );
+
+                await _projectMembersRepository.AddMemberToProjectAsync(newProjectMember, outboxMessage);
             }
             catch(Exception)
             {
@@ -71,32 +83,64 @@ namespace ProjectMembersService
                 throw new NotFoundException($"User with id = {updatingMember.UserId} not found in project with id {updatingMember.ProjectId}");
             }
 
-            await EnsureProjectAndUserExistAsync(updatingMember.ProjectId, updatingMember.UserId);
+            (string projectTitle, string username) = await EnsureProjectAndUserExistAsync(updatingMember.ProjectId, updatingMember.UserId);
 
-            await _projectMembersRepository.UpdateProjectMemberAsync(updatingMember);
+            var outboxMessage = OutboxMessageModel.Create(
+                    new ProjectMemberCreatedUpdatedMessage
+                    {
+                        ProjectId = updatingMember.ProjectId,
+                        ProjectTitle = projectTitle,
+                        UserId = updatingMember.UserId,
+                        Username = username,
+                        Role = updatingMember.Role
+                    }, Topics.ProjectMembers, MessageActions.Updated
+                );
+
+            await _projectMembersRepository.UpdateProjectMemberAsync(updatingMember, outboxMessage);
         }
 
-        public Task RemoveMemberFromProjectAsync(string projectId, string userId)
+        public async Task RemoveMemberFromProjectAsync(string projectId, string userId)
         {
-            return _projectMembersRepository.DeleteMemberFromProjectAsync(projectId, userId);
+            (ProjectModel project, UserModel user) = await GetProjectAndUserAsync(projectId, userId);
+
+            var outboxMessage = OutboxMessageModel.Create(
+                new ProjectMemberDeletedMessage
+                {
+                    ProjectId = projectId,
+                    ProjectTitle = project?.Title,
+                    UserId = userId,
+                    Username = user?.Username
+                }, Topics.ProjectMembers, MessageActions.Deleted
+            );
+
+            await _projectMembersRepository.DeleteMemberFromProjectAsync(projectId, userId, outboxMessage);
         }
 
-        private async Task EnsureProjectAndUserExistAsync(string projectId, string userId)
+        private async Task<(string projectTitle, string username)> EnsureProjectAndUserExistAsync(string projectId, string userId)
+        {
+            (ProjectModel project, UserModel user) = await GetProjectAndUserAsync(projectId, userId);
+
+            if(project == null)
+            {
+                throw new NotFoundException($"Project with id {projectId} not found");
+            }
+
+            if(user == null)
+            {
+                throw new NotFoundException($"User with id {userId} not found");
+            }
+
+            return (project.Title, user.Username);
+        }
+
+        private async Task<(ProjectModel project, UserModel user)> GetProjectAndUserAsync(string projectId, string userId)
         {
             Task<ProjectModel> checkProjectTask = _projectsRepository.GetProjectAsync(projectId);
             Task<UserModel> checkUserTask = _usersRepository.GetUserAsync(userId);
 
             await Task.WhenAll(checkProjectTask, checkUserTask);
 
-            if(checkProjectTask.Result == null)
-            {
-                throw new NotFoundException($"Project with id {projectId} not found");
-            }
-
-            if(checkUserTask.Result == null)
-            {
-                throw new NotFoundException($"User with id {userId} not found");
-            }  
-        }        
+            return (checkProjectTask.Result, checkUserTask.Result);
+        }
     }
 }

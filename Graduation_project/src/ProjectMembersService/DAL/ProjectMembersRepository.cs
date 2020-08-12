@@ -60,10 +60,13 @@ namespace ProjectMembersService
                 $"join projects p on p.id = pm.projectid {whereStatement} ;";
         }
 
-        public async Task AddMemberToProjectAsync(ProjectMemberModel newProjectMember)
+        public async Task AddMemberToProjectAsync(ProjectMemberModel newProjectMember, OutboxMessageModel outboxMessage)
         {
             string insertQuery = $"insert into {_tableName} (userid, projectid, role) "
                 + $"values('{newProjectMember.UserId}', '{newProjectMember.ProjectId}', '{(int)newProjectMember.Role}');";
+
+            string insertOutboxMessageQuery = TakeInsertMessageQuery(outboxMessage);
+            insertQuery += insertOutboxMessageQuery;
 
             int res = await _connection.ExecuteAsync(insertQuery);
 
@@ -73,11 +76,14 @@ namespace ProjectMembersService
             }            
         }
 
-        public async Task UpdateProjectMemberAsync(ProjectMemberModel updatingProjectMember)
+        public async Task UpdateProjectMemberAsync(ProjectMemberModel updatingProjectMember, OutboxMessageModel outboxMessage)
         {
             string updateQuery = $"update {_tableName} set " + 
                 $"role = '{(int)updatingProjectMember.Role}' " +
                 $"where userid = '{updatingProjectMember.UserId}' and projectId = '{updatingProjectMember.ProjectId}';";
+
+            string insertOutboxMessageQuery = TakeInsertMessageQuery(outboxMessage);
+            updateQuery += insertOutboxMessageQuery;
 
             int res = await _connection.ExecuteAsync(updateQuery);
 
@@ -87,9 +93,12 @@ namespace ProjectMembersService
             }
         }
 
-        public Task DeleteMemberFromProjectAsync(string projectId, string userId)
-        {
+        public Task DeleteMemberFromProjectAsync(string projectId, string userId, OutboxMessageModel outboxMessage)
+        {        
             string deleteQuery = $"delete from {_tableName} where userid = '{userId}' and projectId = '{projectId}';";
+            string insertOutboxMessageQuery = TakeInsertMessageQuery(outboxMessage);
+            deleteQuery += insertOutboxMessageQuery;
+            
             return _connection.ExecuteAsync(deleteQuery);    
         }
     }
