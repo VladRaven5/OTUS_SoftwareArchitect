@@ -21,7 +21,7 @@ spec:
           name: ravendbport
         env:
           - name: RAVEN_ARGS
-            value: '--Setup.Mode=None'
+            value: '--Setup.Mode=None --License.Eula.Accepted=true'
         volumeMounts:
         - name: auth-ravendb
           mountPath: /opt/RavenDB/Server/RavenData
