@@ -16,7 +16,12 @@ namespace Shared
 
         public RabbitMqTopicManager(string host, int port, string username, string password)
         {             
-            var factory = new ConnectionFactory() { HostName = host, Port = port, UserName = username, Password = password };            
+            var factory = new ConnectionFactory() { HostName = host, Port = port };     
+            if(!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
+            {
+                factory.UserName = username;
+                factory.Password = password;
+            }       
             
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
