@@ -1,0 +1,1 @@
+helm install prometh stable/prometheus-operator -f ./prometheus/prometheus-values.yaml --atomic
