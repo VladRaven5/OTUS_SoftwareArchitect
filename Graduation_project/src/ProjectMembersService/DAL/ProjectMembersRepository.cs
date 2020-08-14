@@ -65,7 +65,7 @@ namespace ProjectMembersService
             string insertQuery = $"insert into {_tableName} (userid, projectid, role) "
                 + $"values('{newProjectMember.UserId}', '{newProjectMember.ProjectId}', '{(int)newProjectMember.Role}');";
 
-            string insertOutboxMessageQuery = TakeInsertMessageQuery(outboxMessage);
+            string insertOutboxMessageQuery = ConstructInsertMessageQuery(outboxMessage);
             insertQuery += insertOutboxMessageQuery;
 
             int res = await _connection.ExecuteAsync(insertQuery);
@@ -82,7 +82,7 @@ namespace ProjectMembersService
                 $"role = '{(int)updatingProjectMember.Role}' " +
                 $"where userid = '{updatingProjectMember.UserId}' and projectId = '{updatingProjectMember.ProjectId}';";
 
-            string insertOutboxMessageQuery = TakeInsertMessageQuery(outboxMessage);
+            string insertOutboxMessageQuery = ConstructInsertMessageQuery(outboxMessage);
             updateQuery += insertOutboxMessageQuery;
 
             int res = await _connection.ExecuteAsync(updateQuery);
@@ -96,7 +96,7 @@ namespace ProjectMembersService
         public Task DeleteMemberFromProjectAsync(string projectId, string userId, OutboxMessageModel outboxMessage)
         {        
             string deleteQuery = $"delete from {_tableName} where userid = '{userId}' and projectId = '{projectId}';";
-            string insertOutboxMessageQuery = TakeInsertMessageQuery(outboxMessage);
+            string insertOutboxMessageQuery = ConstructInsertMessageQuery(outboxMessage);
             deleteQuery += insertOutboxMessageQuery;
             
             return _connection.ExecuteAsync(deleteQuery);    

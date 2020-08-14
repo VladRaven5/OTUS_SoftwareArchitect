@@ -30,7 +30,7 @@ namespace ProjectsService
             string insertQuery = $"insert into {_tableName} (id, title, description, createddate, begindate, enddate, version) "
                 + $"values('{newProject.Id}', '{newProject.Title}', '{newProject.Description}', '{newProject.CreatedDate}', {GetQueryNullableEscapedValue(newProject.BeginDate)}, {GetQueryNullableEscapedValue(newProject.EndDate)}, {newProject.Version});";
 
-            string insertMessageQuery = TakeInsertMessageQuery(message);
+            string insertMessageQuery = ConstructInsertMessageQuery(message);
 
             insertQuery += insertMessageQuery;
 
@@ -56,7 +56,7 @@ namespace ProjectsService
                 $"version = {newVersion} " +
                 $"where id = '{updatedProject.Id}';";
 
-            string insertMessageQuery = TakeInsertMessageQuery(message);
+            string insertMessageQuery = ConstructInsertMessageQuery(message);
             updateQuery += insertMessageQuery;
 
             int res = await _connection.ExecuteAsync(updateQuery);

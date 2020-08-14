@@ -82,6 +82,7 @@ namespace ProjectsService
 
             return await _projectsRepository.UpdateProjectAsync(updatingProject, outboxMessage);
         }
+        
         public Task DeleteProjectAsync(string projectId)
         {
             var outboxMessage = OutboxMessageModel.Create(

@@ -29,7 +29,7 @@ namespace LabelsService
             string insertQuery = $"insert into {_tableName} (id, title, color, createddate, version) "
                 + $"values('{newLabel.Id}', '{newLabel.Title}', '{newLabel.Color}', '{newLabel.CreatedDate}', {newLabel.Version});";
 
-            string insertMessageQuery = TakeInsertMessageQuery(message);
+            string insertMessageQuery = ConstructInsertMessageQuery(message);
 
             insertQuery += insertMessageQuery;
 
@@ -53,7 +53,7 @@ namespace LabelsService
                 $"version = {newVersion} " +
                 $"where id = '{updatedLabel.Id}';";
 
-            string insertMessageQuery = TakeInsertMessageQuery(message);
+            string insertMessageQuery = ConstructInsertMessageQuery(message);
             updateQuery += insertMessageQuery;
 
             int res = await _connection.ExecuteAsync(updateQuery);

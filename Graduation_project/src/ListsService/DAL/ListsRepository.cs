@@ -31,7 +31,7 @@ namespace ListsService
             string insertQuery = $"insert into {_tableName} (id, title, projectId, createddate, version) "
                 + $"values('{newList.Id}', '{newList.Title}', '{newList.ProjectId}', '{newList.CreatedDate}', {newList.Version});";
 
-            string insertMessageQuery = TakeInsertMessageQuery(message);
+            string insertMessageQuery = ConstructInsertMessageQuery(message);
 
             insertQuery += insertMessageQuery;
 
@@ -54,7 +54,7 @@ namespace ListsService
                 $"version = {newVersion} " +
                 $"where id = '{updatedList.Id}';";
 
-            string insertMessageQuery = TakeInsertMessageQuery(message);
+            string insertMessageQuery = ConstructInsertMessageQuery(message);
             updateQuery += insertMessageQuery;
 
             int res = await _connection.ExecuteAsync(updateQuery);
