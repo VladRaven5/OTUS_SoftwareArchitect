@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_grad_projects_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.6"
+  tag: "0.7"
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
 
@@ -37,6 +37,10 @@ postgresql:
     port: "5432"
   persistence:
     size: 2Gi
+
+metrics:
+  serviceMonitor:
+    enabled: true
 
 serviceAccount:
   # Specifies whether a service account should be created
