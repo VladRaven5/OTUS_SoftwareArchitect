@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -24,6 +25,34 @@ namespace Shared
             return _connection.QueryAsync<TModel>(query);
         }
 
+        protected async Task<IEnumerable<TModel>> GetModelsWithCheckIsAllAsync<TModel>(IEnumerable<string> ids) where TModel : BaseModel
+        {
+            if(ids == null || !ids.Any())
+            {
+                return new List<TModel>();
+            }
+
+            string query = $"select * from {_tableName} where id in ({string.Join(", ", ids.Select(id => $"'{id}'"))});";
+            var results = (await _connection.QueryAsync<TModel>(query)).ToList();
+
+            var notFoundUsersIds = ids.Except(results.Select(r => r.Id)).ToList();
+
+            if(notFoundUsersIds.Any())
+            {
+                throw new NotFoundException($"Some {typeof(TModel).Name} not found. Ids: {string.Join(",", notFoundUsersIds)}");
+            }
+
+            int requestedCount = ids.Count();
+            int resultCount = results.Count;
+
+            if(requestedCount != resultCount)
+            {
+                throw new NotFoundException($"Some {typeof(TModel).Name} not found. Expected count {requestedCount}, but found {resultCount}");
+            }
+            
+            return results;
+        }
+
         protected Task<TModel> GetModelByIdAsync<TModel>(string modelId)
         {
             string query = $"select * from {_tableName} where id = '{modelId}' limit 1;";
@@ -36,14 +65,14 @@ namespace Shared
 
             if (message != null)
             {
-                string insertMessageQuery = TakeInsertMessageQuery(message);
+                string insertMessageQuery = ConstructInsertMessageQuery(message);
                 deleteQuery += insertMessageQuery;
             }
 
             return _connection.ExecuteAsync(deleteQuery);
         }
 
-        protected string TakeInsertMessageQuery(OutboxMessageModel message)
+        protected string ConstructInsertMessageQuery(OutboxMessageModel message)
         {
             return $" insert into {_outboxTableName} (topic, message, action) " +
                 $"values('{message.Topic}', '{message.Message}', '{message.Action}'); ";
