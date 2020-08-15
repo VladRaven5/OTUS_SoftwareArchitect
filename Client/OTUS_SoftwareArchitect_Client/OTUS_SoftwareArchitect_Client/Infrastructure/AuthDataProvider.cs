@@ -7,6 +7,7 @@ namespace OTUS_SoftwareArchitect_Client.Infrastructure
         private const string _cookieStringSettingName = "auth_cookie";
         private const string _cookieDomainSettingName = "cookie_domain";
         private const string _cookiePathSettingName = "cookie_path";
+        private const string _useridSettingName = "user_id";
 
         public static void SetUserAuthData(AuthInfo authInfo)
         {
@@ -27,7 +28,7 @@ namespace OTUS_SoftwareArchitect_Client.Infrastructure
             }
 
             return new AuthInfo(cookieObj.ToString(), domainObj.ToString(), pathObj.ToString());
-        }
+        }        
 
         public static bool HasAuthData()
         {
@@ -43,6 +44,24 @@ namespace OTUS_SoftwareArchitect_Client.Infrastructure
             Application.Current.Properties.Remove(_cookieStringSettingName);
             Application.Current.Properties.Remove(_cookieDomainSettingName);
             Application.Current.Properties.Remove(_cookiePathSettingName);
+
+            ResetUserId();
+        }
+
+
+        public static void SetUserId(string id)
+        {
+            Application.Current.Properties[_useridSettingName] = id;
+        }
+
+        public static void ResetUserId()
+        {
+            Application.Current.Properties.Remove(_useridSettingName);
+        }
+
+        public static string GetUserId()
+        {
+            return Application.Current.Properties[_useridSettingName]?.ToString();
         }
     }
 }

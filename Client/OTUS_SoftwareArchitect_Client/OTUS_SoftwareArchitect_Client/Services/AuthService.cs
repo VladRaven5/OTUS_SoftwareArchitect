@@ -13,12 +13,19 @@ namespace OTUS_SoftwareArchitect_Client.Services
         public AuthService()
         {
             _webClient = DependencyService.Resolve<WebApiClient>();
-
         }
-        public Task<RequestResult<string>> LoginAsync(string login, string password)
+
+        public async Task<RequestResult<string>> LoginAsync(string login, string password)
         {
             var loginDto = new LoginDto { Login = login, Password = password };
-            return _webClient.ExecuteRequestAsync(webApi => webApi.Login(loginDto));
+            var result = await _webClient.ExecuteRequestAsync(webApi => webApi.Login(loginDto));
+
+            if(result.IsSuccess)
+            {
+                AuthDataProvider.SetUserId(result.Result);
+            }
+
+            return result;
         }
 
         public async Task Logout()
