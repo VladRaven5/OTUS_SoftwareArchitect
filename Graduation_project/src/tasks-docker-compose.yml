@@ -16,6 +16,6 @@ services:
   
   tasks_service_current:
     << : *default_tasks_service
-    image: vladraven/otus_grad_tasks_service:0.1
+    image: vladraven/otus_grad_tasks_service:0.2
 
     

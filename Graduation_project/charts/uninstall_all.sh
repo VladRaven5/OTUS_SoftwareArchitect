@@ -1,4 +1,5 @@
 helm uninstall myauth
+helm install mytasks
 helm uninstall myusers
 helm uninstall mylabels
 helm uninstall mylists
@@ -7,3 +8,4 @@ helm uninstall myprojects
 helm uninstall myworkhours
 helm uninstall myapi
 helm uninstall rabbit
+helm uninstall prometh

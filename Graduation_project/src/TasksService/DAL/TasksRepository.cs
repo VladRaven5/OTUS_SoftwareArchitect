@@ -216,6 +216,9 @@ namespace TasksService
 
         private string ConstructQueryToDeleteTaskMembers(string taskId, IEnumerable<string> usersIds)
         {
+            if(!usersIds.Any())
+                return string.Empty;
+
             string deleteQuery = $"delete from {_membersJoinTableName} where " + 
                 $"{string.Join(" OR ", usersIds.Select(id => $"(taskid = '{taskId}' AND userid = '{id}') "))} ;";
 
@@ -249,6 +252,9 @@ namespace TasksService
 
         private string ConstructQueryToDeleteTaskLabels(string taskId, IEnumerable<string> labelsIds)
         {
+            if(!labelsIds.Any())
+                return string.Empty;
+
             string deleteQuery = $"delete from {_labelsJoinTableName} where " + 
                 $"{string.Join(" OR ", labelsIds.Select(id => $"(taskid = '{taskId}' AND labelid = '{id}') "))} ; ";
 
