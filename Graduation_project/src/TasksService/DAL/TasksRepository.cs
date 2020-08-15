@@ -38,7 +38,16 @@ namespace TasksService
             var aggregatedResult = AggregateQueryResult(queryResults.ToList());
 
             return aggregatedResult;
-        }     
+        }
+
+        public async Task<IEnumerable<TaskAggregate>> GetUserTasksAsync(string userId)
+        {
+            string query = GetMergedSelectQuery($" where t.id in ( select taskid from task_members where userid = '{userId}' ) ");
+            var queryResults = await _connection.QueryAsync<TaskQueryJoinedResult>(query);
+            var aggregatedResult = AggregateQueryResult(queryResults.ToList());
+
+            return aggregatedResult;
+        }  
 
         // public Task<IEnumerable<ProjectMemberAggregate>> GetProjectsMembersAsync(string projectId = null, string userId = null)
         // {

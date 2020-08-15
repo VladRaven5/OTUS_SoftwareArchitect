@@ -47,6 +47,11 @@ namespace TasksService
             return _tasksRepository.GetAllTasksAsync();
         }
 
+        public Task<IEnumerable<TaskAggregate>> GetUserTasksAsync(string userId)
+        {
+            return _tasksRepository.GetUserTasksAsync(userId);
+        }
+
         public async Task<TaskAggregate> CreateTaskAsync(TaskModel newTask,
             IEnumerable<string> usersIds, IEnumerable<string> labelsIds, string requestId)
         {

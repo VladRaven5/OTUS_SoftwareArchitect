@@ -46,6 +46,26 @@ namespace TasksService
             }
         }
 
+        [HttpGet("my")]
+        public async Task<ActionResult<IEnumerable<TaskAggregate>>> GetMyTasks()
+        {
+            if(!Request.Headers.TryGetValue(Constants.UserIdHeaderName, out StringValues userIdValue))
+            {
+                return BadRequest($"Header {Constants.UserIdHeaderName} must be specified");
+            }
+
+            string userId = userIdValue.ToString();
+
+            try
+            {
+                return Ok(await _tasksManager.GetUserTasksAsync(userId));
+            }
+            catch(Exception e)
+            {
+                return BadRequest($"{e.GetType().Name}: {e.Message}\n{e.StackTrace}");
+            }            
+        }
+
         [HttpPost]
         public async Task<ActionResult<TaskAggregate>> CreateTask([FromBody] CreateTaskDto createDto)
         {
