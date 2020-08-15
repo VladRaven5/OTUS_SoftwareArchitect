@@ -1,4 +1,4 @@
-﻿using OTUS_SoftwareArchitect_Client.Models;
+﻿using OTUS_SoftwareArchitect_Client.Models.TaskModels;
 using System;
 using System.Globalization;
 using Xamarin.Forms;
