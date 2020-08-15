@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.AuthPage"
+    x:DataType="viewmodels:AuthViewModel">
+    <ContentPage.BindingContext>
+        <viewmodels:AuthViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <Grid
+            RowSpacing="12"
+            Margin="24, 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label
+                Grid.Row="1"
+                Text="PROJ-MAN"
+                VerticalOptions="CenterAndExpand" 
+                FontAttributes="Bold"
+                FontSize="36"          
+                HorizontalOptions="CenterAndExpand" 
+                TextColor="{StaticResource Accent}"
+                />
+
+            <Label
+                Grid.Row="2"
+                Text="Welcome! Go in!"
+                FontSize="Large"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="CenterAndExpand"
+                TextColor="Black"
+                />
+
+            <Entry
+                Grid.Row="3"
+                Placeholder="Login"
+                FontSize="Body"
+                Text="{Binding Login}"
+                />
+
+            <Entry
+                Grid.Row="4"
+                IsPassword="True"
+                Placeholder="Password"
+                FontSize="Body"
+                Text="{Binding Password}"
+                />
+
+            <Button
+                Grid.Row="5"
+                Text="Login"
+                BackgroundColor="{StaticResource Accent}"
+                TextColor="White"
+                Command="{Binding LoginCommand}"
+                />
+
+            <Button
+                Grid.Row="6"
+                Text="I have no account yet"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource Accent}"
+                Command="{Binding RegisterCommand}"/>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>
