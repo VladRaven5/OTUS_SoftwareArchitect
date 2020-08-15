@@ -1,5 +1,5 @@
 helm uninstall myauth
-helm install mytasks
+helm uninstall mytasks
 helm uninstall myusers
 helm uninstall mylabels
 helm uninstall mylists

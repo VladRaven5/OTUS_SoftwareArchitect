@@ -34,12 +34,12 @@ spec:
           - name: RABBIT_HOST
             value: {{ .Values.rabbitMq.host }}          
          command: ['sh', '-c', 'until nslookup $RABBIT_HOST; do echo waiting for $RABBIT_HOST; sleep 2; done;']   
-       - name: wait-ravendb-ready
+       - name: wait-pg-ready
          image: busybox:latest
          env:
-          - name: RAVENDB_HOST
-            value: {{ .Values.ravendb.host }}          
-         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
