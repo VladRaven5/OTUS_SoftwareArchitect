@@ -30,7 +30,7 @@ namespace AuthService
             
             services.AddDataProtection()
                 .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
-                .SetApplicationName("NotJiraApp");
+                .SetApplicationName("ProjectMan");
             
             services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -38,7 +38,7 @@ namespace AuthService
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.Name = "UserAuthCookie";
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Events = new CookieAuthenticationEvents
                     {
                         OnRedirectToLogin = async (context) => context.Response.StatusCode = 401,

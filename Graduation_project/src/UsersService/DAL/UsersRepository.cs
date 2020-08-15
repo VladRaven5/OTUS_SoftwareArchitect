@@ -98,8 +98,8 @@ namespace UsersService
                 return null;
 
             rdbMessage.IsInProcess = true;
-            var outbox = rdbMessage.ToBasicOutbox();
-            await _connection.SaveChangesAsync();            
+            await _connection.SaveChangesAsync();  
+            var outbox = rdbMessage.ToBasicOutbox();                                
 
             return outbox;
         }

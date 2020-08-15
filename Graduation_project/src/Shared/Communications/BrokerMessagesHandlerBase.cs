@@ -6,16 +6,19 @@ namespace Shared
 {
     public abstract class BrokerMessagesHandlerBase : IDisposable
     {
+        protected abstract List<TopicQueueBindingArgs> _bindingArgs { get; }
         private readonly int _brokerMessagesLifetimeDays = 2;
         protected readonly RabbitMqTopicManager _rabbitMq;
 
-        public BrokerMessagesHandlerBase(RabbitMqTopicManager rabbitMq, List<TopicQueueBindingArgs> bindingArgs)
+        public BrokerMessagesHandlerBase(RabbitMqTopicManager rabbitMq)
         {
-            _rabbitMq = rabbitMq;
+            _rabbitMq = rabbitMq;                     
+        }
 
-            _rabbitMq.MessageReceived += OnMessageReceived;
-
-            InitializeQueues(bindingArgs);            
+        public virtual void Initialize()
+        {
+            _rabbitMq.MessageReceived += OnMessageReceived;            
+            InitializeQueues(_bindingArgs);   
         }
 
         protected virtual void InitializeQueues(List<TopicQueueBindingArgs> bindingArgs)

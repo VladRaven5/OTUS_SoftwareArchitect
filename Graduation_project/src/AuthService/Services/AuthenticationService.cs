@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Shared;
 
 namespace AuthService
 {
@@ -40,7 +41,7 @@ namespace AuthService
         {
             if(! (await CheckIsLoginAvailable(login)))
             {
-                throw new Exception($"Login {login} already in use");
+                throw new ProhibitedException($"Login {login} already in use");
             }
 
             UserCreationResult userCreationResult = await CheckUsernameAndCreateAsync(username);

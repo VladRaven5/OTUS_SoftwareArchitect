@@ -64,7 +64,7 @@ namespace AuthService
 
             SetUserIdHeader(user.Id);      
 
-            return Ok("Success");
+            return Ok(user.Id);
         }
 
         [Authorize]

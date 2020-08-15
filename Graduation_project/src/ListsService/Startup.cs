@@ -51,7 +51,7 @@ namespace ListsService
                 endpoints.MapControllers();
             });
 
-            app.ApplicationServices.GetService<BrokerMessagesHandler>();
+            app.ApplicationServices.GetService<BrokerMessagesHandler>().Initialize();
         }
 
         private void InitializeRabbitMQ(IServiceCollection services)
