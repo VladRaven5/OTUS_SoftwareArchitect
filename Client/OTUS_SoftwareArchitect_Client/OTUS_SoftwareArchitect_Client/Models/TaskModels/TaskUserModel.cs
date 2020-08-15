@@ -1,6 +1,6 @@
 ﻿using OTUS_SoftwareArchitect_Client.Models.BaseModels;
 
-namespace OTUS_SoftwareArchitect_Client.Models
+namespace OTUS_SoftwareArchitect_Client.Models.TaskModels
 {
     public class TaskUserModel : BaseModel
     {

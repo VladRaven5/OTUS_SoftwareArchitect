@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:ContentPageBase
+    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels" xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.ProjectsPage"
+    x:DataType="viewmodels:ProjectsViewModel"
+    Title="Projects">
+    <ContentPage.BindingContext>
+        <viewmodels:ProjectsViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <Grid>
+            <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource Accent}">            
+                <CollectionView
+                    ItemsSource="{Binding Projects}"
+                    ItemsLayout="VerticalList">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ProjectModel">
+                            <Grid Padding="0, 8, 0, 0" RowSpacing="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="1"/>
+                                </Grid.RowDefinitions>
+
+                                <Label
+                                    Text="{Binding Title}"
+                                    TextColor="Black"
+                                    FontSize="Medium"
+                                    Margin="12,0"/>
+
+                                <Label
+                                    Grid.Row="1"
+                                    Text="{Binding DateRange}"                                    
+                                    FontSize="Small"
+                                    Margin="12,0"/>
+
+                                <BoxView
+                                    Grid.Row="2"
+                                    HeightRequest="1"
+                                    BackgroundColor="LightGray"
+                                    VerticalOptions="End"/>
+                            </Grid>
+                            
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+
+            <Button
+                HeightRequest="64"
+                WidthRequest="64"
+                CornerRadius="32"
+                Margin="0, 0, 36, 36"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                BackgroundColor="{StaticResource Accent}"
+                ImageSource="plus.png"
+                Command="{Binding CreateProjectCommand}"/>
+        </Grid>
+    </ContentPage.Content>
+</views:ContentPageBase>

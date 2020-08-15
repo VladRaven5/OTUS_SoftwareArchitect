@@ -1,4 +1,4 @@
-﻿namespace OTUS_SoftwareArchitect_Client.Models
+﻿namespace OTUS_SoftwareArchitect_Client.Models.TaskModels
 {
     public enum TaskState
     {

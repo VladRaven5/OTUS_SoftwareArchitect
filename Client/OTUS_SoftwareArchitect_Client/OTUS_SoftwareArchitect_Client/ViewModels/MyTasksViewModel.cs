@@ -1,4 +1,4 @@
-﻿using OTUS_SoftwareArchitect_Client.Models;
+﻿using OTUS_SoftwareArchitect_Client.Models.TaskModels;
 using OTUS_SoftwareArchitect_Client.Networking.Misc;
 using OTUS_SoftwareArchitect_Client.Services;
 using System;

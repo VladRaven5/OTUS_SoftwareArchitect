@@ -1,7 +1,7 @@
 ﻿using OTUS_SoftwareArchitect_Client.Models.BaseModels;
 using Xamarin.Forms;
 
-namespace OTUS_SoftwareArchitect_Client.Models
+namespace OTUS_SoftwareArchitect_Client.Models.TaskModels
 {
     public class TaskLabelModel : BaseModel
     {

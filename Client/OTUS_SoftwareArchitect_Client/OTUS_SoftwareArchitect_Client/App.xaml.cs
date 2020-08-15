@@ -29,6 +29,7 @@ namespace OTUS_SoftwareArchitect_Client
             DependencyService.Register<WebApiClient>();
             DependencyService.Register<AuthService>();
             DependencyService.Register<TasksService>();
+            DependencyService.Register<ProjectsService>();
         }
 
         protected override void OnStart()
