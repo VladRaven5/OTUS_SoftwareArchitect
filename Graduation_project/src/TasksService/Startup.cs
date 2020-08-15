@@ -60,7 +60,7 @@ namespace TasksService
                 endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
 
-            app.ApplicationServices.GetService<BrokerMessagesHandler>();
+            app.ApplicationServices.GetService<BrokerMessagesHandler>().Initialize();
         }
 
         private void InitializeRabbitMQ(IServiceCollection services)

@@ -9,17 +9,17 @@ namespace ProjectMembersService
 {
     public class BrokerMessagesHandler : BrokerMessagesHandlerBase
     {
-        private static List<TopicQueueBindingArgs> _bindingArgs => new List<TopicQueueBindingArgs> 
-            { 
-                new TopicQueueBindingArgs(Topics.Users, "userstoprojectmembers"),
-                new TopicQueueBindingArgs(Topics.Projects, "projectstoprojectmembers"),
-            };
+        protected override List<TopicQueueBindingArgs> _bindingArgs => new List<TopicQueueBindingArgs> 
+        { 
+            new TopicQueueBindingArgs(Topics.Users, "userstoprojectmembers"),
+            new TopicQueueBindingArgs(Topics.Projects, "projectstoprojectmembers"),
+        };
 
         private readonly IMapper _mapper;
         private readonly IServiceProvider _serviceProvider;
 
         public BrokerMessagesHandler(RabbitMqTopicManager rabbitMq, IMapper mapper, IServiceProvider serviceProvider)
-            : base(rabbitMq, _bindingArgs)
+            : base(rabbitMq)
         {
             _mapper = mapper;
             _serviceProvider = serviceProvider;

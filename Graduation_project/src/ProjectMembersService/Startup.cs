@@ -75,7 +75,7 @@ namespace ProjectMembersService
                 endpoints.MapControllers();
             });
 
-            app.ApplicationServices.GetService<BrokerMessagesHandler>();
+            app.ApplicationServices.GetService<BrokerMessagesHandler>().Initialize();
         }
     }
 }
