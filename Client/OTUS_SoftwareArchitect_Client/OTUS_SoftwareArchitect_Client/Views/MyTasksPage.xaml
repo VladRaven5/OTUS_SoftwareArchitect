@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels" xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models" xmlns:converters="clr-namespace:OTUS_SoftwareArchitect_Client.Converters"
+             mc:Ignorable="d"
+             x:Class="OTUS_SoftwareArchitect_Client.Views.MyTasksPage"
+             x:DataType="viewmodels:MyTasksViewModel"
+             Title="My tasks">
+    <ContentPage.BindingContext>
+        <viewmodels:MyTasksViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <x:Double x:Key="labelSize">18</x:Double>
+            <x:Single  x:Key="labelCornerRadius">9</x:Single>
+            <converters:TaskStateColorConverter x:Key="taskStateColorConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <Grid>             
+            <RefreshView
+                x:Name="refreshView"
+                IsRefreshing="{Binding IsBusy}"
+                Command="{Binding RefreshCommand}"
+                RefreshColor="{StaticResource Accent}">
+                <CollectionView
+                    ItemsLayout="VerticalList"
+                    ItemsSource="{Binding Tasks}"
+                    IsGrouped="True">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:TaskModel">
+                            <Grid Padding="12, 8">
+                                <Frame CornerRadius="8" Padding="12" BackgroundColor="White">
+                                    <Grid RowSpacing="4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="80"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Label
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Text="{Binding State}"
+                                            TextColor="{Binding State, Converter={StaticResource taskStateColorConverter}}"
+                                            FontSize="Small"
+                                            VerticalTextAlignment="Center"
+                                            HorizontalOptions="End"/>
+
+                                        <CollectionView                                        
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Margin="0,0"
+                                            ItemsSource="{Binding Labels}"
+                                            HeightRequest="{StaticResource labelSize}"
+                                            ItemSizingStrategy="MeasureFirstItem" >
+                                            <CollectionView.ItemsLayout>
+                                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="4"/>
+                                            </CollectionView.ItemsLayout>
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="models:TaskLabelModel">
+                                                    <Frame 
+                                                        Padding="4,2"
+                                                        BackgroundColor="{Binding RealColor}"
+                                                        HeightRequest="{StaticResource labelSize}"                                                    
+                                                        CornerRadius="{StaticResource labelCornerRadius}"
+                                                        VerticalOptions="Center"
+                                                        HorizontalOptions="Center"
+                                                        HasShadow="False">
+                                                        <Label Text="{Binding Title}" FontSize="11" TextColor="White"/>
+                                                    </Frame>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+
+                                        <Label
+                                            Grid.Row="1"
+                                            Grid.ColumnSpan="2"
+                                            Text="{Binding Title}"
+                                            FontSize="16"/>
+
+                                        <StackLayout Grid.Row="2" Orientation="Horizontal" HeightRequest="20" IsVisible="{Binding Members.Count}">
+                                            <Image Source="members.png" WidthRequest="18" HeightRequest="18"/>
+                                            <Label Text="{Binding Members.Count}"/>
+                                        </StackLayout>
+
+                                        <Label
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            Text="{Binding DueDate, StringFormat='{0:dd.MM.yyyy}'}"
+                                            HorizontalOptions="End"
+                                            FontSize="Small"/>
+                                    </Grid>
+                                </Frame>
+                            </Grid>
+                                                                       
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate x:DataType="viewmodels:TasksGroup">
+                            <Label
+                                Padding="8, 8, 0, 4"
+                                Text="{Binding Title}"
+                                FontSize="Medium"
+                                TextColor="{StaticResource Accent}"/>
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+                </CollectionView>
+            </RefreshView>
+
+            <Button
+                HeightRequest="64"
+                WidthRequest="64"
+                CornerRadius="32"
+                Margin="0, 0, 36, 36"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                BackgroundColor="{StaticResource Accent}"
+                ImageSource="plus.png"
+                Command="{Binding CreateTaskCommand}"/>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

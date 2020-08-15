@@ -3,19 +3,16 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
             mc:Ignorable="d"
             xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
-            x:Class="OTUS_SoftwareArchitect_Client.Views.MainPage">
+            x:Class="OTUS_SoftwareArchitect_Client.Views.MainPage"
+            android:TabbedPage.ToolbarPlacement="Bottom">
 
     <TabbedPage.Children>
-        <NavigationPage Title="Browse">
-            <NavigationPage.Icon>
-                <OnPlatform x:TypeArguments="FileImageSource">
-                    <On Platform="iOS" Value="tab_feed.png"/>
-                </OnPlatform>
-            </NavigationPage.Icon>
+        <NavigationPage Title="My tasks"  Icon="tasks_list.png">            
             <x:Arguments>
-                <views:ItemsPage />
+                <views:MyTasksPage />
             </x:Arguments>
         </NavigationPage>
         
@@ -25,6 +22,12 @@
                     <On Platform="iOS" Value="tab_about.png"/>
                 </OnPlatform>
             </NavigationPage.Icon>
+            <x:Arguments>
+                <views:AboutPage />
+            </x:Arguments>
+        </NavigationPage>
+
+        <NavigationPage Title="Profile" Icon="tab_about.png">            
             <x:Arguments>
                 <views:AboutPage />
             </x:Arguments>

@@ -14,8 +14,6 @@ namespace OTUS_SoftwareArchitect_Client
 
             RegisterDependencies();
 
-            //MainPage = new MainPage();
-
             bool isUserCredsExists = AuthDataProvider.HasAuthData();
             Page initialPage = isUserCredsExists
                 ? (Page)new MainPage()
@@ -30,6 +28,7 @@ namespace OTUS_SoftwareArchitect_Client
             DependencyService.Register<WebApiProvider>();
             DependencyService.Register<WebApiClient>();
             DependencyService.Register<AuthService>();
+            DependencyService.Register<TasksService>();
         }
 
         protected override void OnStart()
