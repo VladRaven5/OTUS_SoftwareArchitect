@@ -72,7 +72,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: arch.homework
-      paths: [ "/otusapp/projects($|/)(.*)" ]
+      paths: [ "/otusapp/lists($|/)(.*)" ]
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

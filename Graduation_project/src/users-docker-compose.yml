@@ -16,6 +16,6 @@ services:
   
   users_service_current:
     << : *default_users_service
-    image: vladraven/otus_grad_users_service:0.4
+    image: vladraven/otus_grad_users_service:0.5
 
     

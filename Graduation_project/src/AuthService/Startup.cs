@@ -38,7 +38,7 @@ namespace AuthService
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.Name = "UserAuthCookie";
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
                     options.Events = new CookieAuthenticationEvents
                     {
                         OnRedirectToLogin = async (context) => context.Response.StatusCode = 401,

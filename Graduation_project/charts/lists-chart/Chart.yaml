@@ -28,6 +28,6 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
     tags:
-      - projects-database
+      - lists-database
 
 

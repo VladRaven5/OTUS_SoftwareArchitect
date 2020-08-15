@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_grad_labels_service
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: latest
+  tag: "0.2"
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
 

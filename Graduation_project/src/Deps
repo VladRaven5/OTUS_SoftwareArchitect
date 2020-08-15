@@ -1,0 +1,17 @@
+dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
+
+
+dotnet add package npgsql
+dotnet add package dapper
+
+dotnet add package rabbitmq.client
+dotnet add package newtonsoft.json
+
+dotnet add package ravendb.client
+
+dotnet add package Microsoft.AspNetCore.Cors
+dotnet add package NSwag.AspNetCore
+
+dotnet add package prometheus-net.AspNetCore
+
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
