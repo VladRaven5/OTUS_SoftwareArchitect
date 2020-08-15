@@ -30,11 +30,23 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            AddHost(request);
+
+
             var res = await base.SendAsync(request, cancellationToken);
             GetHeader(res);
             return res;
         }
 
+        private void AddHost(HttpRequestMessage request)
+        {
+            string currentHost = request.Headers.Host;
+
+            if(currentHost != "arch.homework")
+            {
+                request.Headers.Host = "arch.homework";
+            }
+        }
 
         private void GetHeader(HttpResponseMessage res)
         {
