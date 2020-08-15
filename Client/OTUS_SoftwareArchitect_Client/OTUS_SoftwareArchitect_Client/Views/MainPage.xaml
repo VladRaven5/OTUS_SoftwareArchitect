@@ -15,19 +15,20 @@
                 <views:MyTasksPage />
             </x:Arguments>
         </NavigationPage>
-        
-        <NavigationPage Title="About">
-            <NavigationPage.Icon>
-                <OnPlatform x:TypeArguments="FileImageSource">
-                    <On Platform="iOS" Value="tab_about.png"/>
-                </OnPlatform>
-            </NavigationPage.Icon>
+
+        <NavigationPage Title="Projects"  Icon="projects.png">
+            <x:Arguments>
+                <views:MyTasksPage />
+            </x:Arguments>
+        </NavigationPage>
+
+        <NavigationPage Title="Notifications" Icon="notification.png">           
             <x:Arguments>
                 <views:AboutPage />
             </x:Arguments>
         </NavigationPage>
 
-        <NavigationPage Title="Profile" Icon="tab_about.png">            
+        <NavigationPage Title="Profile" Icon="profile.png">            
             <x:Arguments>
                 <views:AboutPage />
             </x:Arguments>
