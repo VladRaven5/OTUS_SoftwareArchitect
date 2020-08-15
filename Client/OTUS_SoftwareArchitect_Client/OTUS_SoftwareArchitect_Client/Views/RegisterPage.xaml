@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+             mc:Ignorable="d"
+             x:Class="OTUS_SoftwareArchitect_Client.Views.RegisterPage"
+             x:DataType="viewmodels:RegisterViewModel">
+    <ContentPage.BindingContext>
+        <viewmodels:RegisterViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <Grid Margin="24,0" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8*"/>
+
+            </Grid.RowDefinitions>
+
+            <Label
+                Grid.Row="1"
+                HorizontalTextAlignment="Center"
+                FontSize="Large"
+                TextColor="Black"
+                Text="Fill in fields to register"
+                />
+
+            <Entry
+                Grid.Row="3"
+                Text="{Binding Username}"
+                Placeholder="Your username"                
+                FontSize="Body"
+                />
+
+            <Entry
+                Grid.Row="4"  
+                Text="{Binding Login}"
+                Placeholder="Your login"
+                FontSize="Body"
+                />
+
+            <Entry
+                Grid.Row="5"
+                Text="{Binding Password}"
+                Placeholder="Your password"
+                FontSize="Body"
+                />
+
+            <Button
+                Grid.Row="7"
+                Text="Register"
+                Command="{Binding RegisterCommand}"
+                BackgroundColor="{StaticResource Accent}"
+                TextColor="White"/>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>
