@@ -25,6 +25,11 @@ namespace ListsService
             return _listsRepository.GetListsAsync();
         }
 
+        public Task<IEnumerable<ListProjectAggregate>> GetProjectListsAsync(string projectId)
+        {
+            return _listsRepository.GetProjectListsAsyn(projectId);
+        }
+
         public async Task<ListProjectAggregate> GetListByIdAsync(string listId)
         {
              var list = await _listsRepository.GetListByIdAsync(listId);
@@ -69,6 +74,7 @@ namespace ListsService
                 throw;
             }
         }
+
 
         public async Task<ListProjectAggregate> UpdateListAsync(ListModel updatingList)
         {

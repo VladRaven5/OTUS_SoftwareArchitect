@@ -20,6 +20,12 @@ namespace ListsService
             return _connection.QueryAsync<ListProjectAggregate>(mergingQuery);
         }
 
+        public Task<IEnumerable<ListProjectAggregate>> GetProjectListsAsyn(string projectId)
+        {
+            var mergingQuery = GetMergedSelectQuery($" where p.id = '{projectId}' ");
+            return _connection.QueryAsync<ListProjectAggregate>(mergingQuery);
+        }
+
         public Task<ListProjectAggregate> GetListByIdAsync(string listId)
         {
             var mergingQuery = GetMergedSelectQuery($"where l.id = '{listId}' limit 1");
@@ -43,7 +49,7 @@ namespace ListsService
             }            
 
             return await GetListByIdAsync(newList.Id);
-        }
+        }        
 
         public async Task<ListProjectAggregate> UpdateListAsync(ListModel updatedList, OutboxMessageModel message)
         {

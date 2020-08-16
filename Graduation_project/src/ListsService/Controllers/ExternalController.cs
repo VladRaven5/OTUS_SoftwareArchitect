@@ -46,6 +46,12 @@ namespace ListsService
             }
         }
 
+        [HttpGet("of-project/{projectId}")]
+        public async Task<ActionResult<IEnumerable<ListProjectAggregate>>> GetProjectLists(string projectId)
+        {
+            return Ok(await _listsManager.GetProjectListsAsync(projectId)); 
+        }
+
         [HttpPost]
         public async Task<ActionResult<ListProjectAggregate>> CreateList([FromBody] CreateListDto createDto)
         {
