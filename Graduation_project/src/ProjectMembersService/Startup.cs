@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NSwag;
 using Shared;
 
 namespace ProjectMembersService
@@ -67,8 +68,17 @@ namespace ProjectMembersService
 
             app.UseAuthorization();
 
-            app.UseOpenApi();
-            app.UseSwaggerUi3();
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Project members service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp/project-members"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/project-members/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {

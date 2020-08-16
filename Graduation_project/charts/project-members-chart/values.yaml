@@ -6,9 +6,9 @@ replicaCount: 1
 
 image:
   repository: vladraven/otus_grad_project_members_service
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.3"
+  tag: "latest"
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
 
