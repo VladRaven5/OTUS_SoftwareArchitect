@@ -39,7 +39,7 @@ namespace OTUS_SoftwareArchitect_Client.Views
 
         private void OnProjectMemberPickRequested(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ProjectMembersPickPage() { BindingContext = this.BindingContext });
+            Navigation.PushAsync(new PickMembersPage() { BindingContext = this.BindingContext });
         }
 
         private void OnProjectSaved(object sender, EventArgs e)

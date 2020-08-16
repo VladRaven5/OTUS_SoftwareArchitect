@@ -6,8 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
     mc:Ignorable="d"
-    x:Class="OTUS_SoftwareArchitect_Client.Views.ProjectMembersPickPage"
-    Title="Pick members">
+    x:Class="OTUS_SoftwareArchitect_Client.Views.PickMembersPage"
+    Title="Members">
     <ContentPage.Resources>
         <Style TargetType="Grid">
             <Setter Property="VisualStateManager.VisualStateGroups">

@@ -1,5 +1,6 @@
 ﻿using OTUS_SoftwareArchitect_Client.DTO.TaskDtos;
 using OTUS_SoftwareArchitect_Client.Models;
+using OTUS_SoftwareArchitect_Client.Models.BaseModels;
 using OTUS_SoftwareArchitect_Client.Models.ProjectModels;
 using OTUS_SoftwareArchitect_Client.Networking.Misc;
 using OTUS_SoftwareArchitect_Client.Services;
@@ -18,6 +19,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         private readonly TasksService _tasksService;
         private readonly ListsService _listsService;
         private readonly ProjectsService _projectsService;
+        private readonly LabelsService _labelsService;
         private readonly string _requestId;
 
         private string _title;
@@ -28,17 +30,21 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         private Dictionary<string, List<SimpleUserModel>> _membersByProjectDict = new Dictionary<string, List<SimpleUserModel>>();
         private ObservableCollection<object> _selectedMembers = new ObservableCollection<object>();
         private ListModel _selectedList;
+        private IEnumerable<LabelModel> _allLabels;
+        private ObservableCollection<object> _selectedLabels = new ObservableCollection<object>();
 
         public CreateTaskViewModel()
         {
             _tasksService = DependencyService.Resolve<TasksService>();
             _listsService = DependencyService.Resolve<ListsService>();
             _projectsService = DependencyService.Resolve<ProjectsService>();
+            _labelsService = DependencyService.Resolve<LabelsService>();
 
             _requestId = RequestIdProvider.GetRequestId();
 
             CreateCommand = new AsyncCommand(CreateTaskAsync);
             PickMembersCommand = new Command(OnPickMembersTapped);
+            PickLabelsCommand = new Command(OnPickLabelsTapped);
 
             DueDate = DateTime.Now.AddDays(7);
         }
@@ -105,6 +111,26 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             }
         }
 
+        public IEnumerable<LabelModel> AllLabels
+        {
+            get => _allLabels;
+            set
+            {
+                _allLabels = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<object> SelectedLabels
+        {
+            get => _selectedLabels;
+            set
+            {
+                _selectedLabels = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<object> Members
         {
             get => _selectedMembers;
@@ -116,13 +142,13 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         }
 
 
-
-
         public ICommand CreateCommand { get; }
         public ICommand PickMembersCommand { get; }
+        public ICommand PickLabelsCommand { get; }
 
         public event EventHandler TaskCreated;
         public event EventHandler PickMembersRequested;
+        public event EventHandler PickLabelsRequested;
 
 
 
@@ -154,7 +180,8 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
                     ListId = SelectedList.Id,
                     Description = Description,
                     DueDate = dueDate,
-                    MembersIds = Members.Select(m => (m as SimpleUserModel).Id).ToList()
+                    MembersIds = Members.Select(m => (m as BaseModel).Id).ToList(),
+                    LabelsIds = SelectedLabels?.Select(l => (l as BaseModel).Id).ToList() ?? new List<string>()
                 };
 
                 var creationResult = await _tasksService.CreateTaskAsync(_requestId, dto);
@@ -180,11 +207,13 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             {
                 var listsResultTask = _listsService.GetLists();
                 var membersResultTask = _projectsService.GetProjectsMembersAsync();
+                var labelsResultTask = _labelsService.GetLabels();
 
-                await Task.WhenAll(listsResultTask, membersResultTask);
+                await Task.WhenAll(listsResultTask, membersResultTask, labelsResultTask);
 
                 var listsResult = listsResultTask.Result;
                 var membersResult = membersResultTask.Result;
+                var labelsResult = labelsResultTask.Result;
 
 
                 if (!listsResult.IsSuccess)
@@ -199,11 +228,18 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
                     return;
                 }
 
+                if (!labelsResult.IsSuccess)
+                {
+                    ShowToast(labelsResult.GetFullMessage());
+                    return;
+                }
+
                 Lists = listsResult.Result;
                 SelectedList = Lists.FirstOrDefault();
-                SetMembers(membersResult.Result);                
+                AllLabels = labelsResult.Result;
+                SetMembers(membersResult.Result);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }
@@ -255,6 +291,11 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         private void OnPickMembersTapped()
         {
             PickMembersRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnPickLabelsTapped()
+        {
+            PickLabelsRequested?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -8,6 +8,7 @@
     xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
     xmlns:converters="clr-namespace:OTUS_SoftwareArchitect_Client.Converters"
     xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models.TaskModels"
+    xmlns:models1="clr-namespace:OTUS_SoftwareArchitect_Client.Models"
     mc:Ignorable="d"
     x:Class="OTUS_SoftwareArchitect_Client.Views.MyTasksPage"
     x:DataType="viewmodels:MyTasksViewModel"
@@ -68,7 +69,7 @@
                                                 <LinearItemsLayout Orientation="Horizontal" ItemSpacing="4"/>
                                             </CollectionView.ItemsLayout>
                                             <CollectionView.ItemTemplate>
-                                                <DataTemplate x:DataType="models:TaskLabelModel">
+                                                <DataTemplate x:DataType="models1:LabelModel">
                                                     <Frame 
                                                         Padding="4,2"
                                                         BackgroundColor="{Binding RealColor}"

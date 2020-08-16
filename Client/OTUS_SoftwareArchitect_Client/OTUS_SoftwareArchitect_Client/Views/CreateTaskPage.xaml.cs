@@ -19,11 +19,17 @@ namespace OTUS_SoftwareArchitect_Client.Views
             var vm = BindingContext as CreateTaskViewModel;
             vm.TaskCreated += OnTaskCreated;
             vm.PickMembersRequested += OnPickMembersRequested;
+            vm.PickLabelsRequested += OnPickLabelsRequested;
+        }
+
+        private void OnPickLabelsRequested(object sender, EventArgs e)
+        {
+            Navigation.PushAsync(new PickLabelsPage { BindingContext = this.BindingContext });
         }
 
         private void OnPickMembersRequested(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ProjectMembersPickPage { BindingContext = this.BindingContext });
+            Navigation.PushAsync(new PickMembersPage { BindingContext = this.BindingContext });
         }
 
         private void OnTaskCreated(object sender, EventArgs e)
@@ -31,6 +37,7 @@ namespace OTUS_SoftwareArchitect_Client.Views
             var vm = sender as CreateTaskViewModel;
             vm.TaskCreated -= OnTaskCreated;
             vm.PickMembersRequested -= OnPickMembersRequested;
+            vm.PickLabelsRequested -= OnPickLabelsRequested;
 
             Navigation.PopAsync();
         }

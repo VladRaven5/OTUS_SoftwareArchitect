@@ -96,6 +96,13 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         #endregion Project members
 
+        #region Labels
+
+        [Get("/labels")]
+        Task<IEnumerable<LabelModel>> GetLabels();
+
+        #endregion Labels
+
         #region Lists
 
         [Get("/lists/of-project/{projectId}")]

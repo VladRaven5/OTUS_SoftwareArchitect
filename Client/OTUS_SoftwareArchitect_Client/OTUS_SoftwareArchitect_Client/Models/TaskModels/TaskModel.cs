@@ -17,6 +17,6 @@ namespace OTUS_SoftwareArchitect_Client.Models.TaskModels
         public string ProjectId { get; set; }
         public string ListTitle { get; set; }
         public ICollection<TaskUserModel> Members { get; set; }
-        public IEnumerable<TaskLabelModel> Labels { get; set; }
+        public IEnumerable<LabelModel> Labels { get; set; }
     }
 }
