@@ -12,7 +12,7 @@
     </ContentPage.BindingContext>
     <ContentPage.Content>
         <Grid
-            RowSpacing="12"
+            RowSpacing="16"
             Margin="24, 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100"/>

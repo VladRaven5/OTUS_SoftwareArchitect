@@ -14,6 +14,7 @@ namespace OTUS_SoftwareArchitect_Client.Infrastructure
             Application.Current.Properties[_cookieDomainSettingName] = authInfo.Domain;
             Application.Current.Properties[_cookieStringSettingName] = authInfo.Cookie;
             Application.Current.Properties[_cookiePathSettingName] = authInfo.Path;
+            Application.Current.SavePropertiesAsync();
         }
 
         public static AuthInfo GetUserAuthData()
@@ -46,17 +47,21 @@ namespace OTUS_SoftwareArchitect_Client.Infrastructure
             Application.Current.Properties.Remove(_cookiePathSettingName);
 
             ResetUserId();
+
+            Application.Current.SavePropertiesAsync();
         }
 
 
         public static void SetUserId(string id)
         {
             Application.Current.Properties[_useridSettingName] = id;
+            Application.Current.SavePropertiesAsync();
         }
 
         public static void ResetUserId()
         {
             Application.Current.Properties.Remove(_useridSettingName);
+            Application.Current.SavePropertiesAsync();
         }
 
         public static string GetUserId()
