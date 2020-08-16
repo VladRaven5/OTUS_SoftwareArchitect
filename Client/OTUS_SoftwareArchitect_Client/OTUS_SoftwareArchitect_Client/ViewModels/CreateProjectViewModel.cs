@@ -24,6 +24,9 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             _requestId = RequestIdProvider.GetRequestId();
 
             CreateCommand = new AsyncCommand(CreateAsync);
+
+            BeginDate = DateTime.Now;
+            EndDate = BeginDate + TimeSpan.FromDays(30);
         }
 
         public string Title

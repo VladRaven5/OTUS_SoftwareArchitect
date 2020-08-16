@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.EditProjectPage"
+    x:DataType="viewmodels:EditProjectViewModel"
+    Title="Edit project">
+    <ContentPage.Content>
+        <Grid Padding="16" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="110"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="110"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Entry
+                Grid.Row="0"
+                Grid.ColumnSpan="5"
+                Placeholder="Title"
+                Text="{Binding Title}"/>
+            
+            <Label
+                Margin="2,0,0,8"
+                Grid.Row="1"
+                Grid.Column="0"
+                Text="Begin:"
+                FontSize="Medium"
+                VerticalOptions="Center"/>
+
+            <DatePicker
+                Grid.Row="1"
+                Grid.Column="1"
+                Date="{Binding BeginDate}"/>
+
+            <Label
+                Margin="0,0,0,8"
+                Grid.Row="1"
+                Grid.Column="2"
+                Text="End:"
+                FontSize="Medium"
+                VerticalOptions="Center"/>
+
+            <DatePicker
+                Grid.Row="1"
+                Grid.Column="3"
+                Date="{Binding EndDate}"/>
+
+            <StackLayout
+                Grid.Row="2"
+                Grid.ColumnSpan="5"
+                VerticalOptions="Start"
+                HeightRequest="32"
+                Orientation="Horizontal">
+                <Image Source="members.png" WidthRequest="18" HeightRequest="18"/>                
+                <CollectionView 
+                    Margin="0,4"
+                    InputTransparent="True"
+                    ItemsSource="{Binding ProjectMembers}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:SimpleUserModel">
+                            <Frame Padding="4, 0" CornerRadius="10" HasShadow="False" BorderColor="LightGray">                                
+                                <Label Margin="4,1" Text="{Binding Username}" VerticalOptions="Center"/>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+
+            <Button
+                Grid.Row="2"                
+                Grid.ColumnSpan="5"
+                BackgroundColor="Transparent"
+                Command="{Binding UpdateMembersCommand}"
+                />
+
+            <Editor
+                Grid.Row="3"
+                Grid.ColumnSpan="5"
+                Placeholder="Description"
+                Text="{Binding Description}"/>
+            
+
+
+            <Button
+                Grid.Row="4"
+                Grid.ColumnSpan="5"
+                Text="Save"                
+                VerticalOptions="End"
+                Command="{Binding SaveCommand}"
+                BackgroundColor="{StaticResource Accent}"
+                TextColor="White"/>
+
+            <Button
+                Grid.Row="5"
+                Grid.ColumnSpan="5"
+                Margin="0,0,0,32"
+                Text="Delete"                
+                VerticalOptions="End"
+                Command="{Binding DeleteCommand}"
+                BackgroundColor="Red"
+                TextColor="White"/>
+
+
+            <ActivityIndicator
+                Grid.ColumnSpan="5"
+                Grid.RowSpan="6"
+                Color="{StaticResource Accent}"
+                IsVisible="{Binding IsBusy}"
+                IsRunning="{Binding IsBusy}"
+                HeightRequest="64"
+                WidthRequest="64"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                />
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

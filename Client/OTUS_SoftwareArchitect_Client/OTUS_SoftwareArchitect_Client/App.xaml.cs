@@ -30,6 +30,7 @@ namespace OTUS_SoftwareArchitect_Client
             DependencyService.Register<AuthService>();
             DependencyService.Register<TasksService>();
             DependencyService.Register<ProjectsService>();
+            DependencyService.Register<UsersService>();
         }
 
         protected override void OnStart()

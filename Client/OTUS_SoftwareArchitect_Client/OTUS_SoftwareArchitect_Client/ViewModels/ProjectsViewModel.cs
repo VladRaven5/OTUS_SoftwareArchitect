@@ -20,6 +20,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
             RefreshCommand = new AsyncCommand(RefreshCollectionAsync);
             CreateProjectCommand = new Command(CreateProject);
+            SelectedCommand = new Command<object>(OnProjectSelected);
         }
 
         public IEnumerable<ProjectModel> Projects
@@ -34,8 +35,10 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
         public ICommand RefreshCommand { get; }
         public ICommand CreateProjectCommand { get; }
+        public ICommand SelectedCommand { get; }
 
         public event EventHandler CreateProjectRequested;
+        public event EventHandler<ItemSelectedEventArgs> ProjectSelected;
 
 
         public void OnViewAppearing()
@@ -69,5 +72,21 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
                 IsBusy = false;
             }
         }
+
+        private void OnProjectSelected(object projectObject)
+        {
+            var project = projectObject as ProjectModel;
+            ProjectSelected?.Invoke(this, new ItemSelectedEventArgs(project.Id));
+        }
+    }
+
+    public class ItemSelectedEventArgs : EventArgs
+    {
+        public ItemSelectedEventArgs(string itemId)
+        {
+            ItemId = itemId;
+        }
+
+        public string ItemId { get; }
     }
 }

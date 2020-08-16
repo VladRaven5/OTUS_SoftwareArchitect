@@ -30,7 +30,7 @@ namespace OTUS_SoftwareArchitect_Client.Networking
             }
         }
 
-        public async Task<RequestResult> ExecuteRequestAsync<TResult>(Func<IWebApi, Task> request)
+        public async Task<RequestResult> ExecuteRequestAsync(Func<IWebApi, Task> request)
         {
             try
             {

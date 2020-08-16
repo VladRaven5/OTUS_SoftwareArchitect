@@ -9,7 +9,8 @@
     mc:Ignorable="d"
     x:Class="OTUS_SoftwareArchitect_Client.Views.ProjectsPage"
     x:DataType="viewmodels:ProjectsViewModel"
-    Title="Projects">
+    Title="Projects"
+    x:Name="projectsPage">
     <ContentPage.BindingContext>
         <viewmodels:ProjectsViewModel/>
     </ContentPage.BindingContext>
@@ -18,10 +19,16 @@
             <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource Accent}">            
                 <CollectionView
                     ItemsSource="{Binding Projects}"
-                    ItemsLayout="VerticalList">
+                    ItemsLayout="VerticalList"               
+                    SelectionMode="None">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:ProjectModel">
                             <Grid Padding="0, 8, 0, 0" RowSpacing="8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.SelectedCommand, Source={x:Reference projectsPage}}"
+                                        CommandParameter="{Binding . }"/>
+                                </Grid.GestureRecognizers>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
