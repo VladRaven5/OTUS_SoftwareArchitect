@@ -1,4 +1,4 @@
-﻿namespace OTUS_SoftwareArchitect_Client.DTO
+﻿namespace OTUS_SoftwareArchitect_Client.DTO.AuthDtos
 {
     public class RegisterDto
     {

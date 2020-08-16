@@ -1,4 +1,4 @@
-﻿using OTUS_SoftwareArchitect_Client.DTO;
+﻿using OTUS_SoftwareArchitect_Client.DTO.AuthDtos;
 using OTUS_SoftwareArchitect_Client.Infrastructure;
 using OTUS_SoftwareArchitect_Client.Networking;
 using System.Threading.Tasks;

@@ -8,4 +8,10 @@ namespace OTUS_SoftwareArchitect_Client.Networking.Misc
         Task ExecuteAsync();
         bool CanExecute();
     }
+
+    public interface IAsyncCommand<T> : ICommand
+    {
+        Task ExecuteAsync(T arg);
+        bool CanExecute(T arg);
+    }
 }

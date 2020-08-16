@@ -16,7 +16,6 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 {
     public class EditProjectViewModel : BaseViewModel
     {
-        private readonly string _projectId;
         private readonly ProjectsService _projectsService;
         private readonly UsersService _usersService;
 
@@ -31,7 +30,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
         public EditProjectViewModel(string projectId)
         {
-            _projectId = projectId;
+            ProjectId = projectId;
 
             _projectsService = DependencyService.Resolve<ProjectsService>();
             _usersService = DependencyService.Resolve<UsersService>();
@@ -39,82 +38,12 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             SaveCommand = new AsyncCommand(SaveAsync);
             DeleteCommand = new AsyncCommand(DeleteAsync);
             UpdateMembersCommand = new Command(OnUpdateMembersClicked);
+            OpenListsCommand = new Command(OnOpenListClicked);
 
             Task.Run(async () => await InitializeAsync());
         }
 
-
-        private async Task InitializeAsync()
-        {
-            IsBusy = true;
-
-            try
-            {
-                var projectResultTask = _projectsService.GetProjectAsync(_projectId);
-                var membersResultTask = _projectsService.GetProjectMembers(_projectId);
-                var usersResultTask = _usersService.GetUsersAsync();
-
-                await Task.WhenAll(projectResultTask, membersResultTask, usersResultTask);
-
-                var projectResult = projectResultTask.Result;
-                var membersResult = membersResultTask.Result;
-                var usersResult = usersResultTask.Result;
-
-
-                if (!projectResult.IsSuccess)
-                {
-                    ShowToast(projectResult.GetFullMessage());
-                    return;
-                }
-
-                if (!membersResult.IsSuccess)
-                {
-                    ShowToast(membersResult.GetFullMessage());
-                    return;
-                }
-
-                if (!usersResult.IsSuccess)
-                {
-                    ShowToast(usersResult.GetFullMessage());
-                    return;
-                }
-
-
-                SetMembers(usersResult.Result, membersResult.Result);
-                SetProjectProperties(projectResult.Result);
-            }
-            finally
-            {
-                IsBusy = false;
-            }          
-        }
-
-        private void SetMembers(IEnumerable<UserModel> users, IEnumerable<ProjectMemberModel> members)
-        {
-            var simpleUsers = users.Select(u => new SimpleUserModel { Id = u.Id, Username = u.Username }).ToList();
-
-            var simpleUsersDict = simpleUsers.ToDictionary(su => su.Id);
-
-            var simpleMembers = new List<SimpleUserModel>();
-
-            foreach (var member in members)
-            {
-                simpleMembers.Add(simpleUsersDict[member.UserId]);
-            }
-
-            _initialMembers = simpleMembers.ToList();
-            ProjectMembers = new ObservableCollection<object>(simpleMembers.Cast<object>());
-            AllUsers = simpleUsers;
-        }
-
-        private void SetProjectProperties(ProjectModel project)
-        {
-            Title = project.Title;
-            Description = project.Description;
-            _projectVersion = project.Version;
-            BeginDate = project.BeginDate?.LocalDateTime;
-            EndDate = project.EndDate?.LocalDateTime;
-        }
+        public string ProjectId { get; }
 
         public string Title
         {
@@ -179,10 +108,85 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         public ICommand UpdateMembersCommand { get; set; }
         public ICommand SaveCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ICommand OpenListsCommand { get; }
+        
 
         public event EventHandler UpdateMembersRequested;
+        public event EventHandler ListsNavigationRequested;
         public event EventHandler ProjectSaved;
         public event EventHandler ProjectDeleted;
+
+        private async Task InitializeAsync()
+        {
+            IsBusy = true;
+
+            try
+            {
+                var projectResultTask = _projectsService.GetProjectAsync(ProjectId);
+                var membersResultTask = _projectsService.GetProjectMembers(ProjectId);
+                var usersResultTask = _usersService.GetUsersAsync();
+
+                await Task.WhenAll(projectResultTask, membersResultTask, usersResultTask);
+
+                var projectResult = projectResultTask.Result;
+                var membersResult = membersResultTask.Result;
+                var usersResult = usersResultTask.Result;
+
+
+                if (!projectResult.IsSuccess)
+                {
+                    ShowToast(projectResult.GetFullMessage());
+                    return;
+                }
+
+                if (!membersResult.IsSuccess)
+                {
+                    ShowToast(membersResult.GetFullMessage());
+                    return;
+                }
+
+                if (!usersResult.IsSuccess)
+                {
+                    ShowToast(usersResult.GetFullMessage());
+                    return;
+                }
+
+
+                SetMembers(usersResult.Result, membersResult.Result);
+                SetProjectProperties(projectResult.Result);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void SetMembers(IEnumerable<UserModel> users, IEnumerable<ProjectMemberModel> members)
+        {
+            var simpleUsers = users.Select(u => new SimpleUserModel { Id = u.Id, Username = u.Username }).ToList();
+
+            var simpleUsersDict = simpleUsers.ToDictionary(su => su.Id);
+
+            var simpleMembers = new List<SimpleUserModel>();
+
+            foreach (var member in members)
+            {
+                simpleMembers.Add(simpleUsersDict[member.UserId]);
+            }
+
+            _initialMembers = simpleMembers.ToList();
+            ProjectMembers = new ObservableCollection<object>(simpleMembers.Cast<object>());
+            AllUsers = simpleUsers;
+        }
+
+        private void SetProjectProperties(ProjectModel project)
+        {
+            Title = project.Title;
+            Description = project.Description;
+            _projectVersion = project.Version;
+            BeginDate = project.BeginDate?.LocalDateTime;
+            EndDate = project.EndDate?.LocalDateTime;
+        }
 
 
         private async Task SaveAsync()
@@ -211,7 +215,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
                 var dto = new UpdateProjectDto
                 {
-                    Id = _projectId,
+                    Id = ProjectId,
                     Title = Title,
                     Description = Description,
                     BeginDate = beginDate,
@@ -242,12 +246,17 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             UpdateMembersRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        private void OnOpenListClicked(object obj)
+        {
+            ListsNavigationRequested?.Invoke(this, EventArgs.Empty);
+        }
+
         private async Task DeleteAsync()
         {
             IsBusy = true;
             try
             {
-                var deletionResult = await _projectsService.DeleteProjectAsync(_projectId);
+                var deletionResult = await _projectsService.DeleteProjectAsync(ProjectId);
                 if(!deletionResult.IsSuccess)
                 {
                     ShowToast(deletionResult.GetFullMessage());

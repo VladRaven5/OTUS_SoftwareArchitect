@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:ContentPageBase
+    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels" xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.ProjectListsPage"
+    x:DataType="viewmodels:ProjectListsViewModel"
+    x:Name="projectListsPage">
+    <ContentPage.Content>
+        <Grid>
+            <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource Accent}">
+                <CollectionView
+                    ItemsSource="{Binding Lists}"
+                    ItemsLayout="VerticalList">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ListModel">
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="32"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Margin="16, 12 " Text="{Binding Title}" FontSize="Medium"/>
+
+                                <Button
+                                    Grid.Column="1"
+                                    Padding="4"      
+                                    BackgroundColor="Transparent"
+                                    ImageSource="edit.png"
+                                    Command="{Binding BindingContext.EditListCommand, Source={Reference projectListsPage}}"
+                                    CommandParameter="{Binding .}"/>
+
+                                <Button
+                                    Grid.Column="2"
+                                    Margin="0,0,16,0"
+                                    Padding="4"      
+                                    BackgroundColor="Transparent"
+                                    ImageSource="close.png"
+                                    Command="{Binding BindingContext.DeleteListCommand, Source={Reference projectListsPage}}"
+                                    CommandParameter="{Binding .}"/>
+                                
+                                <views:Divider Grid.ColumnSpan="3" VerticalOptions="End"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>                    
+                </CollectionView>
+            </RefreshView>             
+            
+            <Button
+                HeightRequest="64"
+                WidthRequest="64"
+                CornerRadius="32"
+                Margin="0, 0, 36, 36"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                BackgroundColor="{StaticResource Accent}"
+                ImageSource="plus.png"
+                Command="{Binding CreateListCommand}"/>
+        </Grid>
+    </ContentPage.Content>
+</views:ContentPageBase>

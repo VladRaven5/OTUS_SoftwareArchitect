@@ -1,4 +1,5 @@
-﻿using OTUS_SoftwareArchitect_Client.DTO;
+﻿using OTUS_SoftwareArchitect_Client.DTO.AuthDtos;
+using OTUS_SoftwareArchitect_Client.DTO.ListDtos;
 using OTUS_SoftwareArchitect_Client.DTO.ProjectDtos;
 using OTUS_SoftwareArchitect_Client.Models;
 using OTUS_SoftwareArchitect_Client.Models.ProjectModels;
@@ -52,7 +53,7 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         [Post("/projects")]
         Task<ProjectModel> CreateProject(
-            [Header(Constants.RequestIdHeaderName)] string reqiestId,
+            [Header(Constants.RequestIdHeaderName)] string requestId,
             [Body] CreateProjectDto dto);
 
         [Put("/projects")]
@@ -80,6 +81,24 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         #endregion Project members
 
+        #region Lists
+
+        [Get("/lists/of-project/{projectId}")]
+        Task<IEnumerable<ListModel>> GetProjectLists(string projectId);
+
+        [Post("/lists")]
+        Task<ListModel> CreateList(
+            [Header(Constants.RequestIdHeaderName)] string requestId,
+            [Body] CreateListDto dto);
+
+        [Put("/lists")]
+        Task<ListModel> UpdateList([Body] UpdateListDto dto);
+
+        [Delete("/lists/{listId}")]
+        Task DeleteList(string listId);
+
+
+        #endregion Lists
 
 
 
