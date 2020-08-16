@@ -23,6 +23,18 @@ namespace OTUS_SoftwareArchitect_Client.Views
             vm.ProjectDeleted += OnProjectDeleted;
             vm.ProjectSaved += OnProjectSaved;
             vm.UpdateMembersRequested += OnProjectMemberPickRequested;
+            vm.ListsNavigationRequested += OnListsNavigationRequested;
+        }
+
+        private void OnListsNavigationRequested(object sender, EventArgs e)
+        {
+            var vm = sender as EditProjectViewModel;
+
+            Navigation.PushAsync(new ProjectListsPage
+            {
+                Title = $"Lists of {vm.Title}",
+                BindingContext = new ProjectListsViewModel(vm.ProjectId)
+            });
         }
 
         private void OnProjectMemberPickRequested(object sender, EventArgs e)
@@ -49,6 +61,7 @@ namespace OTUS_SoftwareArchitect_Client.Views
             vm.ProjectDeleted -= OnProjectDeleted;
             vm.ProjectSaved -= OnProjectSaved;
             vm.UpdateMembersRequested -= OnProjectMemberPickRequested;
+            vm.ListsNavigationRequested -= OnListsNavigationRequested;
         }
     }
 }
