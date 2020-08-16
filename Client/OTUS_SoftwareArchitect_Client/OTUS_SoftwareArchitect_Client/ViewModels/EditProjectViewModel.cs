@@ -38,9 +38,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             SaveCommand = new AsyncCommand(SaveAsync);
             DeleteCommand = new AsyncCommand(DeleteAsync);
             UpdateMembersCommand = new Command(OnUpdateMembersClicked);
-            OpenListsCommand = new Command(OnOpenListClicked);
-
-            Task.Run(async () => await InitializeAsync());
+            OpenListsCommand = new Command(OnOpenListClicked);            
         }
 
         public string ProjectId { get; }
@@ -85,7 +83,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             }
         }
 
-        public ObservableCollection<object> ProjectMembers
+        public ObservableCollection<object> Members
         {
             get => _projectMembers;
             private set
@@ -116,8 +114,10 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         public event EventHandler ProjectSaved;
         public event EventHandler ProjectDeleted;
 
-        private async Task InitializeAsync()
+        protected override async Task InitializeAsync()
         {
+            await base.InitializeAsync();
+
             IsBusy = true;
 
             try
@@ -175,7 +175,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             }
 
             _initialMembers = simpleMembers.ToList();
-            ProjectMembers = new ObservableCollection<object>(simpleMembers.Cast<object>());
+            Members = new ObservableCollection<object>(simpleMembers.Cast<object>());
             AllUsers = simpleUsers;
         }
 
@@ -225,7 +225,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
                 var updatedProjectResult = await _projectsService.UdpateProjectAsync(dto, 
                     _initialMembers,
-                    ProjectMembers.Cast<SimpleUserModel>().ToList());
+                    Members.Cast<SimpleUserModel>().ToList());
 
                 if (!updatedProjectResult.IsSuccess)
                 {

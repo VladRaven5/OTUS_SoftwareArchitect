@@ -8,11 +8,17 @@ using Xamarin.Forms;
 using OTUS_SoftwareArchitect_Client.Models;
 using OTUS_SoftwareArchitect_Client.Services;
 using Acr.UserDialogs;
+using System.Threading.Tasks;
 
 namespace OTUS_SoftwareArchitect_Client.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
+        public BaseViewModel()
+        {
+            Task.Run(async () => await InitializeAsync());
+        }
+
         public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
 
         bool isBusy = false;
@@ -40,6 +46,11 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             onChanged?.Invoke();
             OnPropertyChanged(propertyName);
             return true;
+        }
+
+        protected virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
         }
 
         protected void ShowToast(string message)

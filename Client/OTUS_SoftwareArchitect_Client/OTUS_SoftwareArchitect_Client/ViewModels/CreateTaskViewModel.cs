@@ -1,0 +1,260 @@
+﻿using OTUS_SoftwareArchitect_Client.DTO.TaskDtos;
+using OTUS_SoftwareArchitect_Client.Models;
+using OTUS_SoftwareArchitect_Client.Models.ProjectModels;
+using OTUS_SoftwareArchitect_Client.Networking.Misc;
+using OTUS_SoftwareArchitect_Client.Services;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Xamarin.Forms;
+
+namespace OTUS_SoftwareArchitect_Client.ViewModels
+{
+    public class CreateTaskViewModel : BaseViewModel, IViewLoadingAware
+    {
+        private readonly TasksService _tasksService;
+        private readonly ListsService _listsService;
+        private readonly ProjectsService _projectsService;
+        private readonly string _requestId;
+
+        private string _title;
+        private string _description;
+        private DateTime? _dueDate;
+        private IEnumerable<ListModel> _lists;
+        private List<SimpleUserModel> _allAvailableMembers;
+        private Dictionary<string, List<SimpleUserModel>> _membersByProjectDict = new Dictionary<string, List<SimpleUserModel>>();
+        private ObservableCollection<object> _selectedMembers = new ObservableCollection<object>();
+        private ListModel _selectedList;
+
+        public CreateTaskViewModel()
+        {
+            _tasksService = DependencyService.Resolve<TasksService>();
+            _listsService = DependencyService.Resolve<ListsService>();
+            _projectsService = DependencyService.Resolve<ProjectsService>();
+
+            _requestId = RequestIdProvider.GetRequestId();
+
+            CreateCommand = new AsyncCommand(CreateTaskAsync);
+            PickMembersCommand = new Command(OnPickMembersTapped);
+
+            DueDate = DateTime.Now.AddDays(7);
+        }
+
+        public string Title
+        {
+            get => _title;
+            set
+            {
+                _title = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Description
+        {
+            get => _description;
+            set
+            {
+                _description = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public DateTime? DueDate
+        {
+            get => _dueDate;
+            set
+            {
+                _dueDate = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public IEnumerable<ListModel> Lists
+        {
+            get => _lists;
+            set
+            {
+                _lists = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ListModel SelectedList
+        {
+            get => _selectedList;
+            set
+            {
+                _selectedList = value;
+                OnPropertyChanged();
+                UpdateAvailableMembers();
+                Members?.Clear();
+            }
+        }
+
+        public List<SimpleUserModel> AllUsers
+        {
+            get => _allAvailableMembers;
+            set
+            {
+                _allAvailableMembers = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<object> Members
+        {
+            get => _selectedMembers;
+            set
+            {
+                _selectedMembers = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+
+
+        public ICommand CreateCommand { get; }
+        public ICommand PickMembersCommand { get; }
+
+        public event EventHandler TaskCreated;
+        public event EventHandler PickMembersRequested;
+
+
+
+        private async Task CreateTaskAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Title))
+            {
+                ShowToast("Title can't be empty");
+                return;
+            }
+
+            if (SelectedList == null)
+            {
+                ShowToast("List must be specified");
+                return;
+            }
+
+            IsBusy = true;
+
+            try
+            {
+                var dueDate = DueDate.HasValue
+                    ? new DateTimeOffset(DueDate.Value, DateTimeOffset.Now.Offset)
+                    : (DateTimeOffset?)null;
+
+                var dto = new CreateTaskDto
+                {
+                    Title = Title,
+                    ListId = SelectedList.Id,
+                    Description = Description,
+                    DueDate = dueDate,
+                    MembersIds = Members.Select(m => (m as SimpleUserModel).Id).ToList()
+                };
+
+                var creationResult = await _tasksService.CreateTaskAsync(_requestId, dto);
+                if (!creationResult.IsSuccess)
+                {
+                    ShowToast(creationResult.GetFullMessage());
+                    return;
+                }
+
+                TaskCreated?.Invoke(this, EventArgs.Empty);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private async Task InitializeInternalAsync()
+        {
+            IsBusy = true;
+
+            try
+            {
+                var listsResultTask = _listsService.GetLists();
+                var membersResultTask = _projectsService.GetProjectsMembersAsync();
+
+                await Task.WhenAll(listsResultTask, membersResultTask);
+
+                var listsResult = listsResultTask.Result;
+                var membersResult = membersResultTask.Result;
+
+
+                if (!listsResult.IsSuccess)
+                {
+                    ShowToast(listsResult.GetFullMessage());
+                    return;
+                }
+
+                if (!membersResult.IsSuccess)
+                {
+                    ShowToast(membersResult.GetFullMessage());
+                    return;
+                }
+
+                Lists = listsResult.Result;
+                SelectedList = Lists.FirstOrDefault();
+                SetMembers(membersResult.Result);                
+            }
+            catch(Exception e)
+            {
+
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void SetMembers(IEnumerable<ProjectMemberModel> allMembers)
+        {
+            var membersGroupedByProject = allMembers.GroupBy(member => member.ProjectId);
+
+            Dictionary<string, List<SimpleUserModel>> projectMemberMap = new Dictionary<string, List<SimpleUserModel>>();
+
+            foreach (var projectMembers in membersGroupedByProject)
+            {
+                projectMemberMap.Add(
+                    projectMembers.Key,
+                    projectMembers.Select(m => new SimpleUserModel { Id = m.UserId, Username = m.Username }).ToList());
+            }
+
+            _membersByProjectDict = projectMemberMap;
+
+            UpdateAvailableMembers();
+        }
+
+        private void UpdateAvailableMembers()
+        {
+            if (SelectedList != null)
+            {
+                if (_membersByProjectDict.TryGetValue(SelectedList.ProjectId, out List<SimpleUserModel> selectedProjectMembers))
+                {
+                    AllUsers = selectedProjectMembers;
+                }
+                else
+                {
+                    AllUsers = new List<SimpleUserModel>();
+                }
+            }
+        }
+
+
+        public void OnViewAppearing()
+        {
+            InitializeInternalAsync();
+        }
+
+        private void OnPickMembersTapped()
+        {
+            PickMembersRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+}

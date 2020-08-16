@@ -7,7 +7,6 @@
     xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
     mc:Ignorable="d"
     x:Class="OTUS_SoftwareArchitect_Client.Views.ProjectMembersPickPage"
-    x:DataType="viewmodels:EditProjectViewModel"
     Title="Pick members">
     <ContentPage.Resources>
         <Style TargetType="Grid">
@@ -31,10 +30,10 @@
             ItemsLayout="VerticalList"
             ItemsSource="{Binding AllUsers}"
             SelectionMode="Multiple"
-            SelectedItems="{Binding ProjectMembers}">
+            SelectedItems="{Binding Members}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:SimpleUserModel">
-                    <Grid Padding="16, 4">
+                    <Grid Padding="16, 12">
                         <Label Text="{Binding Username}" TextColor="Black"  VerticalOptions="Center" FontSize="Medium"/>
                     </Grid>
                 </DataTemplate>

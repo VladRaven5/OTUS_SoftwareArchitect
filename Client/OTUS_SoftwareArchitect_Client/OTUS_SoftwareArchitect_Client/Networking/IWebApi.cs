@@ -1,6 +1,7 @@
 ﻿using OTUS_SoftwareArchitect_Client.DTO.AuthDtos;
 using OTUS_SoftwareArchitect_Client.DTO.ListDtos;
 using OTUS_SoftwareArchitect_Client.DTO.ProjectDtos;
+using OTUS_SoftwareArchitect_Client.DTO.TaskDtos;
 using OTUS_SoftwareArchitect_Client.Models;
 using OTUS_SoftwareArchitect_Client.Models.ProjectModels;
 using OTUS_SoftwareArchitect_Client.Models.TaskModels;
@@ -41,6 +42,17 @@ namespace OTUS_SoftwareArchitect_Client.Networking
         //[Headers("X-UserId: 2                                   ")]
         Task<IEnumerable<TaskModel>> GetMyTasks(/*[Header("X-UserId")] string userId*/);
 
+        [Post("/tasks")]
+        Task<TaskModel> CreateTask(
+            [Header(Constants.RequestIdHeaderName)] string requestId,
+            [Body] CreateTaskDto dto);
+
+        [Put("/tasks")]
+        Task<TaskModel> UpdateTask([Body] UpdateTaskDto dto);
+
+        [Delete("/tasks/{taskId}")]
+        Task<string> DeleteTask(string taskId);
+
         #endregion Tasks
 
         #region Projects
@@ -70,6 +82,9 @@ namespace OTUS_SoftwareArchitect_Client.Networking
         [Get("/project-members")]
         Task<IEnumerable<ProjectMemberModel>> GetProjectMembers(string projectId);
 
+        [Get("/project-members")]
+        Task<IEnumerable<ProjectMemberModel>> GetProjectsMembers();
+
         [Post("/project-members")]
         Task<string> AddMemberToProject(
             [Header(Constants.RequestIdHeaderName)] string requestId, 
@@ -85,6 +100,9 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         [Get("/lists/of-project/{projectId}")]
         Task<IEnumerable<ListModel>> GetProjectLists(string projectId);
+
+        [Get("/lists")]
+        Task<IEnumerable<ListModel>> GetLists();
 
         [Post("/lists")]
         Task<ListModel> CreateList(

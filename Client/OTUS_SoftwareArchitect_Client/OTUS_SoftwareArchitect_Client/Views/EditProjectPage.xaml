@@ -71,7 +71,7 @@
                 <CollectionView 
                     Margin="0,8"
                     InputTransparent="True"
-                    ItemsSource="{Binding ProjectMembers}">
+                    ItemsSource="{Binding Members}">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6"/>
                     </CollectionView.ItemsLayout>

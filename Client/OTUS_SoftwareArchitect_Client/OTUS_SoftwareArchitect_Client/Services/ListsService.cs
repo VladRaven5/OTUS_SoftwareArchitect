@@ -21,6 +21,11 @@ namespace OTUS_SoftwareArchitect_Client.Services
             return _webApiClient.ExecuteRequestAsync(webApi => webApi.GetProjectLists(projectId));
         }
 
+        internal Task<RequestResult<IEnumerable<ListModel>>> GetLists()
+        {
+            return _webApiClient.ExecuteRequestAsync(webApi => webApi.GetLists());
+        }
+
         public Task<RequestResult<ListModel>> CreateListAsync(CreateListDto dto)
         {
             string requestId = RequestIdProvider.GetRequestId();

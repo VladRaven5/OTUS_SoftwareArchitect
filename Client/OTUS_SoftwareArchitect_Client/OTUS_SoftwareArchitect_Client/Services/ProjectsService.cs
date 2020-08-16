@@ -99,6 +99,11 @@ namespace OTUS_SoftwareArchitect_Client.Services
             return _webClient.ExecuteRequestAsync(webApi => webApi.GetProjectMembers(projectId));
         }
 
+        public Task<RequestResult<IEnumerable<ProjectMemberModel>>> GetProjectsMembersAsync()
+        {
+            return _webClient.ExecuteRequestAsync(webApi => webApi.GetProjectsMembers());
+        }
+
 
         private class ModelsByIdComparer : IEqualityComparer<BaseModel>
         {
