@@ -1,4 +1,5 @@
 ﻿using OTUS_SoftwareArchitect_Client.DTO;
+using OTUS_SoftwareArchitect_Client.DTO.ProjectDtos;
 using OTUS_SoftwareArchitect_Client.Models;
 using OTUS_SoftwareArchitect_Client.Models.TaskModels;
 using Refit;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace OTUS_SoftwareArchitect_Client.Networking
 {
     public interface IWebApi
-    {
+    {      
         #region Auth
         [Post("/login")]
         Task<string> Login([Body] LoginDto loginDto);
@@ -37,6 +38,10 @@ namespace OTUS_SoftwareArchitect_Client.Networking
         [Get("/projects")]
         Task<IEnumerable<ProjectModel>> GetProjects();
 
+        [Post("/projects")]
+        Task<ProjectModel> CreateProject(
+            [Header(Constants.RequestIdHeaderName)] string reqiestId,
+            [Body] CreateProjectDto dto);
 
         #endregion Projects
 

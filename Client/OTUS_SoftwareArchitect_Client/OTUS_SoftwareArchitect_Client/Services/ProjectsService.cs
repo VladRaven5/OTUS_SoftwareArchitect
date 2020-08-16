@@ -1,4 +1,5 @@
-﻿using OTUS_SoftwareArchitect_Client.Models;
+﻿using OTUS_SoftwareArchitect_Client.DTO.ProjectDtos;
+using OTUS_SoftwareArchitect_Client.Models;
 using OTUS_SoftwareArchitect_Client.Networking;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,6 +19,11 @@ namespace OTUS_SoftwareArchitect_Client.Services
         public Task<RequestResult<IEnumerable<ProjectModel>>> GetProjectsAsync()
         {
             return _webClient.ExecuteRequestAsync(webApi => webApi.GetProjects());
+        }
+
+        public Task<RequestResult<ProjectModel>> CreateProjectAsync(string requestId, CreateProjectDto dto)
+        {
+            return _webClient.ExecuteRequestAsync(webApi => webApi.CreateProject(requestId, dto));
         }
     }
 }
