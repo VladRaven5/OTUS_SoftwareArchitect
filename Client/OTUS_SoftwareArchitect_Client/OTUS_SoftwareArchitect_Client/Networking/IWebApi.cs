@@ -39,8 +39,10 @@ namespace OTUS_SoftwareArchitect_Client.Networking
         #region Tasks
 
         [Get("/tasks/my")]
-        //[Headers("X-UserId: 2                                   ")]
-        Task<IEnumerable<TaskModel>> GetMyTasks(/*[Header("X-UserId")] string userId*/);
+        Task<IEnumerable<TaskModel>> GetMyTasks();
+
+        [Get("/tasks/{taskId}")]
+        Task<TaskModel> GetTask(string taskId);
 
         [Post("/tasks")]
         Task<TaskModel> CreateTask(

@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <views:ContentPageBase
-    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views" 
+    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels" xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+    xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models"
     mc:Ignorable="d"
-    x:Class="OTUS_SoftwareArchitect_Client.Views.CreateTaskPage"
-    x:DataType="viewmodels:CreateTaskViewModel"
-    Title="New Task">
-    <ContentPage.BindingContext>
-        <viewmodels:CreateTaskViewModel/>
-    </ContentPage.BindingContext>
+    x:Class="OTUS_SoftwareArchitect_Client.Views.EditTaskPage"
+    x:DataType="viewmodels:EditTaskViewModel"
+    Title="Edit task">
     <ContentPage.Content>
         <Grid Padding="16" RowSpacing="12">
             <Grid.RowDefinitions>
@@ -24,9 +22,10 @@
                 <RowDefinition Height="40"/>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>                
+                <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -121,12 +120,13 @@
                 Orientation="Horizontal"
                 Margin="2,0,0,0"
                 Grid.Row="4"
-                Grid.ColumnSpan="2">
-
+                Grid.ColumnSpan="2"
+                Spacing="8">
+                
                 <Label                
                     Text="Labels:"
                     FontSize="Body"
-                    VerticalOptions="Center"
+                    VerticalOptions="Center" 
                     WidthRequest="70"/>
 
                 <CollectionView                                        
@@ -161,7 +161,7 @@
                     FontSize="Body"
                     VerticalOptions="Center"
                     HorizontalOptions="End"/>
-            </StackLayout>
+            </StackLayout>            
 
             <Button
                 Grid.Row="4"                
@@ -191,23 +191,32 @@
                 Grid.Row="6"
                 Grid.ColumnSpan="2"
                 Placeholder="Description"
-                Text="{Binding Description}"/>            
+                Text="{Binding Description}"/>
 
 
             <Button
                 Grid.Row="7"
                 Grid.ColumnSpan="2"
-                Margin="0,0,0,32"
-                Text="Create"                
+                Text="Save"                
                 VerticalOptions="End"
-                Command="{Binding CreateCommand}"
+                Command="{Binding SaveTaskCommand}"
                 BackgroundColor="{StaticResource Accent}"
+                TextColor="White"/>
+
+            <Button
+                Grid.Row="8"
+                Grid.ColumnSpan="2"
+                Margin="0,0,0,32"
+                Text="Delete"                
+                VerticalOptions="End"
+                Command="{Binding DeleteTaskCommand}"
+                BackgroundColor="#ef5350"
                 TextColor="White"/>
 
 
             <ActivityIndicator
                 Grid.ColumnSpan="2"
-                Grid.RowSpan="8"
+                Grid.RowSpan="9"
                 Color="{StaticResource Accent}"
                 IsVisible="{Binding IsBusy}"
                 IsRunning="{Binding IsBusy}"

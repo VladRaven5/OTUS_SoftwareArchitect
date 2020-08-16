@@ -12,7 +12,8 @@
     mc:Ignorable="d"
     x:Class="OTUS_SoftwareArchitect_Client.Views.MyTasksPage"
     x:DataType="viewmodels:MyTasksViewModel"
-    Title="My tasks">
+    x:Name="myTasksPage"
+    Title="My Tasks">
     <ContentPage.BindingContext>
         <viewmodels:MyTasksViewModel/>
     </ContentPage.BindingContext>
@@ -37,6 +38,11 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:TaskModel">
                             <Grid Padding="12, 8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.TaskSelectedCommand, Source={x:Reference myTasksPage}}"
+                                        CommandParameter="{Binding . }"/>
+                                </Grid.GestureRecognizers>
                                 <Frame CornerRadius="8" Padding="12" BackgroundColor="White">
                                     <Grid RowSpacing="4">
                                         <Grid.ColumnDefinitions>

@@ -152,7 +152,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
 
 
-        private async Task CreateTaskAsync()
+        protected async Task CreateTaskAsync()
         {
             if (string.IsNullOrWhiteSpace(Title))
             {
@@ -174,24 +174,15 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
                     ? new DateTimeOffset(DueDate.Value, DateTimeOffset.Now.Offset)
                     : (DateTimeOffset?)null;
 
-                var dto = new CreateTaskDto
-                {
-                    Title = Title,
-                    ListId = SelectedList.Id,
-                    Description = Description,
-                    DueDate = dueDate,
-                    MembersIds = Members.Select(m => (m as BaseModel).Id).ToList(),
-                    LabelsIds = SelectedLabels?.Select(l => (l as BaseModel).Id).ToList() ?? new List<string>()
-                };
+                var dto = GetTaskDto();
+                dto.Title = Title;
+                dto.ListId = SelectedList.Id;
+                dto.Description = Description;
+                dto.DueDate = dueDate;
+                dto.MembersIds = Members.Select(m => (m as BaseModel).Id).ToList();
+                dto.LabelsIds = SelectedLabels?.Select(l => (l as BaseModel).Id).ToList() ?? new List<string>();
 
-                var creationResult = await _tasksService.CreateTaskAsync(_requestId, dto);
-                if (!creationResult.IsSuccess)
-                {
-                    ShowToast(creationResult.GetFullMessage());
-                    return;
-                }
-
-                TaskCreated?.Invoke(this, EventArgs.Empty);
+                await SendDtoAsync(dto);
             }
             finally
             {
@@ -199,7 +190,24 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             }
         }
 
-        private async Task InitializeInternalAsync()
+        protected virtual async Task SendDtoAsync(CreateTaskDto dto)
+        {
+            var creationResult = await _tasksService.CreateTaskAsync(_requestId, dto);
+            if (!creationResult.IsSuccess)
+            {
+                ShowToast(creationResult.GetFullMessage());
+                return;
+            }
+
+            TaskCreated?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual CreateTaskDto GetTaskDto()
+        {
+            return new CreateTaskDto();
+        }
+
+        protected virtual async Task InitializeTaskRelatedDataAsync()
         {
             IsBusy = true;
 
@@ -285,7 +293,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
         public void OnViewAppearing()
         {
-            InitializeInternalAsync();
+            InitializeTaskRelatedDataAsync();
         }
 
         private void OnPickMembersTapped()

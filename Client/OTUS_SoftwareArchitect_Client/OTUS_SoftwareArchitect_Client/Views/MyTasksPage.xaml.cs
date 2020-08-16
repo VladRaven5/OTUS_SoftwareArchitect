@@ -1,7 +1,5 @@
 ﻿using OTUS_SoftwareArchitect_Client.ViewModels;
 using System;
-
-using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace OTUS_SoftwareArchitect_Client.Views
@@ -20,8 +18,13 @@ namespace OTUS_SoftwareArchitect_Client.Views
 
             var vm = BindingContext as MyTasksViewModel;
             vm.CreateTaskRequested += OnCreateTaskRequested;
+            vm.TaskSelected += OnTaskSelected;
         }
 
+        private void OnTaskSelected(object sender, ItemSelectedEventArgs e)
+        {
+            Navigation.PushAsync(new EditTaskPage { BindingContext = new EditTaskViewModel(e.ItemId) });
+        }
 
         private void OnCreateTaskRequested(object sender, EventArgs e)
         {

@@ -33,6 +33,11 @@ namespace OTUS_SoftwareArchitect_Client.Services
             return _webClient.ExecuteRequestAsync(webApi => webApi.UpdateTask(dto));
         }
 
+        public  Task<RequestResult<TaskModel>> GetTaskAsync(string taskId)
+        {
+            return _webClient.ExecuteRequestAsync(webApi => webApi.GetTask(taskId));
+        }
+
         public Task<RequestResult<string>> DeleteTaskAsync(string taskId)
         {
             return _webClient.ExecuteRequestAsync(webApi => webApi.DeleteTask(taskId));

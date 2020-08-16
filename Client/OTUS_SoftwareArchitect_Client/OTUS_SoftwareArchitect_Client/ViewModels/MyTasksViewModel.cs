@@ -23,6 +23,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
             RefreshCommand = new AsyncCommand(RefreshCollectionAsync);
             CreateTaskCommand = new Command(CreateTask);
+            TaskSelectedCommand = new Command<object>(OnTaskTapped);
         }
 
         public List<TasksGroup> Tasks 
@@ -37,8 +38,10 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
         public ICommand RefreshCommand { get; }
         public ICommand CreateTaskCommand { get; }
+        public ICommand TaskSelectedCommand { get; }
 
         public event EventHandler CreateTaskRequested;
+        public event EventHandler<ItemSelectedEventArgs> TaskSelected;
 
 
         public void OnViewAppearing()
@@ -88,6 +91,12 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         private void CreateTask()
         {
             CreateTaskRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnTaskTapped(object taskObject)
+        {
+            var task = taskObject as TaskModel;
+            TaskSelected?.Invoke(this, new ItemSelectedEventArgs(task.Id));
         }
     }
 
