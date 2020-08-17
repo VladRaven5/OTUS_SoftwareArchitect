@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NSwag;
 using StackExchange.Redis;
 
 namespace AuthService
@@ -24,6 +25,7 @@ namespace AuthService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSwaggerDocument();
 
             var redisConnectionString = Configuration.GetConnectionString("RedisConnection");
             var redis = ConnectionMultiplexer.Connect(redisConnectionString);
@@ -65,6 +67,18 @@ namespace AuthService
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Authentication service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {

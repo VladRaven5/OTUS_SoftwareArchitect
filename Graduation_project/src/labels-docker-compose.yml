@@ -16,6 +16,6 @@ services:
   
   labels_service_current:
     << : *default_labels_service
-    image: vladraven/otus_grad_labels_service:0.2
+    image: vladraven/otus_grad_labels_service:0.3
 
     
