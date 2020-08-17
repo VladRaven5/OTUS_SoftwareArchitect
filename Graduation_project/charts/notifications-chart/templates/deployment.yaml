@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "notifications-chart.fullname" . }}
+  labels:
+    {{- include "notifications-chart.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "notifications-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "notifications-chart.selectorLabels" . | nindent 8 }}
+        date: "{{ now | unixEpoch }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "notifications-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+       - name: wait-rabbit-ready
+         image: busybox:latest
+         env:
+         - name: RABBIT_HOST
+           value: {{ .Values.rabbitMq.host }}          
+         command: ['sh', '-c', 'until nslookup $RABBIT_HOST; do echo waiting for $RABBIT_HOST; sleep 2; done;']
+       - name: wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+       - name: notifications-pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_USER
+            value: {{.Values.postgresql.postgresqlUsername}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.postgresql.postgresqlPassword}}
+          - name: POSTGRES_DB
+            value: {{.Values.postgresql.postgresqlDatabase}}
+          - name: POSTGRES_HOST
+            value: {{.Values.postgresql.fullnameOverride}}
+          - name: POSTGRES_PORT
+            value: "{{.Values.postgresql.service.port}}"
+         command:
+          - sh
+          - "-c"
+          - |
+            psql "user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB" << 'EOF'
+              create database notifications;
+              \c notifications;
+              create table project_members (userid char(36), projectid char(36), primary key (userid, projectid));
+              create table notifications (id char(36) primary key, userid char(36), text varchar, createddate timestamp);
+              create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+            EOF
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: {{.Values.image.connectionStringEnvName}}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "notifications-chart.fullname" . }}
+                  key: PG_CONNECTION
+            - name: {{ .Values.rabbitMq.hostEnvName }}
+              value: "{{ .Values.rabbitMq.host }}.default.svc"
+            - name: {{ .Values.rabbitMq.portEnvName }}
+              value: "{{ .Values.rabbitMq.port }}"
+            - name: {{ .Values.rabbitMq.usernameEnvName }}
+              value: {{ .Values.rabbitMq.username }}
+            - name: {{ .Values.rabbitMq.passwordEnvName }}
+              value: {{ .Values.rabbitMq.password }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

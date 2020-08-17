@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "notifications-chart.fullname" . }}-test-connection"
+  labels:
+    {{- include "notifications-chart.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "notifications-chart.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
