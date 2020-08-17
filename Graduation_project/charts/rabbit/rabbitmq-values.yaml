@@ -3,6 +3,11 @@ fullnameOverride: rabbitmq-broker
 persistence:
   size: 1Gi
 
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
 auth:
   username: user
   #this pass is required according to bug in chart: https://github.com/bitnami/charts/issues/3095
