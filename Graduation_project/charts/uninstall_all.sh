@@ -6,6 +6,7 @@ helm uninstall mylists
 helm uninstall myprojmembers
 helm uninstall myprojects
 helm uninstall myworkhours
+helm uninstall mynotif
 helm uninstall myapi
 helm uninstall rabbit
 helm uninstall prometh
