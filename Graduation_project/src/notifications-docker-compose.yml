@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-notifications-service:
+  &default_notifications_service
+  image: vladraven/otus_grad_notifications_service
+  build:
+    context: .
+    dockerfile: NotificationsDockerfile
+  ports:
+    - 5000:5000
+
+services:
+  notifications_service_latest:
+    *default_notifications_service
+  
+  notifications_service_current:
+    << : *default_notifications_service
+    image: vladraven/otus_grad_notifications_service:0.1
+
+    

@@ -1,0 +1,6 @@
+create database notifications;
+\c notifications;
+
+create table project_members (userid char(36), projectid char(36), primary key (userid, projectid));
+create table notifications (id char(36) primary key, userid char(36), text varchar, createddate timestamp);
+create table handled_requests(requestid char(36) primary key, invalidateat timestamp);

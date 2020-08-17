@@ -13,5 +13,3 @@ dotnet add package Microsoft.AspNetCore.Cors
 dotnet add package NSwag.AspNetCore
 
 dotnet add package prometheus-net.AspNetCore
-
-dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
