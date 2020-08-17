@@ -33,6 +33,7 @@ namespace OTUS_SoftwareArchitect_Client
             DependencyService.Register<UsersService>();
             DependencyService.Register<ListsService>();
             DependencyService.Register<LabelsService>();
+            DependencyService.Register<NotificationsService>();
         }
 
         protected override void OnStart()

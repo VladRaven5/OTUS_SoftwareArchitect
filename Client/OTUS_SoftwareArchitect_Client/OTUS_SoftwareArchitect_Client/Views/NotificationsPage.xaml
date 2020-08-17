@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:ContentPageBase
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+    xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models" xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.NotificationsPage"
+    x:DataType="viewmodels:NotificationsViewModel"
+    Title="Notifications">
+    <ContentPage.BindingContext>
+        <viewmodels:NotificationsViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource Accent}">
+            <CollectionView
+                ItemsSource="{Binding Notifications}"
+                ItemsLayout="VerticalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:NotificationModel">
+                        <Grid Padding="0" RowSpacing="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Label
+                                Grid.Row="0"
+                                Margin="12, 8,8,0"
+                                Text="{Binding Text}" 
+                                TextColor="Black"
+                                FontSize="Body"
+                                LineBreakMode="WordWrap"/>
+
+                            <Label
+                                Grid.Row="1"
+                                Margin="12, 0, 8, 8"
+                                Text="{Binding CreatedDate, StringFormat='{0:dd.MM.yyyy}'}"
+                                HorizontalOptions="End"/>
+
+                            <views:Divider Grid.Row="1" VerticalOptions="End"/>
+
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>                
+            </CollectionView>
+        </RefreshView>
+    </ContentPage.Content>
+</views:ContentPageBase>

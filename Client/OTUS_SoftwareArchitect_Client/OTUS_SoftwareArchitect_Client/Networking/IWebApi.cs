@@ -127,8 +127,12 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         #endregion Lists
 
+        #region Notifications
 
+        [Get("/notifications/my")]
+        Task<IEnumerable<NotificationModel>> GetMyNotifications();
 
+        #endregion Notifications
     }
 
     public interface ILocalWebApi

@@ -24,7 +24,7 @@
 
         <NavigationPage Title="Notifications" Icon="notification.png">           
             <x:Arguments>
-                <views:AboutPage />
+                <views:NotificationsPage />
             </x:Arguments>
         </NavigationPage>
 
