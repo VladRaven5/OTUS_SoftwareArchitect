@@ -63,13 +63,13 @@ namespace LabelsService
 
         public async Task<LabelModel> UpdateLabelAsync(LabelModel updatingLabel)
         {
-            LabelModel currentProject = await _labelsRepository.GetLabelByIdAsync(updatingLabel.Id);
-            if(currentProject == null)
+            LabelModel currentLabel = await _labelsRepository.GetLabelByIdAsync(updatingLabel.Id);
+            if(currentLabel == null)
             {
                 throw new NotFoundException($"Label with id = {updatingLabel.Id} not found");
             }
 
-            if(currentProject.Version != updatingLabel.Version)
+            if(currentLabel.Version != updatingLabel.Version)
             {
                 throw new VersionsNotMatchException();
             }
@@ -77,22 +77,28 @@ namespace LabelsService
             var outboxMessage = OutboxMessageModel.Create(
                 new LabelCreatedUpdatedMessage
                 {
-                    LabelId = updatingLabel.Id,
+                    LabelId = updatingLabel.Id, 
+                    OldTitle = currentLabel.Title,                   
                     Title = updatingLabel.Title,
                     Color = updatingLabel.Color
                 }, Topics.Labels, MessageActions.Updated);
 
             return await _labelsRepository.UpdateLabelAsync(updatingLabel, outboxMessage);
         }
-        public Task DeleteLabelAsync(string labelId)
+        public async Task DeleteLabelAsync(string labelId)
         {
+            var label = await _labelsRepository.GetLabelByIdAsync(labelId);
+            if(label == null)
+                return;
+
             var outboxMessage = OutboxMessageModel.Create(
                 new LabelDeletedMessage
                 {
                     LabelId = labelId,
+                    Title = label.Title
                 }, Topics.Labels, MessageActions.Deleted);
 
-            return _labelsRepository.DeleteLabelAsync(labelId, outboxMessage);
+            await _labelsRepository.DeleteLabelAsync(labelId, outboxMessage);
         }
     }
 }

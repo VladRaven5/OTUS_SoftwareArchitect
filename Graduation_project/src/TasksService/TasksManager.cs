@@ -150,12 +150,16 @@ namespace TasksService
 
         public async Task DeleteTaskAsync(string taskId)
         {
-            var task = await _tasksRepository.GetSimpleTaskAsync(taskId);
+            var task = await _tasksRepository.GetTaskAsync(taskId);
+            if(task == null)
+                return;
+
             var outboxMessage = OutboxMessageModel.Create(
                 new TaskDeletedMessage
                 {
                     TaskId = taskId,
-                    Title = task?.Title
+                    Title = task.Title,
+                    ProjectId = task.ProjectId
                 }, Topics.Tasks, MessageActions.Deleted);
 
             await _tasksRepository.DeleteTaskAsync(taskId, outboxMessage);

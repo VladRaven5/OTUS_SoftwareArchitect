@@ -77,21 +77,27 @@ namespace ProjectsService
                 new ProjectCreatedUpdatedMessage
                 {
                     ProjectId = updatingProject.Id,
-                    Title = updatingProject.Title
+                    Title = updatingProject.Title,
+                    OldTitle = currentProject.Title
                 }, Topics.Projects, MessageActions.Updated);
 
             return await _projectsRepository.UpdateProjectAsync(updatingProject, outboxMessage);
         }
         
-        public Task DeleteProjectAsync(string projectId)
+        public async Task DeleteProjectAsync(string projectId)
         {
+            var project = await _projectsRepository.GetProjectByIdAsync(projectId); 
+            if(project == null)
+                return;
+
             var outboxMessage = OutboxMessageModel.Create(
                 new ProjectDeletedMessage
                 {
                     ProjectId = projectId,
+                    Title = project.Title
                 }, Topics.Projects, MessageActions.Deleted);
 
-            return _projectsRepository.DeleteProjectAsync(projectId, outboxMessage);
+            await _projectsRepository.DeleteProjectAsync(projectId, outboxMessage);
         }        
     }
 }
