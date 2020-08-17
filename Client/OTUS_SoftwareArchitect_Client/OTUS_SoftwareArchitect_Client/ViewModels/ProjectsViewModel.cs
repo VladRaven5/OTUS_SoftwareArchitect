@@ -3,6 +3,7 @@ using OTUS_SoftwareArchitect_Client.Networking.Misc;
 using OTUS_SoftwareArchitect_Client.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -65,7 +66,7 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
                     return;
                 }
 
-                Projects = myTasksRequest.Result;
+                Projects = myTasksRequest.Result.ToList();
             }
             finally
             {

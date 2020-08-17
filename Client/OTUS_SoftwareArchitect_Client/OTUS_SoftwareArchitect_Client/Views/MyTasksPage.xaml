@@ -70,7 +70,7 @@
                                             Margin="0,0"
                                             ItemsSource="{Binding Labels}"
                                             HeightRequest="{StaticResource labelSize}"
-                                            ItemSizingStrategy="MeasureFirstItem" >
+                                            ItemSizingStrategy="MeasureAllItems" >
                                             <CollectionView.ItemsLayout>
                                                 <LinearItemsLayout Orientation="Horizontal" ItemSpacing="4"/>
                                             </CollectionView.ItemsLayout>

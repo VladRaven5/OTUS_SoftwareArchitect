@@ -14,7 +14,7 @@ using Xamarin.Forms;
 
 namespace OTUS_SoftwareArchitect_Client.ViewModels
 {
-    public class EditProjectViewModel : BaseViewModel
+    public class EditProjectViewModel : BaseViewModel, IViewLoadingAware
     {
         private readonly ProjectsService _projectsService;
         private readonly UsersService _usersService;
@@ -114,10 +114,8 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
         public event EventHandler ProjectSaved;
         public event EventHandler ProjectDeleted;
 
-        protected override async Task InitializeAsync()
+        private async Task InitializeInternalAsync()
         {
-            await base.InitializeAsync();
-
             IsBusy = true;
 
             try
@@ -154,6 +152,10 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
 
                 SetMembers(usersResult.Result, membersResult.Result);
                 SetProjectProperties(projectResult.Result);
+            }
+            catch(Exception e)
+            {
+
             }
             finally
             {
@@ -269,6 +271,11 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
             {
                 IsBusy = false;
             }            
+        }
+
+        public void OnViewAppearing()
+        {
+            Task.Run(InitializeInternalAsync);
         }
     }
 

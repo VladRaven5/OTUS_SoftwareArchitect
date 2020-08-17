@@ -90,7 +90,7 @@
                     InputTransparent="True"
                     ItemsSource="{Binding Members}">
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:SimpleUserModel">
