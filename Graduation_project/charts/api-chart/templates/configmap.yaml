@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: {{ include "api-chart.fullname" . }}
 data:
-  ENDPOINTS: "Authentication @ http://arch.homework/otusapp/swagger/v1/swagger.json, Project members @ http://arch.homework/otusapp/project-members/swagger/v1/swagger.json, Notifications @ http://arch.homework/otusapp/notifications/swagger/v1/swagger.json, Pets @ https://petstore.swagger.io/v2/swagger.json"
+  ENDPOINTS: "Authentication @ http://arch.homework/otusapp/swagger/v1/swagger.json, Labels @ http://arch.homework/otusapp/labels/swagger/v1/swagger.json, Lists @ http://arch.homework/otusapp/lists/swagger/v1/swagger.json, Notifications @ http://arch.homework/otusapp/notifications/swagger/v1/swagger.json, Project members @ http://arch.homework/otusapp/project-members/swagger/v1/swagger.json, Projects @ http://arch.homework/otusapp/projects/swagger/v1/swagger.json, Tasks @ http://arch.homework/otusapp/tasks/swagger/v1/swagger.json, Users @ http://arch.homework/otusapp/users/swagger/v1/swagger.json, Working hours @ http://arch.homework/otusapp/working-hours/swagger/v1/swagger.json"
