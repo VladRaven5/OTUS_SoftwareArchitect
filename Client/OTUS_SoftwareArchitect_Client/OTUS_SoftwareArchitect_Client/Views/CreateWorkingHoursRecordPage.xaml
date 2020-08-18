@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:ContentPageBase
+    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.CreateWorkingHoursRecordPage"
+    x:DataType="viewmodels:CreateWorkingHoursRecordViewModel"
+    Title="Create reporting record">
+    <ContentPage.BindingContext>
+        <viewmodels:CreateWorkingHoursRecordViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <Grid Padding="16, 32" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label
+                Grid.Row="0"
+                Grid.Column="0"
+                Text="Task:"
+                FontSize="Body"
+                TextColor="Black"
+                VerticalOptions="Center"/>
+
+            <Picker
+                Grid.Row="0"
+                Grid.Column="1"
+                ItemsSource="{Binding AvailableTasks}"
+                SelectedItem="{Binding SelectedTask}"
+                ItemDisplayBinding="{Binding Title}"
+                HorizontalOptions="End"
+                WidthRequest="150"/>
+
+            <Label
+                Grid.Row="1"
+                Grid.Column="0"
+                Text="Project:"
+                FontSize="Body"
+                TextColor="Black"
+                VerticalOptions="Center"/>
+
+            <Label
+                Grid.Row="1"
+                Grid.Column="1"
+                Text="{Binding ProjectTitle}"
+                HorizontalTextAlignment="End"
+                HorizontalOptions="End"
+                WidthRequest="150"
+                FontSize="Body"
+                TextColor="Black"/>
+
+            <Label
+                Grid.Row="2"
+                Grid.Column="0"
+                Text="Hours:"
+                FontSize="Body"
+                TextColor="Black"
+                VerticalOptions="Center"/>
+
+            <Entry
+                Grid.Row="2"
+                Grid.Column="1"
+                Text="{Binding Hours}"
+                Keyboard="Numeric"
+                HorizontalOptions="End"
+                WidthRequest="50"
+                FontSize="Body"
+                TextColor="Black" HorizontalTextAlignment="End"/>
+
+            <Editor
+                Grid.Row="3"
+                Grid.ColumnSpan="2"
+                FontSize="Body"
+                TextColor="Black"
+                Text="{Binding Description}"/>
+
+            <Button
+                Grid.Row="4"
+                Grid.ColumnSpan="2"
+                Text="Create"                
+                VerticalOptions="End"
+                Command="{Binding CreateCommand}"
+                BackgroundColor="{StaticResource Accent}"
+                TextColor="White"/>
+
+
+            <ActivityIndicator
+                Grid.Row="5"
+                Grid.ColumnSpan="2"
+                Color="{StaticResource Accent}"
+                IsVisible="{Binding IsBusy}"
+                IsRunning="{Binding IsBusy}"
+                HeightRequest="64"
+                WidthRequest="64"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"/>
+
+        </Grid>
+    </ContentPage.Content>
+</views:ContentPageBase>

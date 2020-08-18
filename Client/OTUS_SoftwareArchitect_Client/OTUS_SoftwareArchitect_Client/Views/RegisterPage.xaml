@@ -18,6 +18,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="8*"/>
@@ -53,12 +54,34 @@
                 FontSize="Body"
                 />
 
+            <StackLayout Orientation="Horizontal" Grid.Row="6">
+                <Label Text="Region:" FontSize="Body" HorizontalOptions="FillAndExpand" VerticalOptions="Center"/>
+                <Picker
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    WidthRequest="100"
+                    ItemsSource="{Binding AvailableRegions}"
+                    SelectedItem="{Binding SelectedRegion}"
+                    ItemDisplayBinding="{Binding Title}"/>
+            </StackLayout>          
+            
+
             <Button
-                Grid.Row="7"
+                Grid.Row="8"
                 Text="Register"
                 Command="{Binding RegisterCommand}"
                 BackgroundColor="{StaticResource Accent}"
                 TextColor="White"/>
+
+            <ActivityIndicator
+                Grid.Row="9"
+                Color="{StaticResource Accent}"
+                IsVisible="{Binding IsBusy}"
+                IsRunning="{Binding IsBusy}"
+                HeightRequest="64"
+                WidthRequest="64"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"/>
         </Grid>
     </ContentPage.Content>
 </ContentPage>

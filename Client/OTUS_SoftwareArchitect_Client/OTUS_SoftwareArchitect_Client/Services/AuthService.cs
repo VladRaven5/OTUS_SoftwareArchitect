@@ -34,11 +34,12 @@ namespace OTUS_SoftwareArchitect_Client.Services
             var result = await _webClient.ExecuteRequestAsync(webApi => webApi.Logout());
         }
 
-        public Task<RequestResult<string>> RegisterAsync(string username, string login, string password)
+        public Task<RequestResult<string>> RegisterAsync(string username, string region, string login, string password)
         {
             var registerDto = new RegisterDto
             {
                 Username = username,
+                Region = region,
                 Login = login,
                 Password = password
             };

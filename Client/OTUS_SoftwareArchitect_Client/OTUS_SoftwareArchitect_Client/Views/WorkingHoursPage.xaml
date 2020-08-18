@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:ContentPageBase
+    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels" xmlns:models="clr-namespace:OTUS_SoftwareArchitect_Client.Models"
+    mc:Ignorable="d"
+    x:DataType="viewmodels:WorkingHoursViewModel"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.WorkingHoursPage"
+    x:Name="hoursPage"
+    Title="Reporting">
+    <ContentPage.BindingContext>
+        <viewmodels:WorkingHoursViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <Grid>
+            <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource Accent}">
+                <CollectionView
+                    ItemsSource="{Binding WorkingHoursRecords}"
+                    ItemsLayout="VerticalList"               
+                    SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:WorkingHoursRecordModel">
+                            <Grid Padding="0, 8, 0, 0" RowSpacing="8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.SelectedCommand, Source={x:Reference hoursPage}}"
+                                        CommandParameter="{Binding . }"/>
+                                </Grid.GestureRecognizers>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="1"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="40"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label
+                                    Text="{Binding Description}"
+                                    TextColor="Black"
+                                    FontSize="Medium"
+                                    Margin="12,0"/>
+
+                                <StackLayout
+                                    Margin="12,0"
+                                    Grid.Row="1"
+                                    Orientation="Horizontal">
+                                    
+                                    <Label Text="{Binding TaskTitle}" FontSize="Small"/>
+                                    <Label Text="{Binding ProjectTitle, StringFormat='({0})'}" FontSize="Small"/>
+                                </StackLayout>
+
+                                
+
+                                <Label
+                                    Grid.Column="1"
+                                    Grid.RowSpan="2"
+                                    FontSize="Medium"
+                                    TextColor="Black"
+                                    Text="{Binding Hours}"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End"/>
+
+                                <Button
+                                    Grid.Column="2"
+                                    Grid.RowSpan="2"
+                                    Padding="4"      
+                                    BackgroundColor="Transparent"
+                                    ImageSource="close.png"
+                                    Command="{Binding BindingContext.DeleteRecordCommand, Source={Reference hoursPage}}"
+                                    CommandParameter="{Binding .}"/>
+
+                                <BoxView
+                                    Grid.ColumnSpan="3"
+                                    Grid.Row="2"
+                                    HeightRequest="1"
+                                    BackgroundColor="LightGray"
+                                    VerticalOptions="End"/>
+                            </Grid>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+
+            <Button
+                HeightRequest="64"
+                WidthRequest="64"
+                CornerRadius="32"
+                Margin="0, 0, 36, 36"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                BackgroundColor="{StaticResource Accent}"
+                ImageSource="plus.png"
+                Command="{Binding CreateRecordCommand}"/>
+        </Grid>
+    </ContentPage.Content>
+</views:ContentPageBase>

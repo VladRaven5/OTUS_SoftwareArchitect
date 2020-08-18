@@ -22,7 +22,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Label
                 Grid.Row="1"
@@ -72,6 +72,16 @@
                 BackgroundColor="Transparent"
                 TextColor="{StaticResource Accent}"
                 Command="{Binding RegisterCommand}"/>
+
+            <ActivityIndicator
+                Grid.Row="7"
+                Color="{StaticResource Accent}"
+                IsVisible="{Binding IsBusy}"
+                IsRunning="{Binding IsBusy}"
+                HeightRequest="64"
+                WidthRequest="64"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"/>
         </Grid>
     </ContentPage.Content>
 </ContentPage>

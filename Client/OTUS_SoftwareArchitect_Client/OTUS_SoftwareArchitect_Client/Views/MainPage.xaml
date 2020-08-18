@@ -16,6 +16,12 @@
             </x:Arguments>
         </NavigationPage>
 
+        <NavigationPage Title="Reporting"  Icon="clock.png">
+            <x:Arguments>
+                <views:WorkingHoursPage />
+            </x:Arguments>
+        </NavigationPage>
+
         <NavigationPage Title="Projects"  Icon="projects.png">
             <x:Arguments>
                 <views:ProjectsPage />
@@ -30,7 +36,7 @@
 
         <NavigationPage Title="Profile" Icon="profile.png">            
             <x:Arguments>
-                <views:AboutPage />
+                <views:ProfilePage />
             </x:Arguments>
         </NavigationPage>
     </TabbedPage.Children>

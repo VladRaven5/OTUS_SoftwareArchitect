@@ -2,6 +2,7 @@
 using OTUS_SoftwareArchitect_Client.DTO.ListDtos;
 using OTUS_SoftwareArchitect_Client.DTO.ProjectDtos;
 using OTUS_SoftwareArchitect_Client.DTO.TaskDtos;
+using OTUS_SoftwareArchitect_Client.DTO.WorkingHours;
 using OTUS_SoftwareArchitect_Client.Models;
 using OTUS_SoftwareArchitect_Client.Models.ProjectModels;
 using OTUS_SoftwareArchitect_Client.Models.TaskModels;
@@ -32,6 +33,12 @@ namespace OTUS_SoftwareArchitect_Client.Networking
 
         [Get("/users")]
         Task<IEnumerable<UserModel>> GetUsers();
+
+        [Get("/users/{userId}")]
+        Task<UserModel> GetUser(string userId);
+
+        [Put("/users")]
+        Task<UserModel> UpdateUser(UpdateUserDto dto);
 
 
         #endregion Users
@@ -133,6 +140,25 @@ namespace OTUS_SoftwareArchitect_Client.Networking
         Task<IEnumerable<NotificationModel>> GetMyNotifications();
 
         #endregion Notifications
+
+        #region Working Hours
+
+        [Get("/working-hours/my")]
+        Task<IEnumerable<WorkingHoursRecordModel>> GetMyWorkingHours();
+
+        [Post("/working-hours")]
+        Task<WorkingHoursRecordModel> CreateWorkingHoursRecord(
+            [Header(Constants.RequestIdHeaderName)] string requestId,
+            [Body] CreateWorkingHoursRecordDto dto);
+
+        [Put("/working-hours")]
+        Task<WorkingHoursRecordModel> UpdateWorkingHoursRecord(UpdateWorkingHoursRecordDto dto);
+
+        [Delete("/working-hours/{recordId}")]
+        Task DeleteWorkingHoursRecord(string recordId);
+
+
+        #endregion Working Hours
     }
 
     public interface ILocalWebApi

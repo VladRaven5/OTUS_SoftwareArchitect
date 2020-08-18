@@ -34,6 +34,7 @@ namespace OTUS_SoftwareArchitect_Client
             DependencyService.Register<ListsService>();
             DependencyService.Register<LabelsService>();
             DependencyService.Register<NotificationsService>();
+            DependencyService.Register<WorkingHoursService>();
         }
 
         protected override void OnStart()

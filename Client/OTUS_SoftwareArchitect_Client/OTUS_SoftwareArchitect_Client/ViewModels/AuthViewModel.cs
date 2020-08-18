@@ -35,14 +35,23 @@ namespace OTUS_SoftwareArchitect_Client.ViewModels
                 return;
             }
 
-            var result = await _authService.LoginAsync(Login, Password);
-            if(!result.IsSuccess)
-            {
-                ShowToast(result.GetFullMessage());
-                return;
-            }
+            IsBusy = true;
 
-            SuccessLogin?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                var result = await _authService.LoginAsync(Login, Password);
+                if (!result.IsSuccess)
+                {
+                    ShowToast(result.GetFullMessage());
+                    return;
+                }
+
+                SuccessLogin?.Invoke(this, EventArgs.Empty);
+            }
+            finally
+            {
+                IsBusy = false;
+            }            
         }
 
         public string Login

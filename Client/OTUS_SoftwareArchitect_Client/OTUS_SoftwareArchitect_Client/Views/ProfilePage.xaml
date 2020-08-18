@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:ContentPageBase
+    xmlns:views="clr-namespace:OTUS_SoftwareArchitect_Client.Views"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:OTUS_SoftwareArchitect_Client.ViewModels"
+    mc:Ignorable="d"
+    x:Class="OTUS_SoftwareArchitect_Client.Views.ProfilePage"
+    x:DataType="viewmodels:ProfileViewModel"
+    Title="Profile">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="FontSize" Value="Body" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+
+            <Style TargetType="Entry" x:Key="valueLabel">
+                <Setter Property="FontSize" Value="Body"/>
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="TextColor" Value="Black"/>
+                <Setter Property="HorizontalOptions" Value="Fill"/>
+            </Style>            
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <viewmodels:ProfileViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource Accent}">
+            <ScrollView>
+                <Grid Padding="16, 32">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Text="Username:"/>
+
+                    <Entry
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource valueLabel}"
+                        Text="{Binding Username}"
+                        Placeholder="Username"/>
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="Email:"/>
+
+                    <Entry
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource valueLabel}"
+                        Text="{Binding Email}"
+                        Placeholder="Email"
+                        Keyboard="Email"/>
+
+                     <Label
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Text="Phone number:"/>
+
+                    <Entry
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource valueLabel}"
+                        Text="{Binding PhoneNumber}"
+                        Placeholder="Phone number"
+                        Keyboard="Telephone"/>
+
+                    <Label
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Text="Region:"/>
+
+                    <Picker
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        ItemsSource="{Binding AvailableRegions}"
+                        SelectedItem="{Binding SelectedRegion}"
+                        ItemDisplayBinding="{Binding Title}"/>
+
+                    <Button
+                        Grid.Row="5"
+                        Grid.ColumnSpan="2"
+                        Text="Save"
+                        BackgroundColor="{StaticResource Accent}"
+                        TextColor="White"
+                        Command="{Binding SaveCommand}"
+                        />
+
+                    <Button
+                        Grid.Row="6"
+                        Grid.ColumnSpan="2"
+                        Text="Logout"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Accent}"
+                        Command="{Binding LogoutCommand}"/>
+                </Grid>
+            </ScrollView>
+        </RefreshView>
+    </ContentPage.Content>
+</views:ContentPageBase>
