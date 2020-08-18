@@ -36,7 +36,8 @@ namespace AuthService
         {
             try
             {
-                var user = await _authenticationService.RegisterAsync(registerDto.Username, registerDto.Login, registerDto.Password);
+                var user = await _authenticationService.RegisterAsync(registerDto.Username, registerDto.Region,
+                    registerDto.Login, registerDto.Password);
                 //await AuthenticateUser(user.Id);
                 //SetUserIdHeader(user.Id);
             }

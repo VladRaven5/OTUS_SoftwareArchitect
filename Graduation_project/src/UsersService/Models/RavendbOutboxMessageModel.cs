@@ -18,8 +18,11 @@ namespace UsersService
             Topic = baseModel.Topic;
             Action = baseModel.Action;
             IsInProcess = baseModel.IsInProcess;
+
+            OutboxMessageId = baseModel.GetHashCode();
         }
         public long Index { get; set; }
+        public int OutboxMessageId { get; set; }
         public string Message { get; set; }
         public string Topic { get; set; }        
         public string Action { get; set; }
@@ -29,7 +32,7 @@ namespace UsersService
         {
             return new OutboxMessageModel
             {
-                Id = 0, //doesn't matter
+                Id = OutboxMessageId,
                 Message = Message,
                 Topic = Topic,
                 Action = Action,

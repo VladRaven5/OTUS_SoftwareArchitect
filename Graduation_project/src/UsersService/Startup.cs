@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,12 +20,13 @@ namespace UsersService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();                
+            services.AddControllers();    
+            services.AddAutoMapper(typeof(Startup));            
 
             InitializeRabbitMQ(services);
             
             services.AddSingleton<DBConnectionProvider, DBConnectionProvider>();
-            services.AddScoped<UsersRepository, UsersRepository>();
+            services.AddScoped<UsersShardedRepository, UsersShardedRepository>();
             services.AddScoped<UsersManager, UsersManager>();
             
             services.AddHostedService<OutboxMessagesSender>();

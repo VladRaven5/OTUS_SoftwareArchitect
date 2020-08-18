@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UsersService
@@ -9,10 +10,12 @@ namespace UsersService
     public class UsersInternalController : ControllerBase
     {
         private readonly UsersManager _userService;
+        private readonly IMapper _mapper;
 
-        public UsersInternalController(UsersManager userService)
+        public UsersInternalController(UsersManager userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -20,7 +23,8 @@ namespace UsersService
         {
             try
             {
-                var user = await _userService.CreateUserAsync(createDto.Username);
+                var creatingUser = _mapper.Map<CreateUserDto, UserModel>(createDto);
+                var user = await _userService.CreateUserAsync(creatingUser);
                 return user;
             }
             catch(Exception e)

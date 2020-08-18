@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
@@ -12,10 +13,12 @@ namespace UsersService
     public class UsersExternalController : ControllerBase
     {
         private readonly UsersManager _userService;
+        private readonly IMapper _mapper;
 
-        public UsersExternalController(UsersManager userService)
+        public UsersExternalController(UsersManager userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -38,17 +41,23 @@ namespace UsersService
         }
 
         [HttpPut]
-        public async Task<ActionResult<UserModel>> UpdateUser(string userId, string username)
+        public async Task<ActionResult<UserModel>> UpdateUser([FromBody] UpdateUserDto updatingDto)
         {
             try
-            {
+            {               
                 string currentUserId = Request.Headers[Constants.UserIdHeaderName];
-                if(currentUserId != userId)
+                if(currentUserId != updatingDto.Id)
                 {
                     return StatusCode((int)HttpStatusCode.Forbidden);
                 }
 
-                return await _userService.UpdateUserAsync(userId, username);
+                var updatingModel = _mapper.Map<UpdateUserDto, UserModel>(updatingDto);
+
+                return await _userService.UpdateUserAsync(updatingModel);
+            }
+            catch(VersionsNotMatchException vnme)
+            {
+                return Conflict(vnme.Message);
             }
             catch(Exception e)
             {

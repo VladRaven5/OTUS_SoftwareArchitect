@@ -11,29 +11,25 @@ namespace UsersService
 {
     public class UsersManager
     {
-        private readonly UsersRepository _repository;
+        private readonly UsersShardedRepository _repository;
         private readonly IConfiguration _configuration;
         private HttpClient _httpClient;
 
-        public UsersManager(UsersRepository repository, IConfiguration configuration)
+        public UsersManager(UsersShardedRepository repository, IConfiguration configuration)
         {
             _repository = repository;
             _configuration = configuration;
         }
 
-        public async Task<UserModel> CreateUserAsync(string username)
+        public async Task<UserModel> CreateUserAsync(UserModel user)
         {
-            bool isUsernameBusy = await _repository.IsAnyUserByPredicateAsync(usr => usr.Username == username);
+            bool isUsernameBusy = await _repository.IsAnyUserByPredicateAsync(usr => usr.Username == user.Username);
 
             if(isUsernameBusy)
             {
                 throw new EntityExistsException("This username already in use");
             }
 
-            var user = new UserModel
-            {
-                Username = username
-            }; 
             user.Init();
 
             var message = OutboxMessageModel.Create(
@@ -59,17 +55,30 @@ namespace UsersService
             return _repository.GetUserAsync(userId);
         }
 
-        internal async Task<UserModel> UpdateUserAsync(string userId, string username)
+        internal async Task<UserModel> UpdateUserAsync(UserModel updatingUser)
         {   
+            var curentUser = await _repository.GetUserAsync(updatingUser.Id);
+            if(curentUser == null)
+            {
+                throw new NotFoundException($"User with id {updatingUser.Id} not found");
+            }
+
+            if(curentUser.Version != updatingUser.Version)
+            {
+                throw new VersionsNotMatchException();
+            }
+
+            updatingUser.Version = curentUser.Version + 1;
+
             var message = OutboxMessageModel.Create(
                 new UserCreatedUpdatedMessage
                 {
-                    UserId = userId,
-                    Username = username
+                    UserId = updatingUser.Id,
+                    Username = updatingUser.Username
                 }, Topics.Users, MessageActions.Updated
             );
 
-            var updatedUser = await _repository.UpdateUserAsync(userId, username, message);
+            var updatedUser = await _repository.UpdateUserAsync(updatingUser, message);
 
             return updatedUser;
         }

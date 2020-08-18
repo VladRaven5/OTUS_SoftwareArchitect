@@ -37,14 +37,16 @@ namespace AuthService
             return _repository.DeleteUserInfoAsync(userId);
         }
 
-        public async Task<UserAuthInfo> RegisterAsync(string username, string login, string password)
+        public async Task<UserAuthInfo> RegisterAsync(string username, string region, string login, string password)
         {
+            EnsureUserRegionExists(region);            
+
             if(! (await CheckIsLoginAvailable(login)))
             {
                 throw new ProhibitedException($"Login {login} already in use");
             }
 
-            UserCreationResult userCreationResult = await CheckUsernameAndCreateAsync(username);
+            UserCreationResult userCreationResult = await CheckUsernameAndCreateAsync(username, region);
 
             if(!userCreationResult.IsSuccess)
             {
@@ -64,7 +66,7 @@ namespace AuthService
                 .Any();
         }
 
-        private async Task<UserCreationResult> CheckUsernameAndCreateAsync(string username)
+        private async Task<UserCreationResult> CheckUsernameAndCreateAsync(string username, string region)
         {
             _httpClient ??= CreateHttpClient();
 
@@ -73,7 +75,7 @@ namespace AuthService
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{usersServiceUrl}/svc/users?username={username}")
+                RequestUri = new Uri($"{usersServiceUrl}/svc/users?username={username}&region={region}")
             };
 
             var response = await _httpClient.SendAsync(request);
@@ -99,6 +101,12 @@ namespace AuthService
             };
 
             return new HttpClient(handler);
+        }
+
+        private void EnsureUserRegionExists(string userRegion)
+        {
+            if(!UsersRegions.HasRegion(userRegion))
+                throw new NotFoundException($"User region {userRegion} not found!");
         }
     }
 }

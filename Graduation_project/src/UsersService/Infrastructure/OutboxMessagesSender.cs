@@ -4,7 +4,7 @@ using Shared;
 
 namespace UsersService
 {
-    public class OutboxMessagesSender : OutboxMessagesSenderBase<UsersRepository>
+    public class OutboxMessagesSender : OutboxMessagesSenderBase<UsersShardedRepository>
     {
         public OutboxMessagesSender(IServiceProvider serviceProvider, RabbitMqTopicManager rabbitMq)
             : base(serviceProvider, rabbitMq)
