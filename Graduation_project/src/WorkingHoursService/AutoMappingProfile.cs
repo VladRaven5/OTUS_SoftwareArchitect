@@ -22,7 +22,14 @@ namespace WorkingHoursService
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProjectId));
             
             CreateMap<UserCreatedUpdatedMessage, UserModel>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));   
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));  
+
+            CreateMap<TaskCreatedMessage, TaskModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.TaskId));
+
+            CreateMap<TaskUpdatedMessage, TaskModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.TaskId));
+
         }
     }
 }

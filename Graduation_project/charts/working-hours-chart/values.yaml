@@ -2,13 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 3
+replicaCount: 2
 
 image:
   repository: vladraven/otus_grad_working_hours_service
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.5"
+  tag: latest
   connectionStringEnvName: ConnectionStrings__DefaultConnection
   containerPort: 5000
 
@@ -68,6 +68,9 @@ ingress:
   enabled: true
   annotations: 
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/auth-url: "http://auth-service.default.svc.cluster.local:9001/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://$host/otusapp/login"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-UserId"
   
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"

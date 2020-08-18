@@ -34,7 +34,7 @@ namespace WorkingHoursService
         
         private async Task CreateTaskAsync(TaskModel newTask)
         {
-            string insertQuery = $"insert into {_tableName} (id,, projectid, title) "
+            string insertQuery = $"insert into {_tableName} (id, projectid, title) "
                 + $"values('{newTask.Id}', '{newTask.ProjectId}', '{newTask.Title}');";
 
             int res = await _connection.ExecuteAsync(insertQuery);

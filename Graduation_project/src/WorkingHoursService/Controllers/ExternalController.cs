@@ -71,7 +71,7 @@ namespace WorkingHoursService
             }
 
             string requestId = requestIdValue.ToString();
-            string userId = requestIdValue.ToString();
+            string userId = userIdValue.ToString();
 
             try
             {

@@ -137,27 +137,41 @@ namespace WorkingHoursService
             {
                 case MessageActions.Created:
                 case MessageActions.Updated:
-                    var message = JsonConvert.DeserializeObject<ProjectCreatedUpdatedMessage>(messageObject.Message);
-                    var model = _mapper.Map<ProjectCreatedUpdatedMessage, ProjectModel>(message);     
+                    TaskModel model = default(TaskModel);
+                    BaseMessage baseMessage;
+                    if(messageObject.Action == MessageActions.Created)
+                    {
+                        var message = JsonConvert.DeserializeObject<TaskCreatedMessage>(messageObject.Message);
+                        baseMessage = message;
+                        model = _mapper.Map<TaskCreatedMessage, TaskModel>(message);   
+                    }
+                    else
+                    {
+                        var message = JsonConvert.DeserializeObject<TaskCreatedMessage>(messageObject.Message);
+                        baseMessage = message;
+                        model = _mapper.Map<TaskCreatedMessage, TaskModel>(message);  
+                    }
+
+                      
                     using(var scope = _serviceProvider.CreateScope())
                         {
                             var requestsRepository = scope.ServiceProvider.GetRequiredService<RequestsRepository>();
-                            var projectsRepository = scope.ServiceProvider.GetRequiredService<ProjectsRepository>();
-                            if(!requestsRepository.IsHandledOrSaveRequestAsync(message.Id, GetRequestIdInvalidationDate()).GetAwaiter().GetResult())
+                            var projectsRepository = scope.ServiceProvider.GetRequiredService<TasksRepository>();
+                            if(!requestsRepository.IsHandledOrSaveRequestAsync(baseMessage.Id, GetRequestIdInvalidationDate()).GetAwaiter().GetResult())
                             {
                                 try
                                 {
-                                    projectsRepository.CreateOrUpdateProjectAsync(model).GetAwaiter().GetResult();
+                                    projectsRepository.CreateOrUpdateTaskAsync(model).GetAwaiter().GetResult();
                                 }
                                 catch(Exception)
                                 {
-                                    requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
+                                    requestsRepository.DeleteRequestIdAsync(baseMessage.Id).GetAwaiter().GetResult();
                                     throw;
                                 }                                
                             }
                             else
                             {
-                                Console.WriteLine($"Already handled: {message.Id}");
+                                Console.WriteLine($"Already handled: {baseMessage.Id}");
                             }
                         }                    
                 break;
