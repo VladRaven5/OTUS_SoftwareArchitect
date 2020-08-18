@@ -58,6 +58,8 @@ namespace UsersService
 
             currentUser.Username = updatingUser.Username;
             currentUser.Region = updatingUser.Region;
+            currentUser.PhoneNumber = updatingUser.PhoneNumber;
+            currentUser.Email = updatingUser.Email;
 
             await _connection.StoreAsync(message.ToRavendDb());
             await _connection.SaveChangesAsync();
