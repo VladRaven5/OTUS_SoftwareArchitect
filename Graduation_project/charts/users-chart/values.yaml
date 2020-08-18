@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: vladraven/otus_grad_users_service
@@ -10,14 +10,30 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "0.5"
   containerPort: 5000
-  dbConnectionStringEnvName: ConnectionStrings__DefaultConnection
+  dbConnectionStringEnvName:
+    cn: ConnectionStrings__CN
+    eu: ConnectionStrings__EU
+    ru: ConnectionStrings__RU
+    us: ConnectionStrings__US
+    local: ConnectionStrings__LocalRegion
   authServiceUrlEnvName: ServicesUris__AuthService
 
 ravendb:
-  label: users-ravendb
-  host: users-ravendb
+  hosts:
+    cn:
+      host: users-cn-ravendb
+      port: "9011"
+    eu:
+      host: users-eu-ravendb
+      port: "9012"
+    ru:
+      host: users-ru-ravendb
+      port: "9013"
+    us:
+      host: users-us-ravendb
+      port: "9014"
+  localShard: RU
   intport: "8080"
-  extport: "9011"
   serviceType: ClusterIP
 
 authService:

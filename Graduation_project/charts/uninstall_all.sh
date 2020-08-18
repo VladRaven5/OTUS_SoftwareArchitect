@@ -10,3 +10,7 @@ helm uninstall mynotif
 helm uninstall myapi
 helm uninstall rabbit
 helm uninstall prometh
+helm uninstall cn-users 
+helm uninstall eu-users 
+helm uninstall ru-users 
+helm uninstall us-users 

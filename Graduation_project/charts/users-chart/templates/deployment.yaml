@@ -19,6 +19,7 @@ spec:
     {{- end }}
       labels:
         {{- include "users-chart.selectorLabels" . | nindent 8 }}
+        date: "{{ now | unixEpoch }}"
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -34,11 +35,29 @@ spec:
          - name: RABBIT_HOST
            value: {{ .Values.rabbitMq.host }}          
          command: ['sh', '-c', 'until nslookup $RABBIT_HOST; do echo waiting for $RABBIT_HOST; sleep 2; done;']   
-       - name: wait-ravendb-ready
+       - name: wait-cn-ravendb-ready
          image: busybox:latest
          env:
           - name: RAVENDB_HOST
-            value: {{ .Values.ravendb.host }}          
+            value: {{ .Values.ravendb.hosts.cn.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+       - name: wait-eu-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.eu.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+       - name: wait-ru-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.ru.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+       - name: wait-us-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.us.host }}          
          command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
       containers:
         - name: {{ .Chart.Name }}
@@ -46,8 +65,16 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           env:
-            - name: {{ .Values.image.dbConnectionStringEnvName }}
-              value: "http://{{ .Values.ravendb.host }}:{{ .Values.ravendb.extport }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.cn }}
+              value: "http://{{ .Values.ravendb.hosts.cn.host }}:{{ .Values.ravendb.hosts.cn.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.eu }}
+              value: "http://{{ .Values.ravendb.hosts.eu.host }}:{{ .Values.ravendb.hosts.eu.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.ru }}
+              value: "http://{{ .Values.ravendb.hosts.ru.host }}:{{ .Values.ravendb.hosts.ru.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.us }}
+              value: "http://{{ .Values.ravendb.hosts.us.host }}:{{ .Values.ravendb.hosts.us.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.local }}
+              value: {{ .Values.ravendb.localShard }}
             - name: {{ .Values.image.authServiceUrlEnvName }}
               value: "http://{{ .Values.authService.url }}:{{ .Values.authService.port }}"
             - name: {{ .Values.rabbitMq.hostEnvName }}

@@ -1,0 +1,11 @@
+# Default values for users-shards-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+ravendb:
+  label: users-us-ravendb
+  host: users-us-ravendb
+  intport: "8080"
+  extport: "9014"
+  serviceType: NodePort
+  mountName: users-us-ravendb

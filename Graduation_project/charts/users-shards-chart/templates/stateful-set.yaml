@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name:  "{{ include "users-chart.fullname" . }}-ss"
+  name:  "{{ include "users-shards-chart.fullname" . }}-ss"
 spec:
   serviceName: "{{ .Values.ravendb.host }}"
   replicas: 1
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.ravendb.label }}
-        image: ravendb/ravendb:latest
+        image: {{ .Values.image.repository}}
         ports:
         - containerPort: {{ .Values.ravendb.intport }}
           name: ravendbport
@@ -23,15 +23,15 @@ spec:
           - name: RAVEN_ARGS
             value: '--Setup.Mode=None --License.Eula.Accepted=true'
         volumeMounts:
-        - name: users-ravendb
+        - name: {{ .Values.ravendb.mountName }}
           mountPath: /opt/RavenDB/Server/RavenData
           subPath: users
   volumeClaimTemplates:
   - metadata:
-      name: users-ravendb
+      name: {{ .Values.ravendb.mountName }}
     spec:
       accessModes: ["ReadWriteOnce"]
       storageClassName: standard
       resources:
         requests:
-          storage: 1Gi
+          storage: 500Mi
