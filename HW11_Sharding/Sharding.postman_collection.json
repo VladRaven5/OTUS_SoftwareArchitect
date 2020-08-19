@@ -1,0 +1,433 @@
+{
+	"info": {
+		"_postman_id": "66afc85e-3303-4d71-8288-3f6008dd4d3f",
+		"name": "Sharding",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Clear users",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users/clear",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "38413bbd-d1b5-40f0-a70b-e904476defdc",
+						"exec": [
+							"regions = { 0: \"CN\", 1: \"EU\", 2: \"RU\", 3: \"US\" }",
+							"regionKey = _.random(0, 3)",
+							"",
+							"region = regions[regionKey]",
+							"",
+							"if(regionKey == 0) {",
+							"    cn_count = pm.variables.get(\"region_cn\");",
+							"    cn_count++",
+							"    pm.variables.set(\"region_cn\", cn_count);",
+							"}",
+							"",
+							"if(regionKey == 1) {",
+							"    eu_count = pm.variables.get(\"region_eu\");",
+							"    eu_count++",
+							"    pm.variables.set(\"region_eu\", eu_count);",
+							"}",
+							"",
+							"if(regionKey == 2) {",
+							"    ru_count = pm.variables.get(\"region_ru\");",
+							"    ru_count++",
+							"    pm.variables.set(\"region_ru\", ru_count);",
+							"}",
+							"",
+							"if(regionKey == 3) {",
+							"    us_count = pm.variables.get(\"region_us\");",
+							"    us_count++",
+							"    pm.variables.set(\"region_us\", us_count);",
+							"}",
+							"",
+							"counter = pm.variables.get(\"iterations\");",
+							"console.log(\"Iterations left: \" + counter)",
+							"counter = counter - 1",
+							"pm.variables.set(\"iterations\", counter);",
+							"",
+							"pm.variables.set(\"region\", region);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2d2ed60b-661b-46be-a1e1-60be08e8012e",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.variables.set(\"user_id\", jsonData.id);",
+							"",
+							"counter = pm.variables.get(\"iterations\");",
+							"",
+							"if(counter == 0)",
+							"{",
+							"    postman.setNextRequest(\"Check users shards\");",
+							"}",
+							"else",
+							"{",
+							"    postman.setNextRequest(\"Create user\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users/?username={{$randomUserName}}&region={{region}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						""
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{$randomUserName}}"
+						},
+						{
+							"key": "region",
+							"value": "{{region}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check users shards",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "da847478-cfe2-4bf6-8ade-dc7f7e6aa028",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Are users sharded correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"",
+							"    cn_count = 0",
+							"    eu_count = 0",
+							"    ru_count = 0",
+							"    us_count = 0",
+							"",
+							"    jsonData.forEach(e => {",
+							"        if(e.shardKey == \"CN\")",
+							"            cn_count = e.count",
+							"        if(e.shardKey == \"EU\")",
+							"            eu_count = e.count",
+							"        if(e.shardKey == \"RU\")",
+							"            ru_count = e.count",
+							"        if(e.shardKey == \"US\")",
+							"            us_count = e.count",
+							"    })",
+							"",
+							"    pm.expect(cn_count).to.eql(parseInt(pm.variables.get(\"region_cn\"), 10))",
+							"    pm.expect(eu_count).to.eql(parseInt(pm.variables.get(\"region_eu\"), 10))",
+							"    pm.expect(ru_count).to.eql(parseInt(pm.variables.get(\"region_ru\"), 10))",
+							"    pm.expect(us_count).to.eql(parseInt(pm.variables.get(\"region_us\"), 10))",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users/sharding-summary",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"sharding-summary"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Replace user to new shard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0868bba9-7a5e-4da6-9e98-07c094227629",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Is region updated\", function () {",
+							"    var jsonData = pm.response.json();",
+							"",
+							"    pm.expect(jsonData.region).to.eql(pm.variables.get(\"region_to_replace\"))",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{user_id}}\",\n    \"username\": \"replaced_user\",\n    \"region\": \"{{region_to_replace}}\",\n    \"version\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check is user changed shard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "43f9de0c-4ab4-4e10-9956-2281a7a25a90",
+						"exec": [
+							"pm.test(\"Is user replaced\", function () {",
+							"    pm.expect(pm.response.text()).to.eql(pm.variables.get(\"region_to_replace\"))",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users/user-shard?userid={{user_id}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"user-shard"
+					],
+					"query": [
+						{
+							"key": "userid",
+							"value": "{{user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c37eff4d-cd68-46e3-bdcd-e4f5f3c2d5fa",
+						"exec": [
+							"pm.test(\"Deleted\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users/{{user_id}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check is user not in shards",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1cddb261-354e-4721-a968-5d132dad0cf3",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f387d661-7514-4003-ab0b-9c7f40981898",
+						"exec": [
+							"pm.test(\"Is user not in shard\", function () {",
+							"    pm.expect(pm.response.text()).to.eql(\"NONE\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{baseUrl}}/otusapp/users/user-shard?userid={{user_id}}",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"otusapp",
+						"users",
+						"user-shard"
+					],
+					"query": [
+						{
+							"key": "userid",
+							"value": "{{user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "dd22fde7-52a7-4f1e-b23e-17eac8e22269",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "6cdac975-4101-492d-a2ff-70ea2d344b62",
+				"type": "text/javascript",
+				"exec": [
+					"tests[\"[INFO] Request: \" + (('data' in request) ? request['data'] : '')] = true;",
+					"tests[\"[INFO] Response: \" + responseBody] = true;"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "1f47c879-634b-421b-b526-cb18afb6a1fa",
+			"key": "baseUrl",
+			"value": "arch.homework"
+		},
+		{
+			"id": "688166e1-403c-4403-9da1-b097b1f3ea16",
+			"key": "iterations",
+			"value": "20"
+		},
+		{
+			"id": "611067a5-8123-4618-8e0b-4c3052bfedc1",
+			"key": "region_cn",
+			"value": "0"
+		},
+		{
+			"id": "02a28ee4-2f19-4b97-8c22-3b350986cdd4",
+			"key": "region_eu",
+			"value": "0"
+		},
+		{
+			"id": "1e35f7b0-1b94-48aa-af7f-d7c252456137",
+			"key": "region_ru",
+			"value": "0"
+		},
+		{
+			"id": "f89588bf-23a2-44a8-b59d-80908ff660a3",
+			"key": "region_us",
+			"value": "0"
+		},
+		{
+			"id": "3721df7b-c98d-4c9f-88cb-7ab17aa78569",
+			"key": "region",
+			"value": ""
+		},
+		{
+			"id": "e78e96ef-a845-4b1a-8f68-1507760938ae",
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"id": "2d539433-03bf-4c75-9c69-3aa96a2a1ed4",
+			"key": "region_to_replace",
+			"value": "RU"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
