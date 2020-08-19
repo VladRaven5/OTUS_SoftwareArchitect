@@ -1,4 +1,6 @@
-echo -e "Starting prometheus\n"
+echo -e "Starting nginx\n"
+helm install nginx stable/nginx-ingress -f ./nginx/values.yaml --atomic
+echo -e "\n\nStarting prometheus\n"
 helm install prometh stable/prometheus-operator -f ./prometheus/prometheus-values.yaml --atomic
 echo -e "\n\nStarting RabbitMQ\n"
 helm install rabbit -f ./rabbit/rabbitmq-values.yaml bitnami/rabbitmq

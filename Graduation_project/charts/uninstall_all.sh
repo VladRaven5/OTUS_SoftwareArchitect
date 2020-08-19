@@ -14,3 +14,4 @@ helm uninstall cn-users
 helm uninstall eu-users 
 helm uninstall ru-users 
 helm uninstall us-users 
+helm uninstall nginx

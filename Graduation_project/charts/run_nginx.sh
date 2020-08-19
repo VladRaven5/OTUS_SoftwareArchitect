@@ -1,0 +1,1 @@
+helm install nginx stable/nginx-ingress -f ./nginx/values.yaml --atomic
