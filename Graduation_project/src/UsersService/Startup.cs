@@ -1,3 +1,4 @@
+using System;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,9 +31,7 @@ namespace UsersService
             
             services.AddSingleton<DBConnectionProvider, DBConnectionProvider>();
             services.AddScoped<UsersShardedRepository, UsersShardedRepository>();
-            services.AddScoped<UsersManager, UsersManager>();
-            
-            services.AddHostedService<OutboxMessagesSender>();
+            services.AddScoped<UsersManager, UsersManager>();        
         }        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,9 +70,17 @@ namespace UsersService
         {
             string host = Configuration.GetValue<string>("RabbitMQ:Host");
             int port = Configuration.GetValue<int>("RabbitMQ:Port");
+            
+            if(string.IsNullOrWhiteSpace(host))
+            {
+                Console.WriteLine("RabbitMQ host not specified. RMQ wasn't start");
+                return;
+            }                
+
             string username = Configuration.GetValue<string>("RabbitMQ:Username");
             string password = Configuration.GetValue<string>("RabbitMQ:Password");
             services.AddSingleton<RabbitMqTopicManager>(new RabbitMqTopicManager(host, port, username, password));
+            services.AddHostedService<OutboxMessagesSender>();
         }
     }
 }
