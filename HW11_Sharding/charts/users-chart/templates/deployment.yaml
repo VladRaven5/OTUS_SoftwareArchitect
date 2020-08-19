@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "users-chart.fullname" . }}
+  labels:
+    {{- include "users-chart.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "users-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "users-chart.selectorLabels" . | nindent 8 }}
+        date: "{{ now | unixEpoch }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "users-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+       - name: wait-cn-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.cn.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+       - name: wait-eu-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.eu.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+       - name: wait-ru-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.ru.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+       - name: wait-us-ravendb-ready
+         image: busybox:latest
+         env:
+          - name: RAVENDB_HOST
+            value: {{ .Values.ravendb.hosts.us.host }}          
+         command: ['sh', '-c', 'until nslookup $RAVENDB_HOST; do echo waiting for $RAVENDB_HOST; sleep 2; done;']
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+            - name: {{ .Values.image.dbConnectionStringEnvName.cn }}
+              value: "http://{{ .Values.ravendb.hosts.cn.host }}:{{ .Values.ravendb.hosts.cn.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.eu }}
+              value: "http://{{ .Values.ravendb.hosts.eu.host }}:{{ .Values.ravendb.hosts.eu.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.ru }}
+              value: "http://{{ .Values.ravendb.hosts.ru.host }}:{{ .Values.ravendb.hosts.ru.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.us }}
+              value: "http://{{ .Values.ravendb.hosts.us.host }}:{{ .Values.ravendb.hosts.us.port }}"
+            - name: {{ .Values.image.dbConnectionStringEnvName.local }}
+              value: {{ .Values.ravendb.localShard }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
