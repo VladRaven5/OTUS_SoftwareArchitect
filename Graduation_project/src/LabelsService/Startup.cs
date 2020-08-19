@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NSwag;
+using Prometheus;
 using Shared;
 
 namespace LabelsService
@@ -22,6 +24,7 @@ namespace LabelsService
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerDocument(); 
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<LabelsRepository, LabelsRepository>();
@@ -42,12 +45,26 @@ namespace LabelsService
             }
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
+
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Labels service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp/labels"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/labels/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
         }
 

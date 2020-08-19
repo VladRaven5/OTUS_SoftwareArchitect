@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSwag;
+using Prometheus;
 using StackExchange.Redis;
 
 namespace AuthService
@@ -64,6 +65,7 @@ namespace AuthService
             }
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -83,6 +85,7 @@ namespace AuthService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
         }
     }

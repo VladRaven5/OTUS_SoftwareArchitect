@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NSwag;
+using Prometheus;
 using Shared;
 
 namespace ListsService
@@ -22,6 +24,7 @@ namespace ListsService
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerDocument(); 
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<ListsRepository, ListsRepository>();
@@ -43,12 +46,26 @@ namespace ListsService
             }
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
+
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Lists service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp/lists"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/lists/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
 
             app.ApplicationServices.GetService<BrokerMessagesHandler>().Initialize();

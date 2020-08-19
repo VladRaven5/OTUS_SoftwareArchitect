@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using AutoMapper;
 using Shared;
 using Prometheus;
+using NSwag;
 
 namespace ProjectsService
 {
@@ -23,6 +24,7 @@ namespace ProjectsService
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerDocument();
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
             services.AddScoped<ProjectsRepository, ProjectsRepository>();
@@ -46,6 +48,18 @@ namespace ProjectsService
             app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
+
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Tasks service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp/projects"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/projects/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {

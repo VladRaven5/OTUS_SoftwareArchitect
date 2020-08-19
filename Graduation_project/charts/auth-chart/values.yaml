@@ -28,6 +28,10 @@ usersService:
   url: "users-service"
   port: "9002"
 
+metrics:
+  serviceMonitor:
+    enabled: true
+
 
 imagePullSecrets: []
 nameOverride: ""

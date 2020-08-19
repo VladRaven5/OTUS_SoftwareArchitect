@@ -8,7 +8,7 @@ image:
   repository: vladraven/otus_grad_users_service
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.5"
+  tag: latest
   containerPort: 5000
   dbConnectionStringEnvName:
     cn: ConnectionStrings__CN
@@ -50,6 +50,10 @@ rabbitMq:
   username: user
   #this pass is required according to bug in chart: https://github.com/bitnami/charts/issues/3095
   password: CHANGEME 
+
+metrics:
+  serviceMonitor:
+    enabled: true
 
 imagePullSecrets: []
 nameOverride: ""

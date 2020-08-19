@@ -34,6 +34,10 @@ rabbitMq:
   #this pass is required according to bug in chart: https://github.com/bitnami/charts/issues/3095
   password: CHANGEME
 
+metrics:
+  serviceMonitor:
+    enabled: true
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

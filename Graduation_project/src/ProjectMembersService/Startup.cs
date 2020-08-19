@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSwag;
+using Prometheus;
 using Shared;
 
 namespace ProjectMembersService
@@ -65,6 +66,7 @@ namespace ProjectMembersService
             app.UseCors();
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
 
@@ -83,6 +85,7 @@ namespace ProjectMembersService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
 
             app.ApplicationServices.GetService<BrokerMessagesHandler>().Initialize();

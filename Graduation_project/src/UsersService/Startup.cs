@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NSwag;
+using Prometheus;
 using Shared;
 
 namespace UsersService
@@ -21,7 +23,8 @@ namespace UsersService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();    
-            services.AddAutoMapper(typeof(Startup));            
+            services.AddAutoMapper(typeof(Startup));  
+            services.AddSwaggerDocument();          
 
             InitializeRabbitMQ(services);
             
@@ -41,12 +44,26 @@ namespace UsersService
             }
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
+
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Users service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp/users"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/users/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
         }
 

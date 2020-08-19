@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AutoMapper;
 using Shared;
+using NSwag;
+using Prometheus;
 
 namespace WorkingHoursService
 {
@@ -22,6 +24,7 @@ namespace WorkingHoursService
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerDocument();
 
 
             services.AddSingleton<PostgresConnectionManager, PostgresConnectionManager>();
@@ -44,12 +47,26 @@ namespace WorkingHoursService
             }
 
             app.UseRouting();
+            app.UseHttpMetrics(); //grab common metrics by default
 
             app.UseAuthorization();
+
+            app.UseOpenApi( o =>
+            {
+                o.PostProcess = (document, request) =>
+                {
+                    document.Info.Title = "Working hours service API";
+                    string documentBaseUrl = document.BaseUrl;
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer(){ Description = "Default" , Url = $"{documentBaseUrl}/otusapp/working-hours"}); 
+                };
+            });
+            app.UseSwaggerUi3(o => { o.TransformToExternalPath = (s, request) => { return $"/otusapp/working-hours/{s}"; }; });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics(); //map metrics to /metrics endpoint
             });
 
             app.ApplicationServices.GetService<BrokerMessagesHandler>().Initialize();
