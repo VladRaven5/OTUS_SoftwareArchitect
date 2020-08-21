@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tasks-chart.fullname" . }}
+  labels:
+    {{- include "tasks-chart.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "tasks-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "tasks-chart.selectorLabels" . | nindent 8 }}
+        date: "{{ now | unixEpoch }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tasks-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:       
+       - name: wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+       - name: tasks-pg-migration-job
+         image: postgres:latest
+         env:
+          - name: POSTGRES_USER
+            value: {{.Values.postgresql.postgresqlUsername}}
+          - name: POSTGRES_PASSWORD
+            value: {{.Values.postgresql.postgresqlPassword}}
+          - name: POSTGRES_DB
+            value: {{.Values.postgresql.postgresqlDatabase}}
+          - name: POSTGRES_HOST
+            value: {{.Values.postgresql.fullnameOverride}}
+          - name: POSTGRES_PORT
+            value: "{{.Values.postgresql.service.port}}"
+         command:
+          - sh
+          - "-c"
+          - |
+            psql "user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB" << 'EOF'
+              create database tasks;
+              \c tasks;
+              create table projects (id char(36) primary key, title varchar(150));
+              create table lists (id char(36) primary key, projectid char(36), title varchar(150));
+              create table users (id char(36) primary key, username varchar(150));
+              create table labels (id char(36) primary key, title varchar(30), color char(6));
+              create table project_members (userid char(36), projectid char(36), primary key (userid, projectid));
+              create table tasks (id char(36) primary key, title varchar(200), description varchar, listid char(36),
+                  state int, duedate timestamp, createddate timestamp, version int not null,
+                  constraint fk_tasks_lists foreign key(listid) references lists(id));
+              create table task_members(taskid char(36), userid char(36), primary key (taskid, userid));
+              create table task_labels(taskid char(36), labelid char(36), primary key (taskid, labelid));
+              create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+              create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
+            EOF
+       {{- if .Values.redis.enabled }}
+       - name: wait-redis-ready
+         image: busybox:latest
+         env:
+          - name: REDIS_HOST
+            value: {{ .Values.redis.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $REDIS_HOST; do echo waiting for $REDIS_HOST; sleep 2; done;']
+       {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: {{.Values.image.connectionStringEnvName}}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tasks-chart.fullname" . }}
+                  key: PG_CONNECTION
+            - name: {{ .Values.image.redisConnectionStringEnvName }}
+              value: {{ .Values.redis.fullnameOverride }} 
+            - name: {{ .Values.image.redisEnabledEnvName }}
+              value: {{ .Values.redis.enabled }}               
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
