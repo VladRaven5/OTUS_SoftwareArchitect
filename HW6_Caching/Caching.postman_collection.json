@@ -1,0 +1,609 @@
+{
+	"info": {
+		"_postman_id": "c9829d2f-5db0-4374-a162-99c2b9212908",
+		"name": "Caching",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get users data from db",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "05a7326e-7a89-4df7-9fbc-2d943b6ae599",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{current_user_id}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a3111eb1-a9fd-4369-a2fd-0e36dd186f3e",
+						"exec": [
+							"var responseText = pm.response.text()",
+							"pm.variables.set(\"response_text\", responseText);    "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/my",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"my"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is same second request from cache",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b191e327-eb70-4a05-9982-fe1f16417074",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{current_user_id}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "16cfd2c6-e419-4e51-b438-1fa614522c54",
+						"exec": [
+							"pm.test(\"Is data from cache (HTTP 202)\", function () {",
+							"    pm.response.to.have.status(202);    ",
+							"});",
+							"",
+							"pm.test(\"Is data same\", function () {",
+							"    pm.expect(pm.response.text()).to.eql(pm.variables.get(\"response_text\"))",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/my",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"my"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create new task",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ccff997c-8d52-402a-8a19-f3fa87259951",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{$randomUUID}}'), \"X-RequestId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d49c90a2-db5c-4203-a1e8-ab433b99d300",
+						"exec": [
+							"pm.test(\"Is task created\", function () {",
+							"    var json = pm.response.json()",
+							"    pm.variables.set(\"created_task_id\", json.id);",
+							"",
+							"    pm.response.to.have.status(200);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"{{$randomWord}}\",\n    \"listid\": \"list00000000000000000000000000000005\",\n    \"membersIds\": [ \"{{current_user_id}}\", \"user00000000000000000000000000000003\"],\n    \"labelsIds\": [ \"label0000000000000000000000000000001\" ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is create invalidate cache",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "004e157c-ab3c-4530-8d32-81d14cc0fb59",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{current_user_id}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "27cf41ad-128b-498f-9d37-92c77b4cd94b",
+						"exec": [
+							"pm.test(\"Is data from DB (HTTP 200)\", function () {",
+							"    pm.response.to.have.status(200);    ",
+							"});",
+							"",
+							"    "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/my",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"my"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update new task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "28db7d39-e162-446d-a74b-bcf68d65fdb2",
+						"exec": [
+							"pm.test(\"Is task updated\", function () {",
+							"    pm.response.to.have.status(200);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"{{$randomWord}}\",\n    \"listid\": \"list00000000000000000000000000000005\",\n    \"membersIds\": [ \"{{current_user_id}}\", \"user00000000000000000000000000000003\"],\n    \"labelsIds\": [ \"label0000000000000000000000000000001\" ],\n    \"id\": \"{{created_task_id}}\",\n    \"version\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is update invalidates cache",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f73990f6-e201-400a-946f-8ec91bf9cd70",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{current_user_id}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "72a1283f-cd1b-495c-9200-3291b8601176",
+						"exec": [
+							"pm.test(\"Is data from DB (HTTP 200)\", function () {",
+							"    var responseText = pm.response.text()",
+							"    pm.variables.set(\"response_text\", responseText);",
+							"    ",
+							"    pm.response.to.have.status(200);    ",
+							"});",
+							"",
+							"    "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/my",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"my"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is cache works after all",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cf85067f-9c41-4902-a24c-f1d0f5baed22",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{current_user_id}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ef05aacf-26b6-4738-a423-25254fe6cd61",
+						"exec": [
+							"pm.test(\"Is data from cache (HTTP 202)\", function () {",
+							"    pm.response.to.have.status(202);    ",
+							"});",
+							"",
+							"pm.test(\"Is data same\", function () {",
+							"    pm.expect(pm.response.text()).to.eql(pm.variables.get(\"response_text\"))",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/my",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"my"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get single task from db",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "85b15a1c-df85-4741-8672-9491e0c27a8d",
+						"exec": [
+							"var responseText = pm.response.text()",
+							"pm.variables.set(\"response_text\", responseText);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/task00000000000000000000000000000011",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"task00000000000000000000000000000011"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Next Get task from cache",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "54a78821-687f-4300-89b2-14f7c7cf337c",
+						"exec": [
+							"pm.test(\"Is data from cache (HTTP 202)\", function () {",
+							"    pm.response.to.have.status(202);    ",
+							"});",
+							"",
+							"pm.test(\"Is data same\", function () {",
+							"    pm.expect(pm.response.text()).to.eql(pm.variables.get(\"response_text\"))",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/task00000000000000000000000000000011",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"task00000000000000000000000000000011"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get filtered tasks",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3fec5354-f4ef-40fd-82c2-319e70840e60",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4118cfd9-540c-49cd-8a61-d1d0fda62021",
+						"exec": [
+							"var responseText = pm.response.text()",
+							"pm.variables.set(\"response_text\", responseText);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"tas%\",\n    \"usersIds\": [ \"user00000000000000000000000000000001\" ],\n    \"labelsIds\": [ \"label0000000000000000000000000000004\", \"label0000000000000000000000000000003\" ],\n    \"listsIds\" : [ \"list00000000000000000000000000000001\", \"list00000000000000000000000000000004\"  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/filter",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"filter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Next filter same args from cache",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ad09c85b-9145-43a4-8395-768144059da8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "8b4361e1-a9ac-4bc9-bb3d-24eeb691146c",
+						"exec": [
+							"pm.test(\"Is filter data from cache (HTTP 202)\", function () {",
+							"    pm.response.to.have.status(202);    ",
+							"});",
+							"",
+							"pm.test(\"Is filter data same\", function () {",
+							"    pm.expect(pm.response.text()).to.eql(pm.variables.get(\"response_text\"))",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"tas%\",\n    \"usersIds\": [ \"user00000000000000000000000000000001\" ],\n    \"labelsIds\": [ \"label0000000000000000000000000000004\", \"label0000000000000000000000000000003\" ],\n    \"listsIds\" : [ \"list00000000000000000000000000000001\", \"list00000000000000000000000000000004\"  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/filter",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"filter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New filter args - from db",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "59756cc3-de32-4359-8a2a-e3038ab1ca22",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"%s%\",\n    \"usersIds\": [ \"user00000000000000000000000000000003\" ],\n    \"labelsIds\": [ \"label0000000000000000000000000000001\" ],\n    \"listsIds\" : [ \"list00000000000000000000000000000003\"  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{base_url}}/otusapp/tasks/filter",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"filter"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "fe7f086b-fd3c-4a6b-8e36-cee16b7028dc",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "ad1d56af-3d84-4ca6-b6b7-38b9b87c49ce",
+				"type": "text/javascript",
+				"exec": [
+					"tests[\"[INFO] Request: \" + (('data' in request) ? request['data'] : '')] = true;",
+					"tests[\"[INFO] Response: \" + responseBody] = true;"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "467efd7d-8d1f-4170-8871-67dd2f952f82",
+			"key": "base_url",
+			"value": "arch.homework"
+		},
+		{
+			"id": "f9798cfa-6e34-4bdf-aba4-f371e72136b0",
+			"key": "current_user_id",
+			"value": "user00000000000000000000000000000002"
+		},
+		{
+			"id": "6f4d1589-014b-41f5-93c0-1a38c17e107f",
+			"key": "response_text",
+			"value": ""
+		},
+		{
+			"id": "c9f0bb05-1c64-483b-a044-bc999ba4f571",
+			"key": "created_task_id",
+			"value": ""
+		}
+	],
+	"protocolProfileBehavior": {}
+}
