@@ -14,6 +14,8 @@ create table tasks (id char(36) primary key, title varchar(200), description var
 create table task_members(taskid char(36), userid char(36), primary key (taskid, userid));
 create table task_labels(taskid char(36), labelid char(36), primary key (taskid, labelid));
 
+create table transactions(id char(36) primary key, objectid char(36), type varchar(50), data varchar, message varchar, state int, createddate timestamp);
+
 create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
 create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
 
