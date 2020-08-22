@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dash-configmap
+  labels:
+    grafana_dashboard: "1"
+data:
+  grafana-net-2-dashboard.json: |-
+{{ .Files.Get "grafana_dashboard.json" | indent 4}}
