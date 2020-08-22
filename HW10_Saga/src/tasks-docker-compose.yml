@@ -1,0 +1,21 @@
+version: '3.4'
+
+#common
+x-tasks-service:
+  &default_tasks_service
+  image: vladraven/otus_tasks_service
+  build:
+    context: .
+    dockerfile: TasksDockerfile
+  ports:
+    - 5000:5000
+
+services:
+  tasks_service_latest:
+    *default_tasks_service
+  
+  tasks_service_current:
+    << : *default_tasks_service
+    image: vladraven/otus_tasks_service:0.5
+
+    

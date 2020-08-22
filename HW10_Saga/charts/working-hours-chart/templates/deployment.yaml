@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "working-hours-chart.fullname" . }}
+  labels:
+    {{- include "working-hours-chart.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "working-hours-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "working-hours-chart.selectorLabels" . | nindent 8 }}
+        date: "{{ now | unixEpoch }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "working-hours-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+       - name: wait-rabbit-ready
+         image: busybox:latest
+         env:
+          - name: RABBIT_HOST
+            value: {{ .Values.rabbitMq.host }}          
+         command: ['sh', '-c', 'until nslookup $RABBIT_HOST; do echo waiting for $RABBIT_HOST; sleep 2; done;']   
+       - name: wait-pg-ready
+         image: busybox:latest
+         env:
+          - name: POSTGRES_HOST
+            value: {{ .Values.postgresql.fullnameOverride }}
+         command: ['sh', '-c', 'until nslookup $POSTGRES_HOST; do echo waiting for $POSTGRES_HOST; sleep 2; done;']
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: {{.Values.image.connectionStringEnvName}}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "working-hours-chart.fullname" . }}
+                  key: PG_CONNECTION
+            - name: {{ .Values.rabbitMq.hostEnvName }}
+              value: "{{ .Values.rabbitMq.host }}.default.svc"
+            - name: {{ .Values.rabbitMq.portEnvName }}
+              value: "{{ .Values.rabbitMq.port }}"
+            - name: {{ .Values.rabbitMq.usernameEnvName }}
+              value: {{ .Values.rabbitMq.username }}
+            - name: {{ .Values.rabbitMq.passwordEnvName }}
+              value: {{ .Values.rabbitMq.password }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

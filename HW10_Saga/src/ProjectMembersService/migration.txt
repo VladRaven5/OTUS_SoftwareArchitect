@@ -1,0 +1,8 @@
+create database project_members;
+\c project_members;
+create table project_members (userid char(36), projectid char(36), role int, primary key (userid, projectid));
+create table projects (id char(36) primary key, title varchar(150));
+create table users (id char(36) primary key, username varchar(200));
+create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
+

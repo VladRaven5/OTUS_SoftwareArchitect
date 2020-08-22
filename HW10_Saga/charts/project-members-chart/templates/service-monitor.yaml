@@ -1,0 +1,20 @@
+{{- if .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "project-members-chart.fullname" . }}
+  labels: 
+    {{- include "project-members-chart.labels" . | nindent 4 }}
+spec:
+  jobLabel: {{ include "project-members-chart.fullname" . }}
+  namespaceSelector:
+    matchNames:
+    - "{{ $.Release.Namespace }}"
+  selector:
+    matchLabels:
+      {{- include "project-members-chart.selectorLabels" . | nindent 6 }}
+  endpoints:
+  - interval: 15s
+    port: http
+    path: /metrics
+{{- end }}
