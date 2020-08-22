@@ -1,0 +1,19 @@
+create database tasks;
+\c tasks;
+
+create table projects (id char(36) primary key, title varchar(150));
+create table lists (id char(36) primary key, projectid char(36), title varchar(150));
+create table users (id char(36) primary key, username varchar(150));
+create table labels (id char(36) primary key, title varchar(30), color char(6));
+create table project_members (userid char(36), projectid char(36), primary key (userid, projectid));
+
+create table tasks (id char(36) primary key, title varchar(200), description varchar, listid char(36),
+    state int, duedate timestamp, createddate timestamp, version int not null,
+    constraint fk_tasks_lists foreign key(listid) references lists(id));
+
+create table task_members(taskid char(36), userid char(36), primary key (taskid, userid));
+create table task_labels(taskid char(36), labelid char(36), primary key (taskid, labelid));
+
+create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
+create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
+
