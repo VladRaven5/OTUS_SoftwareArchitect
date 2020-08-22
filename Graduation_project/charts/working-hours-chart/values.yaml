@@ -22,6 +22,10 @@ postgresql:
     port: "5432"
   persistence:
     size: 2Gi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 rabbitMq:
   hostEnvName: RabbitMQ__Host
