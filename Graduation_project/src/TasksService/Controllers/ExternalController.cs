@@ -66,6 +66,12 @@ namespace TasksService
             }            
         }
 
+        [HttpPost("filter")]
+        public async Task<ActionResult<IEnumerable<TaskAggregate>>> FilterTask([FromBody] FilterTaskArgs dto)
+        {
+            return Ok(await _tasksManager.FilterTasksAsync(dto));
+        }
+
         [HttpPost]
         public async Task<ActionResult<TaskAggregate>> CreateTask([FromBody] CreateTaskDto createDto)
         {

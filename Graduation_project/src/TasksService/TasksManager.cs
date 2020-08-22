@@ -99,7 +99,11 @@ namespace TasksService
                 throw;
             }            
         }
-        
+
+        public Task<IEnumerable<TaskAggregate>> FilterTasksAsync(FilterTaskArgs args)
+        {
+            return _tasksRepository.FilterTasksAsync(args);
+        }
 
         public async Task<TaskAggregate> UpdateTaskAsync(TaskModel updatingTask, IEnumerable<string> usersIds,
             IEnumerable<string> labelsIds)

@@ -49,37 +49,74 @@ namespace TasksService
             return aggregatedResult;
         }  
 
-        // public Task<IEnumerable<ProjectMemberAggregate>> GetProjectsMembersAsync(string projectId = null, string userId = null)
-        // {
-        //     string AddStatement(string target, string statement)
-        //     {
-        //         if(string.IsNullOrWhiteSpace(target))
-        //         {
-        //             target = $"where {statement}";
-        //         }
-        //         else
-        //         {
-        //             target += $" and {statement}";
-        //         }
+        public async Task<IEnumerable<TaskAggregate>> FilterTasksAsync(FilterTaskArgs args)
+        {
+            string AddStatement(string currentStatement, string addingPart)
+            {
+                if(string.IsNullOrWhiteSpace(currentStatement))
+                    return " where " + addingPart;
 
-        //         return target;
-        //     }
+                return currentStatement + " and " + addingPart;
+            }
 
-        //     string whereStatement = string.Empty;
+            string AddContainsStringStatement(string currentStatements, IEnumerable<string> items, string key)
+            {
+                if(!items.IsNullOrEmpty())
+                {
+                    currentStatements = AddStatement(
+                        currentStatements,
+                        $" {key} in ( {string.Join(", ", items.Select(i => $"'{i}'"))} ) "
+                    );
+                }
 
-        //     if(!string.IsNullOrWhiteSpace(projectId))
-        //     {
-        //         whereStatement = AddStatement(whereStatement, $"projectid = '{projectId}'");
-        //     }
+                return currentStatements;
+            }
 
-        //     if(!string.IsNullOrWhiteSpace(userId))
-        //     {
-        //         whereStatement = AddStatement(whereStatement, $"userId = '{userId}'");
-        //     }
+            string whereStatement = string.Empty;
 
-        //     return _connection.QueryAsync<ProjectMemberAggregate>(
-        //         GetMergedSelectQuery(whereStatement));
-        // }
+             whereStatement = AddContainsStringStatement(whereStatement, args.ListsIds, "ls.id");
+
+            if(!args.UsersIds.IsNullOrEmpty())
+            {
+                whereStatement = AddStatement(
+                    whereStatement,
+                    $" t.id in ( select taskid from task_members where userid in ( {string.Join(", ", args.UsersIds.Select(u => $"'{u}'"))} ) ) "
+                );
+            }
+
+            if(!args.LabelsIds.IsNullOrEmpty())
+            {
+                whereStatement = AddStatement(
+                    whereStatement,
+                    $" t.id in ( select taskid from task_labels where labelid in ( {string.Join(", ", args.LabelsIds.Select(l => $"'{l}'"))} ) ) "
+                );
+            }
+
+
+            if(!args.States.IsNullOrEmpty())
+            {
+                whereStatement = AddStatement(
+                    whereStatement,
+                    $" t.state in ( {string.Join(", ", args.States.Select(s => (int)s))} ) "
+                );
+            }
+
+            if(!string.IsNullOrWhiteSpace(args.Title))
+            {
+                whereStatement = AddStatement(whereStatement,
+                    $" t.title like '{args.Title}' ");
+            }
+
+            if(string.IsNullOrWhiteSpace(whereStatement))
+                return new List<TaskAggregate>();          
+        
+            string query = GetMergedSelectQuery(whereStatement);
+
+            var queryResults = await _connection.QueryAsync<TaskQueryJoinedResult>(query);
+            var aggregatedResult = AggregateQueryResult(queryResults.ToList());
+
+            return aggregatedResult;            
+        }        
 
         public async Task<TaskAggregate> CreateTaskAsync(TaskModel newTask, TaskCollections collections, OutboxMessageModel outboxMessage)
         {
