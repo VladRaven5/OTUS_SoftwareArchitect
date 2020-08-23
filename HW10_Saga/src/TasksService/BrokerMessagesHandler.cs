@@ -14,6 +14,7 @@ namespace TasksService
             new TopicQueueBindingArgs(Topics.Projects, "projectstotasks"),
             new TopicQueueBindingArgs(Topics.Labels, "labelstotasks"),
             new TopicQueueBindingArgs(Topics.Lists, "liststotasks"),
+            new TopicQueueBindingArgs(Topics.WorkingHours, "workinghourstotasks"),
         };
 
         private readonly UsersMessageHandler _usersMessagesHandler;

@@ -20,7 +20,11 @@ namespace WorkingHoursService
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                    #if DEBUG
+                    .UseUrls("http://0.0.0.0:5015")
+                    #endif
+                    ;
                 });
     }
 }

@@ -21,11 +21,11 @@ namespace WorkingHoursService
             {
                 if(string.IsNullOrWhiteSpace(target))
                 {
-                    target = $"where {statement}";
+                    target = $"where {statement} ";
                 }
                 else
                 {
-                    target += $" and {statement}";
+                    target += $" and {statement} ";
                 }
 
                 return target;

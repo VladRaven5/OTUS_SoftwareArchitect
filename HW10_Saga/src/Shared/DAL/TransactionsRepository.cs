@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System;
 using Dapper;
 
 namespace Shared
@@ -36,9 +37,9 @@ namespace Shared
                 $" values ('{transactionRecord.Id}', '{transactionRecord.ObjectId}', '{transactionRecord.Type}', '{transactionRecord.Data}', '{transactionRecord.Message}', {(int)transactionRecord.State}, '{transactionRecord.CreatedDate}'); ";
 
             if(outboxMessage != null)
-            {
+            {                
                 string messageQuery = ConstructInsertMessageQuery(outboxMessage);
-                query += messageQuery;
+                query += messageQuery;                               
             }
 
             var result = await _connection.ExecuteAsync(query);
@@ -87,10 +88,20 @@ namespace Shared
             if(outboxMessage != null)
             {
                 string messageQuery = ConstructInsertMessageQuery(outboxMessage);
-                query += messageQuery;
-            }            
+                query += messageQuery;             
+            }          
             
-            var result = await _connection.ExecuteAsync(query);
+            int result = 0;
+            try
+            {
+                result = await _connection.ExecuteAsync(query);
+            }
+            catch
+            {
+                Console.WriteLine(query);
+                throw;
+            }
+            
 
             if(result <= 0)
             {

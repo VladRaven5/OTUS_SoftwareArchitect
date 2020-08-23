@@ -10,5 +10,6 @@ namespace Shared
         public const string Labels = "labels";
 
         public const string Lists = "lists";
+        public const string WorkingHours = "workinghours";
     }
 }

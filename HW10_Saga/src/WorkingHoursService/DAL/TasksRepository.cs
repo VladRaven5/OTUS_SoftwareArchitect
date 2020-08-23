@@ -47,7 +47,7 @@ namespace WorkingHoursService
 
         private async Task UpdateTaskAsync(TaskModel task)
         {
-            string updateQuery = $"update {_tableName} set title = '{task.Title}' projectid = {task.ProjectId} where id = '{task.Id}';";
+            string updateQuery = $"update {_tableName} set title = '{task.Title}' projectid = '{task.ProjectId}' where id = '{task.Id}';";
 
             int res = await _connection.ExecuteAsync(updateQuery);
 

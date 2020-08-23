@@ -174,14 +174,25 @@ namespace WorkingHoursService
                                 Console.WriteLine($"Already handled: {baseMessage.Id}");
                             }
                         }                    
-                break;
+                    break;
 
                 case MessageActions.Deleted:
                     //do nothing for now...
                 break;
 
-                default:
-                    throw new NotFoundException($"Action {messageObject.Action} is not known");
+                case TransactionMessageActions.MoveTask_HandleHoursRequested:
+                case TransactionMessageActions.MoveTask_Complete:
+                case TransactionMessageActions.MoveTask_Rollback:
+                    Console.WriteLine("Move task transaction message");
+                    using(var scope = _serviceProvider.CreateScope())
+                    {
+                        var handler = scope.ServiceProvider.GetRequiredService<MoveTaskTransactionHandler>();
+                        string result = handler.HandleMessageAsync(messageObject).GetAwaiter().GetResult();
+                        Console.WriteLine(result);                        
+                    }
+
+                    break;  
+
             }
         }
     }
