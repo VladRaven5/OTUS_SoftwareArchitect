@@ -43,6 +43,19 @@ spec:
               create table transactions(id char(36) primary key, objectid char(36), type varchar(50), data varchar, message varchar, state int, createddate timestamp);
               create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
               create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
+            
+              insert into projects (id, title) values 
+                ('project00000000000000000000000000001', 'project1'),
+                ('project00000000000000000000000000002', 'project2'),
+                ('project00000000000000000000000000003', 'project3');
+
+              insert into users (id, username) values 
+                ('user00000000000000000000000000000001', 'user1'),
+                ('user00000000000000000000000000000002', 'user2');
+
+              insert into project_members (userid, projectid, role) values 
+                ('user00000000000000000000000000000001', 'project00000000000000000000000000001', 0),
+                ('user00000000000000000000000000000002', 'project00000000000000000000000000001', 1);                  
             EOF
   
   backoffLimit: 0

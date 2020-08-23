@@ -49,10 +49,20 @@ spec:
               create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
               create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
 
-              insert into projects (id, title) values('11111111111111111111111111111111', 'proj111');
-              insert into tasks (id, projectid, title) values('00000000000000000000000000000000', '11111111111111111111111111111111', 'task000');
-              insert into users (id, username) values('222222222222222222222222222222222222', 'Dima');
-              insert into users (id, username) values('333333333333333333333333333333333333', 'Vasya');
+              insert into projects (id, title) values 
+                ('project00000000000000000000000000001', 'project1'),
+                ('project00000000000000000000000000002', 'project2'),
+                ('project00000000000000000000000000003', 'project3'),
+                ('project00000000000000000000000000004', 'project4'),
+                ('project00000000000000000000000000005', 'project5');
+
+              insert into users (id, username) values 
+                ('user00000000000000000000000000000001', 'user1'),
+                ('user00000000000000000000000000000002', 'user2'),
+                ('user00000000000000000000000000000003', 'user3'),
+                ('user00000000000000000000000000000004', 'user4'),
+                ('user00000000000000000000000000000005', 'user5');              
+              
             EOF
   
   backoffLimit: 0
