@@ -65,6 +65,7 @@ namespace WorkingHoursService
                 ProjectId = ProjectId,
                 TaskId = TaskId,
                 AffectedRecordsIds = AffectedRecordsIds,
+                AppliedPostfix = AppliedPostfix
             };
 
             Data = JsonConvert.SerializeObject(transactionData);
