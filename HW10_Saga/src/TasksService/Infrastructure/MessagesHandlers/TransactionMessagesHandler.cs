@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
@@ -11,6 +12,8 @@ namespace TasksService
         public static readonly HashSet<string> Actions = new HashSet<string>
         {
             TransactionMessageActions.MoveTask_PrepareListCompleted,
+            TransactionMessageActions.MoveTask_MoveMembersCompleted,
+            TransactionMessageActions.MoveTask_HandleHoursCompleted,
             TransactionMessageActions.MoveTask_Rollback,
             TransactionMessageActions.MoveTask_Complete,
         };
@@ -28,6 +31,12 @@ namespace TasksService
             {
                 case TransactionMessageActions.MoveTask_PrepareListCompleted:
                     return typeof(MoveTaskListPreparedMessage);
+
+                case TransactionMessageActions.MoveTask_MoveMembersCompleted:
+                    return typeof(MoveTaskMembersMovedMessage);
+
+                case TransactionMessageActions.MoveTask_HandleHoursCompleted:
+                    return typeof(MoveTaskHoursHandledMessage);
                 
                 case TransactionMessageActions.MoveTask_Rollback:
                     return typeof(RollbackTransactionMessage);
@@ -59,33 +68,37 @@ namespace TasksService
                 switch(action)
                 {
                     case TransactionMessageActions.MoveTask_PrepareListCompleted:
-                        var listPreparedMessage = message as MoveTaskListPreparedMessage;
+                        HandleListPreparedAsync(transaction, transactionMessage, repository, tasksRepository).GetAwaiter().GetResult();                        
+                        break;
+
+
+                    case TransactionMessageActions.MoveTask_MoveMembersCompleted:
+                        HandleMembersMovedAsync(transaction, transactionMessage, repository).GetAwaiter().GetResult();
+                        break;
+
+
+                    case TransactionMessageActions.MoveTask_HandleHoursCompleted:
+                        var hoursHanldedMessage = message as MoveTaskHoursHandledMessage;
                         if(transaction == null)
                         {
-                            Console.WriteLine($"Transaction for prepared list {listPreparedMessage.ListId} not found");
+                            Console.WriteLine($"Transaction for handled hours not found");
                             return;
                         }
+                        var moveTaskHoursTransaction = MoveTaskTransaction.CreateFromBase(transaction);             
 
-                        var moveTaskTransaction = MoveTaskTransaction.CreateFromBase(transaction);
+                        moveTaskHoursTransaction.State = TransactionStates.Success; 
 
-                        string newListId = listPreparedMessage.ListId;
+                        string resultListId = moveTaskHoursTransaction.ListId;                       
 
-                        moveTaskTransaction.ListId = newListId;
-                        moveTaskTransaction.IsListPrepared = true;
-                        moveTaskTransaction.UpdateData();
-
-                        //COMPLETE FROM HERE
-                        moveTaskTransaction.State = TransactionStates.Success;                        
-
-                        var task = tasksRepository.GetSimpleTaskAsync(moveTaskTransaction.ObjectId).GetAwaiter().GetResult();
+                        var task = tasksRepository.GetSimpleTaskAsync(moveTaskHoursTransaction.ObjectId).GetAwaiter().GetResult();
 
                         var projectsRepository = scope.ServiceProvider.GetRequiredService<ProjectsRepository>();
-                        var project = projectsRepository.GetProjectAsync(moveTaskTransaction.ProjectId).GetAwaiter().GetResult();
+                        var project = projectsRepository.GetProjectAsync(moveTaskHoursTransaction.ProjectId).GetAwaiter().GetResult();
 
                         var listsRepository = scope.ServiceProvider.GetRequiredService<ListsRepository>();                      
-                        var list = listsRepository.GetListAsync(newListId).GetAwaiter().GetResult();                        
+                        var list = listsRepository.GetListAsync(resultListId).GetAwaiter().GetResult();                        
 
-                        task.ListId = newListId;
+                        task.ListId = resultListId;
 
                         var taskNewListOutboxMessage = OutboxMessageModel.Create(
                             new TaskUpdatedMessage
@@ -101,14 +114,18 @@ namespace TasksService
                         tasksRepository.UpdateTaskAsync(task, taskNewListOutboxMessage).GetAwaiter().GetResult();
                         tasksRepository.UnsetTransactionAsync(task.Id, transactionId).GetAwaiter().GetResult();
 
-                        var transactionOutboxMessage = OutboxMessageModel.Create(
+                        var transactionCompletedOutboxMessage = OutboxMessageModel.Create(
                             new CompleteTransactionMessage
                             {
                                 TransactionId = transactionId
                             }, Topics.Tasks, TransactionMessageActions.MoveTask_Complete);
                         
-                        repository.CreateOrUpdateTransactionAsync(moveTaskTransaction, transactionOutboxMessage).GetAwaiter().GetResult();
+                        repository.CreateOrUpdateTransactionAsync(moveTaskHoursTransaction, transactionCompletedOutboxMessage).GetAwaiter().GetResult();
+
+                        Console.WriteLine($"Complete transaction {transactionId}");
                         break;
+
+
 
 
                     case TransactionMessageActions.MoveTask_Rollback:
@@ -135,6 +152,85 @@ namespace TasksService
                         break;
                 }
             }            
+        }        
+
+        private async Task HandleListPreparedAsync(TransactionBase transaction, BaseTransactionMessage message, TransactionsRepository repository,
+            TasksRepository tasksRepository)
+        {
+            var listPreparedMessage = message as MoveTaskListPreparedMessage;
+            if(transaction == null)
+            {
+                Console.WriteLine($"Transaction for prepared list {listPreparedMessage.ListId} not found");
+                return;
+            }
+
+            var moveTaskTransaction = MoveTaskTransaction.CreateFromBase(transaction);
+
+            string newListId = listPreparedMessage.ListId;
+
+            moveTaskTransaction.ListId = newListId;
+            moveTaskTransaction.IsListPrepared = true;
+            moveTaskTransaction.UpdateData();
+
+            string taskId = moveTaskTransaction.ObjectId;
+
+            IEnumerable<string> taskMembersIds = await tasksRepository.GetTaskMembersIdsAsync(taskId);
+            OutboxMessageModel nextMessage = default(OutboxMessageModel);
+            
+            if(!taskMembersIds.IsNullOrEmpty())
+            {
+                var task = await tasksRepository.GetTaskAsync(taskId);
+
+                moveTaskTransaction.Message = "Move members to project";
+
+                nextMessage = OutboxMessageModel.Create(
+                    new MoveTaskMoveMembersMessage()
+                    {
+                        TransactionId = transaction.Id,
+                        TargetProjectId = moveTaskTransaction.ProjectId,
+                        SourceProjectId = task.ProjectId,
+                        TaskMembers = taskMembersIds
+                    }, Topics.Tasks, TransactionMessageActions.MoveTask_MoveMembersRequested);
+            }
+            else
+            {
+                moveTaskTransaction.AreMembersPrepared = true;
+                moveTaskTransaction.Message = "Handle task hours with new project";
+
+                nextMessage = OutboxMessageModel.Create(
+                    new MoveTaskHandleHoursMessage()
+                    {
+                        TransactionId = transaction.Id,
+                        ProjectId = moveTaskTransaction.ProjectId,
+                        TaskId = taskId
+                    }, Topics.Tasks, TransactionMessageActions.MoveTask_HandleHoursRequested);
+            }
+
+            await repository.CreateOrUpdateTransactionAsync(moveTaskTransaction, nextMessage);
+        }
+
+        private Task HandleMembersMovedAsync(TransactionBase transaction, BaseTransactionMessage message, TransactionsRepository repository)
+        {
+            var membersMovedMesasge = message as MoveTaskMembersMovedMessage;
+            if(transaction == null)
+            {
+                Console.WriteLine($"Transaction for moved task members not found");
+                return Task.CompletedTask;
+            }
+
+            var moveTaskTransaction = MoveTaskTransaction.CreateFromBase(transaction);
+            moveTaskTransaction.AreMembersPrepared = true;
+            moveTaskTransaction.Message = "Handle task hours with new project";
+
+            var outboxMessage = OutboxMessageModel.Create(
+                new MoveTaskHandleHoursMessage()
+                {
+                    TransactionId = transaction.Id,
+                    ProjectId = moveTaskTransaction.ProjectId,
+                    TaskId = moveTaskTransaction.ObjectId
+                }, Topics.Tasks, TransactionMessageActions.MoveTask_HandleHoursRequested);
+
+            return repository.CreateOrUpdateTransactionAsync(moveTaskTransaction, outboxMessage);
         }
     }
 }
