@@ -11,12 +11,14 @@ namespace WorkingHoursService
     {
         private readonly ProjectsRepository _projectsRepository;
         private readonly WorkingHoursRepository _workingHoursRepository;
+        private readonly TasksRepository _tasksRepository;
 
-        public MoveTaskTransactionHandler(ProjectsRepository projectsRepository, WorkingHoursRepository workingHoursRepository,
+        public MoveTaskTransactionHandler(ProjectsRepository projectsRepository, WorkingHoursRepository workingHoursRepository, TasksRepository tasksRepository,
             RequestsRepository requestsRepository, TransactionsRepository transactionsRepository) : base(requestsRepository, transactionsRepository)
         {
             _projectsRepository = projectsRepository;
             _workingHoursRepository = workingHoursRepository;
+            _tasksRepository = tasksRepository;
         }
 
         protected override Task<string> HandleMessageInternalAsync(string messageString, string messageAction)
@@ -48,32 +50,19 @@ namespace WorkingHoursService
                 ? MoveTaskTransaction.Create(transactionId, message.TaskId, message.ProjectId)
                 : MoveTaskTransaction.CreateFromBase(transaction);
 
-            moveTaskTransaction.State = TransactionStates.Processing;          
+            moveTaskTransaction.State = TransactionStates.Processing; 
 
-            //Check project
-            string projectId = message.ProjectId;
-            var project = await _projectsRepository.GetProjectAsync(projectId);
-            if(project == null)
+            string projectTitle = "undefined";
+            string taskId = message.TaskId;
+            var task = await _tasksRepository.GetTaskAsync(taskId);
+            if(task != null)   
             {
-                string reason = $"Project {projectId} not found";                
-
-                var rollbackOutboxMessage = OutboxMessageModel.Create(
-                    new RollbackTransactionMessage
-                    {
-                        TransactionId = transactionId,
-                        Reason = reason
-                    }, Topics.WorkingHours, TransactionMessageActions.MoveTask_Rollback);
-
-                moveTaskTransaction.State = TransactionStates.Denied;
-                moveTaskTransaction.Message = reason;
-                moveTaskTransaction.UpdateData();                   
-
-                await _transactionsRepository.CreateOrUpdateTransactionAsync(moveTaskTransaction, rollbackOutboxMessage);
-
-                return reason;
+                string projectId = task.ProjectId;
+                var project = await _projectsRepository.GetProjectAsync(projectId);
+                projectTitle = project?.Title;
             }
 
-            string postfix = $"(from {project.Title})";
+            string postfix = $"(from {projectTitle})";
             moveTaskTransaction.AppliedPostfix = postfix;
 
             var taskWorkingHours = (await _workingHoursRepository.GetProjectTaskMemberWorkingHoursAsync(taskId: moveTaskTransaction.TaskId)).ToList();
