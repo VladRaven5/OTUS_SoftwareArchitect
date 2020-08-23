@@ -36,6 +36,7 @@ namespace ProjectMembersService
             services.AddScoped<ProjectsRepository, ProjectsRepository>();
             services.AddScoped<UsersRepository, UsersRepository>();
             services.AddScoped<RequestsRepository, RequestsRepository>();
+            services.AddScoped<TransactionsRepository, TransactionsRepository>();
             services.AddScoped<ProjectMembersManager, ProjectMembersManager>();
 
             InitializeRabbitMQ(services);
@@ -53,6 +54,8 @@ namespace ProjectMembersService
             var rabbit = new RabbitMqTopicManager(host, port, username, password);        
             services.AddSingleton<RabbitMqTopicManager>(rabbit);
             services.AddSingleton<BrokerMessagesHandler, BrokerMessagesHandler>();
+
+            services.AddScoped<MoveTaskTransactionHandler, MoveTaskTransactionHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

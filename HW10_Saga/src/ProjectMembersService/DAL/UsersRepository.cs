@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using Shared;
@@ -16,6 +17,11 @@ namespace ProjectMembersService
         public Task<UserModel> GetUserAsync(string userId)
         {
             return GetModelByIdAsync<UserModel>(userId);
+        }
+
+        public Task<IEnumerable<UserModel>> GetAllUsersAsync()
+        {
+            return GetModelsAsync<UserModel>();
         }
 
         public async Task CreateOrUpdateUserAsync(UserModel user)

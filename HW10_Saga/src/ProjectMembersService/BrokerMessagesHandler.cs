@@ -13,6 +13,7 @@ namespace ProjectMembersService
         { 
             new TopicQueueBindingArgs(Topics.Users, "userstoprojectmembers"),
             new TopicQueueBindingArgs(Topics.Projects, "projectstoprojectmembers"),
+            new TopicQueueBindingArgs(Topics.Tasks, "taskstoprojectmembers")
         };
 
         private readonly IMapper _mapper;
@@ -35,6 +36,10 @@ namespace ProjectMembersService
 
                 case Topics.Projects:
                     HandleProjectMessage(messageObject);
+                    break;
+
+                case Topics.Tasks:
+                    HandleTaskMesasge(messageObject);
                     break;
 
                 default:
@@ -135,9 +140,26 @@ namespace ProjectMembersService
                 case MessageActions.Deleted:
                     //do nothing for now...
                 break;
+            }
+        }
 
-                default:
-                    throw new NotFoundException($"Topic {messageObject.Topic} is not known");
+        private void HandleTaskMesasge(ReceivedMessageArgs messageObject)
+        {
+            Console.WriteLine($"Tasks message received");
+            switch(messageObject.Action)
+            {
+                case TransactionMessageActions.MoveTask_MoveMembersRequested:
+                case TransactionMessageActions.MoveTask_Complete:
+                case TransactionMessageActions.MoveTask_Rollback:
+                    Console.WriteLine("Move task transaction message");
+                    using(var scope = _serviceProvider.CreateScope())
+                    {
+                        var handler = scope.ServiceProvider.GetRequiredService<MoveTaskTransactionHandler>();
+                        string result = handler.HandleMessageAsync(messageObject).GetAwaiter().GetResult();
+                        Console.WriteLine(result);                        
+                    }
+
+                    break;                  
             }
         }
     }
