@@ -6,6 +6,66 @@
 	},
 	"item": [
 		{
+			"name": "Delete member1 from target project",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/project-members?projectid={{target_project1}}&userid={{user1}}",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"project-members"
+					],
+					"query": [
+						{
+							"key": "projectid",
+							"value": "{{target_project1}}"
+						},
+						{
+							"key": "userid",
+							"value": "{{user1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete member2 from target project",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/project-members?projectid={{target_project1}}&userid={{user2}}",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"project-members"
+					],
+					"query": [
+						{
+							"key": "projectid",
+							"value": "{{target_project1}}"
+						},
+						{
+							"key": "userid",
+							"value": "{{user2}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create task1",
 			"event": [
 				{
@@ -202,8 +262,8 @@
 							"    pm.expect(json.transactionId).is.not.oneOf([null, undefined])",
 							"    pm.response.to.have.status(200);    ",
 							"});",
-							"",
-							"setTimeout(() => {}, 5000);"
+							"console.log(\"10 seconds delay to perform saga...\")",
+							"setTimeout(() => {}, 10000);"
 						],
 						"type": "text/javascript"
 					}
@@ -487,52 +547,52 @@
 	],
 	"variable": [
 		{
-			"id": "cdcbc8c2-4a35-47ce-91bb-c8f931995013",
+			"id": "5738b1c2-8427-432c-84f7-b32c3c7ea46c",
 			"key": "base_url",
 			"value": "arch.homework"
 		},
 		{
-			"id": "7f6695d2-66e3-436a-a06e-532552011201",
+			"id": "3c46b929-a8bd-4011-816f-a6fe2929f25f",
 			"key": "user1",
 			"value": "user00000000000000000000000000000001"
 		},
 		{
-			"id": "3f196886-b15e-4a61-b68e-ac7a23113e35",
+			"id": "d95ea18c-e312-436d-a23b-864b7ffd9ba1",
 			"key": "user2",
 			"value": "user00000000000000000000000000000002"
 		},
 		{
-			"id": "25239ad1-3f8f-4594-9813-4e660266ebff",
+			"id": "d0c967e7-5854-469e-b035-1e6d361af3af",
 			"key": "created_task_id",
 			"value": ""
 		},
 		{
-			"id": "975e2cb0-f767-4b51-b3c1-8e2d9f8b9048",
+			"id": "63685a1d-b8fc-46d6-addc-beccbb0b5523",
 			"key": "workhour_record1",
 			"value": ""
 		},
 		{
-			"id": "2b36f902-6974-4e48-ac04-97c308332de8",
+			"id": "ce7632f2-9943-496b-80c4-0d159a81a600",
 			"key": "workhour_record2",
 			"value": ""
 		},
 		{
-			"id": "87d9c664-a2b0-434c-8525-19e7646be5c2",
+			"id": "a9739370-5c28-413b-8047-7952508d4436",
 			"key": "new_list_title",
 			"value": ""
 		},
 		{
-			"id": "0bf78cb0-cd76-4c42-a6c0-c4a85441c578",
+			"id": "bcf96ddf-0d2a-4ec6-a49f-5f7ed3c5b751",
 			"key": "target_project1",
 			"value": "project00000000000000000000000000003"
 		},
 		{
-			"id": "2add7ebb-c415-4d5a-9e81-fb8430329e12",
+			"id": "3926432c-a5db-4b7d-8f28-35312d75657a",
 			"key": "target_project2",
 			"value": "project00000000000000000000000000002"
 		},
 		{
-			"id": "66e990bb-2642-45c2-98ee-6733bfde526f",
+			"id": "c2827646-c3ff-4693-bb23-339148f49c58",
 			"key": "source_project_title",
 			"value": "project1"
 		}
