@@ -149,7 +149,13 @@ namespace ListsService
             if(!moveTransaction.IsListCreated || moveTransaction.ListId == null)
                 return Task.CompletedTask; //nothing to do here
 
-            return _listsRepository.DeleteListAsync(moveTransaction.ListId, null);                        
+            var outboxMessage = OutboxMessageModel.Create(
+                new ListDeletedMessage
+                {
+                    ListId = moveTransaction.ListId,
+                }, Topics.Lists, MessageActions.Deleted);
+
+            return _listsRepository.DeleteListAsync(moveTransaction.ListId, outboxMessage);                        
         }       
     }    
 }
