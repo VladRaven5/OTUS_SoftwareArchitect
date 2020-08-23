@@ -30,6 +30,7 @@ namespace ListsService
             services.AddScoped<ListsRepository, ListsRepository>();
             services.AddScoped<ProjectsRepository, ProjectsRepository>();
             services.AddScoped<RequestsRepository, RequestsRepository>();
+            services.AddScoped<TransactionsRepository, TransactionsRepository>();            
             
             InitializeRabbitMQ(services);
             services.AddScoped<ListsManager, ListsManager>();
@@ -79,6 +80,7 @@ namespace ListsService
             string password = Configuration.GetValue<string>("RabbitMQ:Password");
             services.AddSingleton<RabbitMqTopicManager>(new RabbitMqTopicManager(host, port, username, password));
             services.AddSingleton<BrokerMessagesHandler, BrokerMessagesHandler>();
+            services.AddScoped<MoveTaskTransactionHandler, MoveTaskTransactionHandler>();
         }
     }
 }

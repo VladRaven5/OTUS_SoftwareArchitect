@@ -9,6 +9,12 @@ namespace Shared
 
     public static class TransactionMessageActions
     {
-        public const string MoveTask_PrepareListRequested = "move_task_prepare_list_requested";
+        public const string MoveTask_PrepareListRequested = "movetask_preparelist_req";
+        public const string MoveTask_PrepareListCompleted = "movetask_preparelist_ok";
+
+
+
+        public const string MoveTask_Rollback = "movetask_rollback";
+        public const string MoveTask_Complete = "movetask_complete";
     }
 }

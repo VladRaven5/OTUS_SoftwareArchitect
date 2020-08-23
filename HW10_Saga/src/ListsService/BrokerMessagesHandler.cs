@@ -12,6 +12,7 @@ namespace ListsService
         protected override List<TopicQueueBindingArgs> _bindingArgs => new List<TopicQueueBindingArgs> 
         { 
             new TopicQueueBindingArgs(Topics.Projects, "projectstolists"),
+            new TopicQueueBindingArgs(Topics.Tasks, "taskstolists")
         };
 
         private readonly IMapper _mapper;
@@ -32,10 +33,14 @@ namespace ListsService
                     HandleProjectMessage(messageObject);
                     break;
 
+                case Topics.Tasks:
+                    HandleTasksMessage(messageObject);
+                    break;
+
                 default:
                     throw new NotFoundException($"Topic {messageObject.Topic} is not known");
             }
-        }
+        }        
 
         private void HandleProjectMessage(ReceivedMessageArgs messageObject)
         {
@@ -47,34 +52,51 @@ namespace ListsService
                     var message = JsonConvert.DeserializeObject<ProjectCreatedUpdatedMessage>(messageObject.Message);
                     var model = _mapper.Map<ProjectCreatedUpdatedMessage, ProjectModel>(message);     
                     using(var scope = _serviceProvider.CreateScope())
+                    {
+                        var requestsRepository = scope.ServiceProvider.GetRequiredService<RequestsRepository>();
+                        var projectsRepository = scope.ServiceProvider.GetRequiredService<ProjectsRepository>();
+                        if(!requestsRepository.IsHandledOrSaveRequestAsync(message.Id, GetRequestIdInvalidationDate()).GetAwaiter().GetResult())
                         {
-                            var requestsRepository = scope.ServiceProvider.GetRequiredService<RequestsRepository>();
-                            var projectsRepository = scope.ServiceProvider.GetRequiredService<ProjectsRepository>();
-                            if(!requestsRepository.IsHandledOrSaveRequestAsync(message.Id, GetRequestIdInvalidationDate()).GetAwaiter().GetResult())
+                            try
                             {
-                                try
-                                {
-                                    projectsRepository.CreateOrUpdateProjectAsync(model).GetAwaiter().GetResult();
-                                }
-                                catch(Exception)
-                                {
-                                    requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
-                                    throw;
-                                }                                
+                                projectsRepository.CreateOrUpdateProjectAsync(model).GetAwaiter().GetResult();
                             }
-                            else
+                            catch(Exception)
                             {
-                                Console.WriteLine($"Already handled: {message.Id}");
-                            }
-                        }                    
+                                requestsRepository.DeleteRequestIdAsync(message.Id).GetAwaiter().GetResult();
+                                throw;
+                            }                                
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Already handled: {message.Id}");
+                        }
+                    }                    
                 break;
 
                 case MessageActions.Deleted:
                     //do nothing for now...
                 break;
+            }
+        }
 
-                default:
-                    throw new NotFoundException($"Topic {messageObject.Topic} is not known");
+        private void HandleTasksMessage(ReceivedMessageArgs messageObject)
+        {
+            Console.WriteLine($"Tasks message received");
+            switch(messageObject.Action)
+            {
+                case TransactionMessageActions.MoveTask_PrepareListRequested:
+                case TransactionMessageActions.MoveTask_Complete:
+                case TransactionMessageActions.MoveTask_Rollback:
+                    Console.WriteLine("Move task transaction message");
+                    using(var scope = _serviceProvider.CreateScope())
+                    {
+                        var handler = scope.ServiceProvider.GetRequiredService<MoveTaskTransactionHandler>();
+                        string result = handler.HandleMessageAsync(messageObject).GetAwaiter().GetResult();
+                        Console.WriteLine(result);                        
+                    }
+
+                    break;                  
             }
         }
     }

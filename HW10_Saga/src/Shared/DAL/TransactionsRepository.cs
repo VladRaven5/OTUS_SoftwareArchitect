@@ -17,13 +17,29 @@ namespace Shared
             return GetModelByIdAsync<TransactionBase>(id);
         }
 
+        public async Task<TransactionBase> CreateOrUpdateTransactionAsync(TransactionBase transactionRecord, OutboxMessageModel outboxMessage)
+        {
+            var existingTransaction = await GetTransactionAsync(transactionRecord.Id);
+
+            if(existingTransaction == null)
+            {
+                return await CreateTransactionRecordAsync(transactionRecord, outboxMessage);
+            }
+
+            return await UpdateTransactionRecordAsync(transactionRecord.Id, transactionRecord.Data, transactionRecord.Message,
+                transactionRecord.State, outboxMessage);
+        }
+
         public async Task<TransactionBase> CreateTransactionRecordAsync(TransactionBase transactionRecord, OutboxMessageModel outboxMessage)
         {
             string query = $"insert into {_tableName} (id, objectid, type, data, message, state, createddate) " + 
                 $" values ('{transactionRecord.Id}', '{transactionRecord.ObjectId}', '{transactionRecord.Type}', '{transactionRecord.Data}', '{transactionRecord.Message}', {(int)transactionRecord.State}, '{transactionRecord.CreatedDate}'); ";
 
-            string messageQuery = ConstructInsertMessageQuery(outboxMessage);
-            query += messageQuery;
+            if(outboxMessage != null)
+            {
+                string messageQuery = ConstructInsertMessageQuery(outboxMessage);
+                query += messageQuery;
+            }
 
             var result = await _connection.ExecuteAsync(query);
 
@@ -68,8 +84,11 @@ namespace Shared
 
             string query = $"update {_tableName} set {statements} where id = '{id}' ; ";
 
-            string messageQuery = ConstructInsertMessageQuery(outboxMessage);
-            query += messageQuery;
+            if(outboxMessage != null)
+            {
+                string messageQuery = ConstructInsertMessageQuery(outboxMessage);
+                query += messageQuery;
+            }            
             
             var result = await _connection.ExecuteAsync(query);
 

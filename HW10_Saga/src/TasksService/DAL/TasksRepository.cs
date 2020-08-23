@@ -148,6 +148,33 @@ namespace TasksService
             }
 
             return await GetTaskAsync(newTask.Id);          
+        }
+
+        public async Task<TaskAggregate>  UpdateTaskAsync(TaskModel updatingTask, OutboxMessageModel outboxMessage)
+        {
+            string taskId = updatingTask.Id;
+            
+            int version = updatingTask.Version + 1;
+
+            var updateQuery = $"update {_tableName} set " +
+                $"title = '{updatingTask.Title}', " +
+                $"description = '{updatingTask.Description}', " +
+                $"listid = '{updatingTask.ListId}', " +
+                $"state = {(int)updatingTask.State}, " +
+                $"duedate = {GetQueryNullableEscapedValue(updatingTask.DueDate)} " +
+                $"where id = '{taskId}'; ";
+
+            string insertOutboxMessageQuery = ConstructInsertMessageQuery(outboxMessage);
+            updateQuery += insertOutboxMessageQuery;
+
+            int res = await _connection.ExecuteAsync(updateQuery);
+
+            if(res <= 0)
+            {
+                throw new DatabaseException("Update task failed");
+            }
+
+            return await GetTaskAsync(updatingTask.Id);
         }        
 
         public async Task<TaskAggregate>  UpdateTaskAsync(TaskModel updatingTask, TaskCollections addingCollections,
@@ -223,7 +250,7 @@ namespace TasksService
             return "select t.id, p.id as projectid, p.title as projecttitle, " +
                 "t.listid, ls.title as listtitle, t.title, t.description, t.state, t.duedate, " +
                 "u.id as userid, u.username, lb.id as labelid, lb.title as labeltitle, lb.color as labelcolor, " +
-                "tr.transactionid as transactionid, tr.state as transactionstate, tr.message as transactionmessage, " + 
+                "tr.id as transactionid, tr.state as transactionstate, tr.message as transactionmessage, " + 
                 "t.version, t.createddate as createddate " +
                 $"from {_tableName} t " +
                 $"left join transactions tr on tr.id = t.transactionid " +

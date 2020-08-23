@@ -124,6 +124,7 @@ namespace TasksService
             List<string> taskMembers = task.Members?.Select(m => m.Id).ToList() ?? new List<string>();
 
             MoveTaskTransaction moveTransaction = MoveTaskTransaction.Create(taskId, targetProjectId, targetListTitle);
+            moveTransaction.State = TransactionStates.Processing;
             
             var moveMessage = OutboxMessageModel.Create(
                 new MoveTaskPrepareListMessage

@@ -6,5 +6,6 @@ namespace Shared
         public static readonly string UserIdHeaderName = "X-UserId";
 
         public static readonly int RequestIdLifetimeDays = 1;
+        public static readonly int BrokerMessageLifetimeDays = 2;
     }
 }
