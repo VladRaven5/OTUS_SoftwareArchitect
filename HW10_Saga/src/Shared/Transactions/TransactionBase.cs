@@ -22,10 +22,10 @@ namespace Shared
         /// </summary>
         /// <value></value>
         public string Message { get; set; }
-        public TransactionState State { get; set; }
+        public TransactionStates State { get; set; }
     }
 
-    public enum TransactionState
+    public enum TransactionStates
     {
         Pending = 0,
         Processing = 1,

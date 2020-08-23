@@ -8,7 +8,7 @@ create table labels (id char(36) primary key, title varchar(30), color char(6));
 create table project_members (userid char(36), projectid char(36), primary key (userid, projectid));
 
 create table tasks (id char(36) primary key, title varchar(200), description varchar, listid char(36),
-    state int, duedate timestamp, createddate timestamp, version int not null,
+    transactionid char(36), state int, duedate timestamp, createddate timestamp, version int not null,
     constraint fk_tasks_lists foreign key(listid) references lists(id));
 
 create table task_members(taskid char(36), userid char(36), primary key (taskid, userid));

@@ -10,10 +10,12 @@ namespace TasksService
             CreateMap<CreateTaskDto, TaskModel>()
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.TransactionId, opt => opt.Ignore())
                 .ForMember(dest => dest.Version, opt => opt.Ignore());
 
             CreateMap<UpdateTaskDto, TaskModel>()
-                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore());     
+                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.TransactionId, opt => opt.Ignore());     
 
             CreateMap<TaskQueryJoinedResult, TaskAggregate>()
                 .ForMember(dest => dest.Members, opt => opt.Ignore())

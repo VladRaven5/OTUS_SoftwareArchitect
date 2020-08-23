@@ -17,11 +17,14 @@ namespace Shared
             return GetModelByIdAsync<TransactionBase>(id);
         }
 
-        public async Task<TransactionBase> CreateTransactionRecordAsync(TransactionBase transactionRecord)
+        public async Task<TransactionBase> CreateTransactionRecordAsync(TransactionBase transactionRecord, OutboxMessageModel outboxMessage)
         {
             string query = $"insert into {_tableName} (id, objectid, type, data, message, state, createddate) " + 
-                $" values ('{transactionRecord.Id}', '{transactionRecord.ObjectId}', '{transactionRecord.Type}', '{transactionRecord.Data}', '{transactionRecord.Message}', {(int)transactionRecord.State}, '{transactionRecord.CreatedDate}');";
-            
+                $" values ('{transactionRecord.Id}', '{transactionRecord.ObjectId}', '{transactionRecord.Type}', '{transactionRecord.Data}', '{transactionRecord.Message}', {(int)transactionRecord.State}, '{transactionRecord.CreatedDate}'); ";
+
+            string messageQuery = ConstructInsertMessageQuery(outboxMessage);
+            query += messageQuery;
+
             var result = await _connection.ExecuteAsync(query);
 
             if(result <= 0)
@@ -32,7 +35,7 @@ namespace Shared
             return await GetTransactionAsync(transactionRecord.Id);
         }
 
-        public async Task<TransactionBase> UpdateTransactionRecordAsync(string id, string data, string message, TransactionState? state)
+        public async Task<TransactionBase> UpdateTransactionRecordAsync(string id, string data, string message, TransactionStates? state, OutboxMessageModel outboxMessage)
         {
             string AddStatement(string targetStatements, string addingStatement)
             {
@@ -63,7 +66,11 @@ namespace Shared
                 return null;        
 
 
-            string query = $"update {_tableName} set {statements} where id = {id} ";
+            string query = $"update {_tableName} set {statements} where id = '{id}' ; ";
+
+            string messageQuery = ConstructInsertMessageQuery(outboxMessage);
+            query += messageQuery;
+            
             var result = await _connection.ExecuteAsync(query);
 
             if(result <= 0)

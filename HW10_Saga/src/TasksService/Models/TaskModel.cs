@@ -8,6 +8,7 @@ namespace TasksService
         public string Title { get; set; }
         public string Description { get; set; }
         public string ListId { get; set; }
+        public string TransactionId { get; set; }
 
         public TaskState State { get; set; }
         public DateTimeOffset? DueDate { get; set; }

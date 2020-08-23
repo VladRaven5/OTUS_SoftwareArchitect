@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Shared;
 
 namespace TasksService
 {
@@ -18,6 +19,9 @@ namespace TasksService
         public string Username { get; set; }
         public string LabelId { get; set; }
         public string LabelTitle { get; set; }
+        public string TransactionId { get; set; }
+        public TransactionStates TransactionState { get; set; }
+        public string TransactionMessage { get; set; }
         public string LabelColor { get; set; }
         public int Version { get; set; }
         public DateTimeOffset? CreatedDate { get; set; }

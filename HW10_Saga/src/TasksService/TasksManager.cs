@@ -16,11 +16,12 @@ namespace TasksService
         private readonly UsersRepository _usersRepository;
         private readonly LabelsRepository _labelsRepository;
         private readonly ProjectMembersRepository _projectMembersRepository;
+        private readonly TransactionsRepository _transactionsRepository;
         private readonly IMapper _mapper;
 
         public TasksManager(TasksRepository tasksRepository, RequestsRepository requestsRepository,
             ListsRepository listsRepository, UsersRepository usersRepository, LabelsRepository labelsRepository,
-            ProjectMembersRepository projectMembersRepository, IMapper mapper)
+            ProjectMembersRepository projectMembersRepository, TransactionsRepository transactionsRepository, IMapper mapper)
             : base(requestsRepository)
         {
             _tasksRepository = tasksRepository;
@@ -29,6 +30,7 @@ namespace TasksService
             _usersRepository = usersRepository;
             _labelsRepository = labelsRepository;
             _projectMembersRepository = projectMembersRepository;
+            _transactionsRepository = transactionsRepository;
             _mapper = mapper;
         }
 
@@ -98,6 +100,43 @@ namespace TasksService
                 await _requestsRepository.DeleteRequestIdAsync(requestId);
                 throw;
             }            
+        }
+
+        public async Task<TaskAggregate> MoveTaskToProjectAsync(string taskId, string targetProjectId, string targetListTitle, string requestId)
+        {
+            if(!(await CheckAndSaveRequestIdAsync(requestId)))
+            {
+                throw new AlreadyHandledException();
+            }
+
+            var task = await _tasksRepository.GetTaskAsync(taskId);
+
+            if(!string.IsNullOrWhiteSpace(task.TransactionId))
+            {
+                throw new AlreadyInTransactionException();
+            }
+
+            if(task.ProjectId == targetProjectId)
+            {
+                throw new EntityExistsException("Task already in target project");
+            }
+
+            List<string> taskMembers = task.Members?.Select(m => m.Id).ToList() ?? new List<string>();
+
+            MoveTaskTransaction moveTransaction = MoveTaskTransaction.Create(taskId, targetProjectId, targetListTitle);
+            
+            var moveMessage = OutboxMessageModel.Create(
+                new MoveTaskPrepareListMessage
+                {
+                    TransactionId = moveTransaction.Id,
+                    ListTitle = targetListTitle,
+                    ProjectId = targetProjectId
+                }, Topics.Tasks, TransactionMessageActions.MoveTask_PrepareListRequested);
+
+            await _transactionsRepository.CreateTransactionRecordAsync(moveTransaction, moveMessage);
+            await _tasksRepository.SetTransactionAsync(taskId, moveTransaction.Id);
+
+            return await _tasksRepository.GetTaskAsync(taskId);
         }
 
         public Task<IEnumerable<TaskAggregate>> FilterTasksAsync(FilterTaskArgs args)

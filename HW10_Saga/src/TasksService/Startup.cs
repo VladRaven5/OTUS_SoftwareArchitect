@@ -34,6 +34,7 @@ namespace TasksService
             services.AddScoped<UsersRepository, UsersRepository>();
             services.AddScoped<ListsRepository, ListsRepository>();
             services.AddScoped<LabelsRepository, LabelsRepository>();
+            services.AddScoped<TransactionsRepository, TransactionsRepository>();
 
             services.AddScoped<RequestsRepository, RequestsRepository>();
             

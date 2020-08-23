@@ -6,4 +6,9 @@ namespace Shared
         public const string Updated = "updated";
         public const string Deleted = "deleted";
     }
+
+    public static class TransactionMessageActions
+    {
+        public const string MoveTask_PrepareListRequested = "move_task_prepare_list_requested";
+    }
 }
