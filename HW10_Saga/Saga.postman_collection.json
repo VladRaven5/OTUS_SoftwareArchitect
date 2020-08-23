@@ -1,0 +1,541 @@
+{
+	"info": {
+		"_postman_id": "1d4b8336-9a02-4962-b1d5-4f4fc283042b",
+		"name": "Saga",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create task1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bcc51f22-d496-4713-bb69-a0a6b1a9fcc0",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{$randomUUID}}'), \"X-RequestId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c77c3f49-8df2-4cfd-adac-33b602044e4d",
+						"exec": [
+							"pm.test(\"Is task created\", function () {",
+							"    var json = pm.response.json()",
+							"    pm.variables.set(\"created_task_id\", json.id);",
+							"",
+							"    pm.response.to.have.status(200);    ",
+							"});",
+							"",
+							"setTimeout(() => {}, 2000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"listId\": \"list00000000000000000000000000000001\",\n    \"title\": \"{{$randomWord}}\",\n    \"membersIds\": [ \"{{user1}}\", \"{{user2}}\" ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://arch.homework/otusapp/tasks",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create workhour for user1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d4068dfb-8ae8-41a2-9d5d-a0d139715091",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{$randomUUID}}'), \"X-RequestId\");",
+							"pm.request.headers.add(pm.variables.replaceIn('{{user1}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "122b8f31-6d4e-48d9-a0d4-cc7481664e4b",
+						"exec": [
+							"pm.test(\"Is user1 hours record created\", function () {",
+							"    var json = pm.response.json()",
+							"    pm.variables.set(\"workhour_record1\", json.id);",
+							"",
+							"    pm.response.to.have.status(200);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"taskid\": \"{{created_task_id}}\",\n    \"description\": \"{{$randomWords}}\",\n    \"hours\": {{$randomInt}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://arch.homework/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create workhour for user2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "09fc2b78-7c04-40d4-96c4-eafa5a7e6a45",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{$randomUUID}}'), \"X-RequestId\");",
+							"pm.request.headers.add(pm.variables.replaceIn('{{user2}}'), \"X-UserId\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c09343e3-0cdf-4d6e-9578-817962a71115",
+						"exec": [
+							"pm.test(\"Is user2 hours record created\", function () {",
+							"    var json = pm.response.json()",
+							"    pm.variables.set(\"workhour_record2\", json.id);",
+							"",
+							"    pm.response.to.have.status(200);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"taskid\": \"{{created_task_id}}\",\n    \"description\": \"{{$randomWords}}\",\n    \"hours\": {{$randomInt}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://arch.homework/otusapp/working-hours",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"working-hours"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Move task1 to new list ",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d6b9efa1-3339-4c3f-a85a-d95ab12d99d3",
+						"exec": [
+							"pm.request.headers.add(pm.variables.replaceIn('{{$randomUUID}}'), \"X-RequestId\");",
+							"pm.variables.set(\"new_list_title\", pm.variables.replaceIn('{{$randomWord}}'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "61465aa6-f887-44fa-b3d3-850d2e4d95e6",
+						"exec": [
+							"pm.test(\"Is Saga started\", function () {",
+							"    var json = pm.response.json()   ",
+							"    console.log(json.transactionId)     ",
+							"    pm.expect(json.transactionId).is.not.oneOf([null, undefined])",
+							"    pm.response.to.have.status(200);    ",
+							"});",
+							"",
+							"setTimeout(() => {}, 5000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"taskId\": \"{{created_task_id}}\",\n    \"targetProjectId\": \"{{target_project1}}\",\n    \"targetListTitle\": \"{{new_list_title}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://arch.homework/otusapp/tasks/move-task",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"move-task"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check is saga completed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "204806e1-7675-4ad0-8a3a-548e13e287a0",
+						"exec": [
+							"pm.test(\"Is Saga ended\", function () {",
+							"    var json = pm.response.json()        ",
+							"    pm.expect(json.transactionId).to.be.oneOf([null, undefined])",
+							"    pm.response.to.have.status(200);    ",
+							"});",
+							"",
+							"pm.test(\"Is Saga success\", function () {",
+							"    var json = pm.response.json()        ",
+							"    pm.expect(json.listTitle).to.eql(pm.variables.get(\"new_list_title\"))",
+							"    pm.expect(json.projectId).to.eql(pm.variables.get(\"target_project1\"))",
+							"    pm.response.to.have.status(200);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/tasks/{{created_task_id}}",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"tasks",
+						"{{created_task_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is list created",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7a5c387f-e8c4-44d5-ba31-781d4154f52f",
+						"exec": [
+							"pm.test(\"Is list created\", function () {",
+							"    var json = pm.response.json()",
+							"",
+							"    var listCreated = false",
+							"    var creatingListTitle = pm.variables.get(\"new_list_title\")",
+							"",
+							"    json.forEach(l => {",
+							"        if(l.title == creatingListTitle) {",
+							"            listCreated = true",
+							"        }",
+							"    });",
+							"",
+							"    pm.expect(listCreated).to.eql(true) ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/lists",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"lists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Are members added to proj1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a3670e24-bf49-40d1-b47b-04197abcbab5",
+						"exec": [
+							"pm.test(\"Are members added to project\", function () {",
+							"    var json = pm.response.json()",
+							"",
+							"    var user1Added = false",
+							"    var user2Added = false",
+							"",
+							"    var user1Id = pm.variables.get(\"user1\")",
+							"    var user2Id = pm.variables.get(\"user2\")",
+							"",
+							"    json.forEach(m => {",
+							"        if(m.userId == user1Id) {",
+							"            user1Added = true",
+							"        }",
+							"        if(m.userId == user2Id) {",
+							"            user2Added = true",
+							"        }",
+							"    });",
+							"    ",
+							"    pm.expect(user1Added).to.eql(true) ",
+							"    pm.expect(user2Added).to.eql(true) ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/project-members?projectid={{target_project1}}",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"project-members"
+					],
+					"query": [
+						{
+							"key": "projectid",
+							"value": "{{target_project1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is working hours record1 updated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "028d4aa0-aa81-47cb-bd58-b23414686d2a",
+						"exec": [
+							"pm.test(\"Is record1 updated successful\", function () {",
+							"    var json = pm.response.json()      ",
+							"    var sourceProjectTitle = pm.variables.get(\"source_project_title\")",
+							"    var postfix = \"(from \" + sourceProjectTitle + \")\"",
+							"    console.log(postfix)",
+							"    pm.expect(json.description.endsWith(postfix)).to.eql(true)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/working-hours/{{workhour_record1}}",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"working-hours",
+						"{{workhour_record1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is working hours record2 updated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eba8c278-2132-4a19-808a-231fba418245",
+						"exec": [
+							"pm.test(\"Is record2 updated successful\", function () {",
+							"    var json = pm.response.json()      ",
+							"    var sourceProjectTitle = pm.variables.get(\"source_project_title\")",
+							"    var postfix = \"(from \" + sourceProjectTitle + \")\"",
+							"    pm.expect(json.description.endsWith(postfix)).to.eql(true)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://arch.homework/otusapp/working-hours/{{workhour_record2}}",
+					"protocol": "http",
+					"host": [
+						"arch",
+						"homework"
+					],
+					"path": [
+						"otusapp",
+						"working-hours",
+						"{{workhour_record2}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "0212c6a8-2fec-48ef-887f-f4755904d96c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "4e028ff6-de6b-4217-a223-44854bcc5703",
+				"type": "text/javascript",
+				"exec": [
+					"tests[\"[INFO] Request: \" + (('data' in request) ? request['data'] : '')] = true;",
+					"tests[\"[INFO] Response: \" + responseBody] = true;"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "cdcbc8c2-4a35-47ce-91bb-c8f931995013",
+			"key": "base_url",
+			"value": "arch.homework"
+		},
+		{
+			"id": "7f6695d2-66e3-436a-a06e-532552011201",
+			"key": "user1",
+			"value": "user00000000000000000000000000000001"
+		},
+		{
+			"id": "3f196886-b15e-4a61-b68e-ac7a23113e35",
+			"key": "user2",
+			"value": "user00000000000000000000000000000002"
+		},
+		{
+			"id": "25239ad1-3f8f-4594-9813-4e660266ebff",
+			"key": "created_task_id",
+			"value": ""
+		},
+		{
+			"id": "975e2cb0-f767-4b51-b3c1-8e2d9f8b9048",
+			"key": "workhour_record1",
+			"value": ""
+		},
+		{
+			"id": "2b36f902-6974-4e48-ac04-97c308332de8",
+			"key": "workhour_record2",
+			"value": ""
+		},
+		{
+			"id": "87d9c664-a2b0-434c-8525-19e7646be5c2",
+			"key": "new_list_title",
+			"value": ""
+		},
+		{
+			"id": "0bf78cb0-cd76-4c42-a6c0-c4a85441c578",
+			"key": "target_project1",
+			"value": "project00000000000000000000000000003"
+		},
+		{
+			"id": "2add7ebb-c415-4d5a-9e81-fb8430329e12",
+			"key": "target_project2",
+			"value": "project00000000000000000000000000002"
+		},
+		{
+			"id": "66e990bb-2642-45c2-98ee-6733bfde526f",
+			"key": "source_project_title",
+			"value": "project1"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
