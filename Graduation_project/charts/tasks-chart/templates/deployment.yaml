@@ -74,6 +74,14 @@ spec:
               create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
               create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
             EOF
+        {{- if .Values.redis.enabled }}
+        - name: wait-redis-ready
+          image: busybox:latest
+          env:
+            - name: REDIS_HOST
+              value: "{{ .Values.redis.fullnameOverride }}-master"
+          command: ['sh', '-c', 'until nslookup $REDIS_HOST; do echo waiting for $REDIS_HOST; sleep 2; done;']
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -94,6 +102,10 @@ spec:
               value: {{ .Values.rabbitMq.username }}
             - name: {{ .Values.rabbitMq.passwordEnvName }}
               value: {{ .Values.rabbitMq.password }}
+            - name: {{ .Values.image.redisConnectionStringEnvName }}
+              value: "{{ .Values.redis.fullnameOverride }}-master" 
+            - name: {{ .Values.image.redisEnabledEnvName }}
+              value: "{{ .Values.redis.enabled }}" 
           ports:
             - name: http
               containerPort: {{ .Values.image.containerPort }}

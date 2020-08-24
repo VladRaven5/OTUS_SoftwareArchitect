@@ -29,3 +29,9 @@ dependencies:
     condition: postgresql.enabled
     tags:
       - tasks-database
+  - name: redis
+    version: 10.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+    tags:
+      - tasks-redis

@@ -10,6 +10,8 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
   connectionStringEnvName: ConnectionStrings__DefaultConnection
+  redisConnectionStringEnvName: ConnectionStrings__RedisCache
+  redisEnabledEnvName: Redis__Enabled
   containerPort: 5000
 
 imagePullSecrets: []
@@ -41,6 +43,20 @@ postgresql:
     enabled: true
     serviceMonitor:
       enabled: true
+
+redis:
+  enabled: true
+  fullnameOverride: tasks-redis-cache
+  cluster:
+    enabled: false
+  usePassword: false
+  metrcis:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  master:
+    persistence:
+      size: 500Mi
 
 metrics:
   serviceMonitor:
