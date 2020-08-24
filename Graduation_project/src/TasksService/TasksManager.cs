@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Caching.Distributed;
 using Shared;
 
 namespace TasksService
@@ -17,10 +18,11 @@ namespace TasksService
         private readonly LabelsRepository _labelsRepository;
         private readonly ProjectMembersRepository _projectMembersRepository;
         private readonly IMapper _mapper;
+        private readonly IDistributedCache _cache;
 
         public TasksManager(TasksRepository tasksRepository, RequestsRepository requestsRepository,
             ListsRepository listsRepository, UsersRepository usersRepository, LabelsRepository labelsRepository,
-            ProjectMembersRepository projectMembersRepository, IMapper mapper)
+            ProjectMembersRepository projectMembersRepository, IMapper mapper, IDistributedCache cache)
             : base(requestsRepository)
         {
             _tasksRepository = tasksRepository;
@@ -30,15 +32,24 @@ namespace TasksService
             _labelsRepository = labelsRepository;
             _projectMembersRepository = projectMembersRepository;
             _mapper = mapper;
+            _cache = cache;
         }
 
         public async Task<TaskAggregate> GetTaskAsync(string taskId)
         {
+            string cacheKey = string.Format(CacheSettings.TaskIdCacheKeyPattern, taskId);
+            var cachedTask = await _cache.TryGetCachedValueAsync<TaskAggregate>(cacheKey);
+            if(cachedTask != null)
+                return cachedTask;
+
             var task = await  _tasksRepository.GetTaskAsync(taskId);
             if(task == null)
-             {
-                 throw new NotFoundException($"Task with id {taskId} not found");
-             }
+            {
+                throw new NotFoundException($"Task with id {taskId} not found");
+            }
+
+            await _cache.SetCacheValueAsync(cacheKey, task, CacheSettings.TaskIdCacheLifetime);
+
             return task;
         }
 
@@ -47,9 +58,18 @@ namespace TasksService
             return _tasksRepository.GetAllTasksAsync();
         }
 
-        public Task<IEnumerable<TaskAggregate>> GetUserTasksAsync(string userId)
+        public async Task<IEnumerable<TaskAggregate>> GetUserTasksAsync(string userId)
         {
-            return _tasksRepository.GetUserTasksAsync(userId);
+            string cacheKey = string.Format(CacheSettings.UserTasksCacheKeyPattern, userId);
+            var cachedTasksList = await _cache.TryGetCachedValueAsync<IEnumerable<TaskAggregate>>(cacheKey);
+            if(cachedTasksList != null)
+                return cachedTasksList;
+
+            var tasksList = await _tasksRepository.GetUserTasksAsync(userId);
+
+            await _cache.SetCacheValueAsync(cacheKey, tasksList, CacheSettings.UserTasksCacheLifetime);
+
+            return tasksList;
         }
 
         public async Task<TaskAggregate> CreateTaskAsync(TaskModel newTask,
@@ -90,7 +110,18 @@ namespace TasksService
                         Labels = labelsRecords                        
                     }, Topics.Tasks, MessageActions.Created);
 
-                return await _tasksRepository.CreateTaskAsync(newTask, taskCollections, outboxMessage);
+                var createdTask = await _tasksRepository.CreateTaskAsync(newTask, taskCollections, outboxMessage);
+
+                List<Task> cacheInvalidationTasks = new List<Task>();
+                foreach(var user in usersIds)
+                {
+                    string userCacheKey = string.Format(CacheSettings.UserTasksCacheKeyPattern, user);
+                    cacheInvalidationTasks.Add(_cache.RemoveAsync(userCacheKey));
+                }
+
+                await Task.WhenAll(cacheInvalidationTasks);
+
+                return createdTask;
             }
             catch(Exception)
             {
@@ -100,9 +131,17 @@ namespace TasksService
             }            
         }
 
-        public Task<IEnumerable<TaskAggregate>> FilterTasksAsync(FilterTaskArgs args)
+        public async Task<IEnumerable<TaskAggregate>> FilterTasksAsync(FilterTaskArgs args)
         {
-            return _tasksRepository.FilterTasksAsync(args);
+            string cacheKey = CacheSettings.GetFilterArgsCachekey(args);
+            var cachedTasksList = await _cache.TryGetCachedValueAsync<IEnumerable<TaskAggregate>>(cacheKey);
+            if(cachedTasksList != null)
+                return cachedTasksList;
+
+            var filteredTasksList = await _tasksRepository.FilterTasksAsync(args);
+            await _cache.SetCacheValueAsync(cacheKey, filteredTasksList, CacheSettings.TasksFilterCacheLifetime);
+
+            return filteredTasksList;
         }
 
         public async Task<TaskAggregate> UpdateTaskAsync(TaskModel updatingTask, IEnumerable<string> usersIds,
@@ -147,8 +186,30 @@ namespace TasksService
                 }, Topics.Tasks, MessageActions.Updated);
 
 
-            return await _tasksRepository.UpdateTaskAsync(updatingTask, addingCollections.ToTaskCollections(),
+            var updatedTask = await _tasksRepository.UpdateTaskAsync(updatingTask, addingCollections.ToTaskCollections(),
                 removingCollections.ToTaskCollections(), outboxMessage);
+
+                
+            string cacheKey = string.Format(CacheSettings.TaskIdCacheKeyPattern, updatedTask.Id);
+
+            List<Task> cacheInvalidationTasks = new List<Task>();
+            cacheInvalidationTasks.Add(_cache.SetCacheValueAsync(cacheKey, updatedTask, CacheSettings.TaskIdCacheLifetime));
+
+            foreach(var user in usersIds)
+            {
+                string userCacheKey = string.Format(CacheSettings.UserTasksCacheKeyPattern, user);
+                cacheInvalidationTasks.Add(_cache.RemoveAsync(userCacheKey));
+            }
+
+            foreach(var user in removingCollections.Users)
+            {
+                string userCacheKey = string.Format(CacheSettings.UserTasksCacheKeyPattern, user.Id);
+                cacheInvalidationTasks.Add(_cache.RemoveAsync(userCacheKey));
+            }
+
+            await Task.WhenAll(cacheInvalidationTasks);
+
+            return updatedTask;
         }
 
 
@@ -166,6 +227,7 @@ namespace TasksService
                     ProjectId = task.ProjectId
                 }, Topics.Tasks, MessageActions.Deleted);
 
+            await _cache.RemoveAsync(string.Format(CacheSettings.TaskIdCacheKeyPattern, taskId));
             await _tasksRepository.DeleteTaskAsync(taskId, outboxMessage);
         }
 

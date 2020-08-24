@@ -104,7 +104,7 @@ namespace TasksService
             if(!string.IsNullOrWhiteSpace(args.Title))
             {
                 whereStatement = AddStatement(whereStatement,
-                    $" t.title like '{args.Title}' ");
+                    $" t.title like '%{args.Title}%' ");
             }
 
             if(string.IsNullOrWhiteSpace(whereStatement))
@@ -163,6 +163,7 @@ namespace TasksService
                 $"listid = '{updatingTask.ListId}', " +
                 $"state = {(int)updatingTask.State}, " +
                 $"duedate = {GetQueryNullableEscapedValue(updatingTask.DueDate)} " +
+                $"version = {version} " +
                 $"where id = '{taskId}'; ";
 
             string deleteOldTaskMembersQuery = ConstructQueryToDeleteTaskMembers(taskId, removingCollections.Members);

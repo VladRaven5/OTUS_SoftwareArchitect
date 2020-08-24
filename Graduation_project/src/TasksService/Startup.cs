@@ -1,6 +1,8 @@
+using System;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,6 +40,7 @@ namespace TasksService
             services.AddScoped<RequestsRepository, RequestsRepository>();
             
             InitializeRabbitMQ(services);
+            SetRedisCache(services);
             services.AddScoped<TasksManager, TasksManager>();
 
             services.AddHostedService<OutboxMessagesSender>();
@@ -85,6 +88,26 @@ namespace TasksService
             string password = Configuration.GetValue<string>("RabbitMQ:Password");
             services.AddSingleton<RabbitMqTopicManager>(new RabbitMqTopicManager(host, port, username, password));
             services.AddSingleton<BrokerMessagesHandler, BrokerMessagesHandler>();
+        }
+
+        private void SetRedisCache(IServiceCollection services)
+        {
+            var isRedisEnabled = Configuration.GetValue<bool>("Redis:Enabled");
+
+            if(isRedisEnabled)
+            {
+                Console.WriteLine("Use real Redis cache");
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = Configuration.GetConnectionString("RedisCache");
+                    options.InstanceName = "TasksCache";
+                });
+            }      
+            else
+            {
+                Console.WriteLine("Use fake redis stub");
+                services.AddSingleton<IDistributedCache, RedisStub>();
+            }     
         }
     }
 }
