@@ -103,6 +103,42 @@ namespace TasksService
             }
         }        
 
+        [HttpPost("move-task")]
+        public async Task<ActionResult<TaskAggregate>> MoveTaskToProject([FromBody] MoveTaskDto moveDto)
+        {
+            if(!Request.Headers.TryGetValue(Constants.RequestIdHeaderName, out StringValues requestIdValue))
+            {
+                return BadRequest($"Header {Constants.RequestIdHeaderName} must be specified");
+            }
+
+            string requestId = requestIdValue.ToString();
+
+            try
+            {
+                return Ok(await _tasksManager.MoveTaskToProjectAsync(moveDto.TaskId, moveDto.TargetProjectId, moveDto.TargetListTitle, requestId));
+            }
+            catch(AlreadyHandledException)
+            {
+                return Accepted("Request is already handled");
+            }
+            catch(EntityExistsException ee)
+            {
+                return Accepted(ee.Message);
+            }
+            catch(AlreadyInTransactionException te)
+            {
+                return Conflict(te.Message);
+            }
+            catch(NotFoundException nfe)
+            {
+                return NotFound(nfe.Message);
+            }
+            catch(Exception e)
+            {
+                return BadRequest($"{e.Message}\n{e.StackTrace}");
+            }
+        }
+
         [HttpPut]
         public async Task<ActionResult<TaskModel>> UpdateTask([FromBody] UpdateTaskDto updateDto)
         {

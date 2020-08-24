@@ -14,6 +14,7 @@ namespace TasksService
             new TopicQueueBindingArgs(Topics.Projects, "projectstotasks"),
             new TopicQueueBindingArgs(Topics.Labels, "labelstotasks"),
             new TopicQueueBindingArgs(Topics.Lists, "liststotasks"),
+            new TopicQueueBindingArgs(Topics.WorkingHours, "workinghourstotasks"),
         };
 
         private readonly UsersMessageHandler _usersMessagesHandler;
@@ -21,6 +22,7 @@ namespace TasksService
         private readonly ProjectMembersMessageHandler _projectMembersMessageHandler;
         private readonly ListsMessageHandler _listsMessageHandler;
         private readonly LabelsMessageHandler _labelsMessageHandler;
+        private readonly TransactionMessagesHandler _transactionHanlder;
 
 
         private readonly IMapper _mapper;
@@ -37,6 +39,7 @@ namespace TasksService
             _projectMembersMessageHandler = new ProjectMembersMessageHandler(serviceProvider, mapper);
             _listsMessageHandler = new ListsMessageHandler(serviceProvider, mapper);
             _labelsMessageHandler = new LabelsMessageHandler(serviceProvider, mapper);
+            _transactionHanlder = new TransactionMessagesHandler(serviceProvider, mapper);
         }        
 
         protected override void OnMessageReceived(ReceivedMessageArgs messageObject)
@@ -47,6 +50,10 @@ namespace TasksService
 
         private DomainMessagesHandlerBase GetHandler(ReceivedMessageArgs messageObject)
         {
+            if(TransactionMessagesHandler.Actions.Contains(messageObject.Action))
+                return _transactionHanlder;
+
+
             switch(messageObject.Topic)
             {
                 case Topics.Users:

@@ -45,12 +45,9 @@ spec:
                 hours real, createddate timestamp, version int,
                 constraint fk_hours_tasks foreign key(taskid) references tasks(id),
                 constraint fk_hours_users foreign key(userid) references users(id));
+              create table transactions(id char(36) primary key, objectid char(36), type varchar(50), data varchar, message varchar, state int, createddate timestamp);
+              create table outbox_messages (id serial primary key, topic varchar(30), message varchar, action varchar(30), isinprocess boolean not null default false);
               create table handled_requests(requestid char(36) primary key, invalidateat timestamp);
-
-              insert into projects (id, title) values('11111111111111111111111111111111', 'proj111');
-              insert into tasks (id, projectid, title) values('00000000000000000000000000000000', '11111111111111111111111111111111', 'task000');
-              insert into users (id, username) values('222222222222222222222222222222222222', 'Dima');
-              insert into users (id, username) values('333333333333333333333333333333333333', 'Vasya');
             EOF
   
   backoffLimit: 0

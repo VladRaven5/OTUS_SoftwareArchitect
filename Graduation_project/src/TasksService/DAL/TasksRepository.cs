@@ -150,6 +150,38 @@ namespace TasksService
             return await GetTaskAsync(newTask.Id);          
         }
 
+        public async Task<TaskAggregate>  UpdateTaskAsync(TaskModel updatingTask, OutboxMessageModel outboxMessage)
+        {
+            string taskId = updatingTask.Id;
+
+            int version = updatingTask.Version + 1;
+
+            var updateQuery = $"update {_tableName} set " +
+                $"title = '{updatingTask.Title}', " +
+                $"description = '{updatingTask.Description}', " +
+                $"listid = '{updatingTask.ListId}', " +
+                $"state = {(int)updatingTask.State}, " +
+                $"duedate = {GetQueryNullableEscapedValue(updatingTask.DueDate)}, " +
+                $"version = {version} " +
+                $"where id = '{taskId}'; ";
+
+            
+            if(outboxMessage != null)
+            {
+                string insertOutboxMessageQuery = ConstructInsertMessageQuery(outboxMessage);
+                updateQuery += insertOutboxMessageQuery;
+            }            
+
+            int res = await _connection.ExecuteAsync(updateQuery);
+
+            if(res <= 0)
+            {
+                throw new DatabaseException("Update task failed");
+            }
+
+            return await GetTaskAsync(updatingTask.Id);
+        }
+
         public async Task<TaskAggregate>  UpdateTaskAsync(TaskModel updatingTask, TaskCollections addingCollections,
             TaskCollections removingCollections, OutboxMessageModel outboxMessage)
         {
@@ -162,7 +194,7 @@ namespace TasksService
                 $"description = '{updatingTask.Description}', " +
                 $"listid = '{updatingTask.ListId}', " +
                 $"state = {(int)updatingTask.State}, " +
-                $"duedate = {GetQueryNullableEscapedValue(updatingTask.DueDate)} " +
+                $"duedate = {GetQueryNullableEscapedValue(updatingTask.DueDate)}, " +
                 $"version = {version} " +
                 $"where id = '{taskId}'; ";
 
@@ -224,8 +256,10 @@ namespace TasksService
             return "select t.id, p.id as projectid, p.title as projecttitle, " +
                 "t.listid, ls.title as listtitle, t.title, t.description, t.state, t.duedate, " +
                 "u.id as userid, u.username, lb.id as labelid, lb.title as labeltitle, lb.color as labelcolor, " +
+                "tr.id as transactionid, tr.state as transactionstate, tr.message as transactionmessage, " +
                 "t.version, t.createddate as createddate " +
                 $"from {_tableName} t " +
+                $"left join transactions tr on tr.id = t.transactionid " +
                 $"left join lists ls on ls.Id = t.listId " +
                 $"left join projects p on p.Id = ls.projectId " +
                 $"left join task_members tm on  t.id = tm.taskId " +
@@ -312,6 +346,48 @@ namespace TasksService
 
 
         #endregion Labels join
+
+
+        #region Transactions
+
+        public async Task SetTransactionAsync(string taskId, string transactionId)
+        {
+            if(string.IsNullOrWhiteSpace(transactionId))
+                throw new NotFoundException("Transaction id can't be null");
+
+            string query = $"update {_tableName} set transactionId = '{transactionId}' where id = '{taskId}'";
+
+            int res = await _connection.ExecuteAsync(query);
+
+            if(res <= 0)
+            {
+                throw new DatabaseException($"Set transaction {transactionId} to task {taskId} failed");
+            }
+        }
+
+        public async Task UnsetTransactionAsync(string taskId, string transactionId)
+        {
+            if(string.IsNullOrWhiteSpace(transactionId))
+                throw new NotFoundException("Transaction id can't be null");
+
+            var task = await GetSimpleTaskAsync(taskId);
+            if(task.TransactionId != transactionId)
+            {
+                //another transaction in process. We can't reset it
+                return;
+            }
+
+            string query = $"update {_tableName} set transactionid = NULL where id = '{taskId}'";
+
+            int res = await _connection.ExecuteAsync(query);
+
+            if(res <= 0)
+            {
+                throw new DatabaseException($"Unset transaction {transactionId} to task {taskId} failed");
+            }
+        }
+
+        #endregion Transactions
 
         private IEnumerable<TaskAggregate> AggregateQueryResult(IEnumerable<TaskQueryJoinedResult> resultsCollection)
         {

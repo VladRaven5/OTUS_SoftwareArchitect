@@ -20,7 +20,11 @@ namespace ProjectMembersService
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                    #if DEBUG
+                    .UseUrls("http://0.0.0.0:5016")
+                    #endif
+                    ;
                 });
     }
 }

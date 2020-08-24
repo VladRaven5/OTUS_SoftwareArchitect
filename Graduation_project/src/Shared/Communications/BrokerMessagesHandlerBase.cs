@@ -7,7 +7,7 @@ namespace Shared
     public abstract class BrokerMessagesHandlerBase : IDisposable
     {
         protected abstract List<TopicQueueBindingArgs> _bindingArgs { get; }
-        private readonly int _brokerMessagesLifetimeDays = 2;
+        private readonly int _brokerMessagesLifetimeDays = Constants.BrokerMessageLifetimeDays;
         protected readonly RabbitMqTopicManager _rabbitMq;
 
         public BrokerMessagesHandlerBase(RabbitMqTopicManager rabbitMq)
