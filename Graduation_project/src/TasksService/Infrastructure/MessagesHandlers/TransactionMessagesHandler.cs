@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
 
@@ -114,6 +116,11 @@ namespace TasksService
                         tasksRepository.UpdateTaskAsync(task, taskNewListOutboxMessage).GetAwaiter().GetResult();
                         tasksRepository.UnsetTransactionAsync(task.Id, transactionId).GetAwaiter().GetResult();
 
+                        var taskMembers = tasksRepository.GetTaskMembersIdsAsync(task.Id)
+                            .GetAwaiter()
+                            .GetResult()
+                            ?.ToList();                        
+
                         var transactionCompletedOutboxMessage = OutboxMessageModel.Create(
                             new CompleteTransactionMessage
                             {
@@ -123,6 +130,26 @@ namespace TasksService
                         repository.CreateOrUpdateTransactionAsync(moveTaskHoursTransaction, transactionCompletedOutboxMessage).GetAwaiter().GetResult();
 
                         Console.WriteLine($"Complete transaction {transactionId}");
+
+                        //invalidate caches if any member
+                        if(!taskMembers.IsNullOrEmpty())
+                        {
+                            var cache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();                            
+                            List<Task> cacheInvalidationTasks = new List<Task>();
+
+                            string taskCacheKey = string.Format(CacheSettings.TaskIdCacheKeyPattern, task.Id);
+                            cacheInvalidationTasks.Add(cache.RemoveAsync(taskCacheKey));
+
+                            foreach(var user in taskMembers)
+                            {
+                                string userCacheKey = string.Format(CacheSettings.UserTasksCacheKeyPattern, user);
+                                cacheInvalidationTasks.Add(cache.RemoveAsync(userCacheKey));
+                            }
+
+                            Task.WhenAll(cacheInvalidationTasks).GetAwaiter().GetResult();
+                            Console.WriteLine($"Cache invalidated");
+                        }
+
                         break;
 
 
