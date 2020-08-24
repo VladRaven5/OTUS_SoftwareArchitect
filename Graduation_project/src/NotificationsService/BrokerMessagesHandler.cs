@@ -38,6 +38,12 @@ namespace NotificationsService
 
         protected override void OnMessageReceived(ReceivedMessageArgs messageObject)
         {            
+            if(TransactionHandlerBase.Actions.Contains(messageObject.Action))
+            {
+                Console.WriteLine("Transaction message received");
+                return;
+            }
+
             GetHandler(messageObject)
                 .HandleMessage(messageObject);
         }

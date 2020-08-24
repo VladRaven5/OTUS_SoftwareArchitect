@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -6,6 +7,18 @@ namespace Shared
 {
     public abstract class TransactionHandlerBase
     {
+        public static readonly HashSet<string> Actions = new HashSet<string>
+        {
+            TransactionMessageActions.MoveTask_PrepareListRequested,
+            TransactionMessageActions.MoveTask_PrepareListCompleted,
+            TransactionMessageActions.MoveTask_MoveMembersRequested,
+            TransactionMessageActions.MoveTask_MoveMembersCompleted,
+            TransactionMessageActions.MoveTask_HandleHoursRequested,
+            TransactionMessageActions.MoveTask_HandleHoursCompleted,
+            TransactionMessageActions.MoveTask_Rollback,
+            TransactionMessageActions.MoveTask_Complete,
+        };
+
         private readonly RequestsRepository _requestsRepository;
         protected readonly TransactionsRepository _transactionsRepository;
 
